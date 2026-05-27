@@ -11,7 +11,7 @@ import {
   Zap, LogOut, Settings, RefreshCw, Hash, MessageSquare,
   Phone, LayoutDashboard, ChevronRight, Menu,
   Wifi, Lightbulb, X, Camera, CameraOff, Mic, Volume2, VolumeX,
-  Sun, Moon
+  Sun, Moon, Pencil, Trash2
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { 
@@ -3116,7 +3116,7 @@ function CloseJobCardPanel({
 }: { 
   initialReg?: string; 
   initialJcNo?: string; 
-  onBack: () => void 
+  onBack: (goToDashboardHome?: boolean) => void 
 }) {
   const selectedJcNo = initialJcNo || "JH10CK2349";
   const jc = JC_DETAILS[selectedJcNo] || JC_DETAILS["JH10CK2349"];
@@ -3427,7 +3427,7 @@ function CloseJobCardPanel({
               </button>
             </div>
             <button 
-              onClick={onBack} 
+              onClick={() => onBack(true)} 
               className="mt-2 w-full py-2.5 bg-primary hover:bg-primary/90 text-white text-[12px] font-black rounded-lg transition-all font-sans uppercase tracking-wider shadow-lg"
             >
               Back to Workplace
@@ -4712,10 +4712,13 @@ function CloseJobCardPanel({
 
         {step === 7 ? (
           <button 
-            onClick={handleNextStep}
-            className="flex items-center gap-1 px-5 py-2.5 bg-primary hover:bg-primary-hover text-white rounded-lg transition-all font-sans uppercase tracking-wider font-extrabold shadow-lg shadow-primary/25"
+            id="btn-complete-job-card-step8"
+            onClick={() => {
+              setShowSuccessCard(true);
+            }}
+            className="flex items-center gap-1 px-5 py-2.5 bg-[#10B981] hover:bg-[#10B981]/90 text-white rounded-lg transition-all font-sans uppercase tracking-wider font-extrabold shadow-lg shadow-[#10B981]/25"
           >
-            📋 Generate Pre-Invoice
+            ✅ COMPLETE JOB CARD
           </button>
         ) : step === 9 ? (
           <button 
@@ -5584,7 +5587,13 @@ function PanelRenderer({ panel, onAction, initialData }: { panel: PanelType; onA
   if (panel === "my-calls") return <CallsPanel />
   if (panel === "suzuki-connect-form") return <SuzukiConnectFormPanel onAction={onAction} />
   if (panel === "suzuki-connect-advice") return <SuzukiConnectAdvicePanel onAction={onAction} />
-  if (panel === "close-jobcard") return <CloseJobCardPanel initialReg={initialData?.regNo as string} initialJcNo={initialData?.jcNo as string} onBack={() => onAction("all-jobcards")} />
+  if (panel === "close-jobcard") return <CloseJobCardPanel initialReg={initialData?.regNo as string} initialJcNo={initialData?.jcNo as string} onBack={(goToDashboardHome) => {
+    if (goToDashboardHome) {
+      onAction("welcome");
+    } else {
+      onAction("all-jobcards");
+    }
+  }} />
   return null
 }
 
@@ -6376,19 +6385,176 @@ function JCChatStepRenderer({
     }
 
     case "DEMANDS_LIST": {
+      const demands = jcSession.demands || [];
+      const isItemAccepted = (d: any) => d.accepted === "YES" || d.accepted === true || d.accepted === undefined;
+      const labourTotal = demands.filter(d => d.type === "L" && isItemAccepted(d)).reduce((s, d) => s + d.price, 0);
+      const partsTotal = demands.filter(d => d.type === "P" && isItemAccepted(d)).reduce((s, d) => s + d.price, 0);
+
       return (
-        <div className="mt-3 p-4 bg-card/90 rounded-xl border border-border shadow-xl flex flex-col gap-3 font-sans">
-          {/* Active Demands Scroll list */}
-          <div className="flex flex-col gap-2 max-h-[140px] overflow-y-auto pr-1">
-            {jcSession.demands?.map((d: any) => (
-              <div key={d.id} className="p-2 border border-border rounded-lg bg-card/40 flex justify-between items-center text-[11.5px]">
-                <div>
-                  <p className="font-bold text-foreground">{d.desc}</p>
-                  <p className="text-[9.5px] text-muted-foreground font-mono">Code: {d.code} | Class: {d.type === "L" ? "Labour" : "Part"}</p>
-                </div>
-                <span className="text-secondary font-bold font-mono text-[11px]">₹{d.price * d.qty}</span>
+        <div className="mt-3 p-4 bg-card/90 rounded-xl border border-border shadow-xl flex flex-col gap-3 font-sans w-full max-w-full overflow-hidden">
+          <span className="text-[12px] font-bold text-primary uppercase tracking-wide">Demanded Repairs Table Details</span>
+
+          <div className="overflow-x-auto rounded-xl border border-border bg-card/20 shadow-inner max-w-full">
+            <table className="w-full text-left border-collapse text-[11px] font-sans">
+              <thead>
+                <tr className="border-b border-border bg-card/75 font-bold text-muted-foreground uppercase text-[9.5px] tracking-wider">
+                  <th className="px-3 py-3 text-center w-[50px]">S.NO.</th>
+                  <th className="px-3 py-3 text-center w-[50px]">TYPE</th>
+                  <th className="px-3 py-3">DESCRIPTION</th>
+                  <th className="px-3 py-3 min-w-[130px]">PART NO./LABOUR CODE</th>
+                  <th className="px-3 py-3 text-right w-[60px]">QTY</th>
+                  <th className="px-3 py-3 text-right w-[95px]">PRICE</th>
+                  <th className="px-3 py-3 text-center w-[100px]">ACCEPTED</th>
+                  <th className="px-3 py-3 text-center w-[90px]">ACCEPTED QTY.</th>
+                  <th className="px-3 py-3">REJECTION REASON</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(() => {
+                  let lCount = 0;
+                  let pCount = 0;
+                  
+                  // Sort L items aggregate first, then P items
+                  const sortedDemands = [...demands].sort((a, b) => {
+                    if (a.type === "L" && b.type !== "L") return -1;
+                    if (a.type !== "L" && b.type === "L") return 1;
+                    return 0;
+                  });
+
+                  return sortedDemands.map((d) => {
+                    const originalIdx = demands.findIndex(orig => orig.code === d.code);
+                    const sNo = d.type === "L" ? ++lCount : ++pCount;
+                    const isAccepted = isItemAccepted(d);
+
+                    return (
+                      <tr key={d.code} className="border-b border-border hover:bg-card/35 transition-colors align-middle">
+                        {/* S.NO. */}
+                        <td className="px-3 py-2.5 text-center font-mono text-muted-foreground">{sNo}</td>
+                        
+                        {/* TYPE */}
+                        <td className="px-3 py-2.5 text-center">
+                          <span className={`px-2 py-0.5 rounded text-[9.5px] font-bold font-mono tracking-wide ${d.type === "L" ? "bg-primary/10 border border-primary/20 text-primary" : "bg-emerald-500/10 border border-emerald-500/20 text-emerald-400"}`}>
+                            {d.type}
+                          </span>
+                        </td>
+                        
+                        {/* DESCRIPTION */}
+                        <td className="px-3 py-2.5 font-medium text-foreground max-w-[160px] truncate">{d.desc}</td>
+                        
+                        {/* PART NO./LABOUR CODE */}
+                        <td className="px-3 py-2.5 font-mono text-xs text-muted-foreground">
+                          <div className="flex items-center gap-1">
+                            <span>{d.code}</span>
+                            {d.type === "P" && (
+                              <span className="text-[9px] text-muted-foreground/60 select-none">▼</span>
+                            )}
+                          </div>
+                        </td>
+                        
+                        {/* QTY */}
+                        <td className="px-3 py-2.5 text-right font-mono text-foreground">
+                          {d.qty % 1 === 0 ? d.qty : d.qty.toFixed(2)}
+                        </td>
+                        
+                        {/* PRICE */}
+                        <td className="px-3 py-2.5 text-right font-mono font-medium text-foreground">
+                          ₹{d.price.toLocaleString('en-IN', { minimumFractionDigits: d.price % 1 === 0 ? 0 : 2, maximumFractionDigits: 2 })}
+                        </td>
+                        
+                        {/* ACCEPTED */}
+                        <td className="px-3 py-2.5 text-center">
+                          <select
+                            value={(d.accepted === "YES" || d.accepted === true || d.accepted === undefined) ? "YES" : "NO"}
+                            onChange={(e) => {
+                              const targetVal = e.target.value;
+                              const updatedDemands = [...demands];
+                              if (originalIdx !== -1) {
+                                updatedDemands[originalIdx] = {
+                                  ...updatedDemands[originalIdx],
+                                  accepted: targetVal,
+                                  acceptedQty: targetVal === "YES" ? d.qty : 0,
+                                  rejectionReason: targetVal === "YES" ? "-" : "Customer Refused"
+                                };
+                                setJcSession({ ...jcSession, demands: updatedDemands });
+                              }
+                            }}
+                            className={`px-2 py-1 text-[11px] font-bold rounded border cursor-pointer outline-none bg-background transition-all ${isAccepted ? "border-emerald-500/30 text-emerald-400" : "border-destructive/30 text-destructive/80"}`}
+                          >
+                            <option value="YES" className="text-emerald-400 font-sans font-semibold bg-background">YES</option>
+                            <option value="NO" className="text-destructive font-sans font-semibold bg-background">NO</option>
+                          </select>
+                        </td>
+                        
+                        {/* ACCEPTED QTY. */}
+                        <td className="px-3 py-2.5 text-center">
+                          <input
+                            type="number"
+                            step="0.01"
+                            disabled={!isAccepted}
+                            value={isAccepted ? (d.acceptedQty ?? d.qty) : 0}
+                            onChange={(e) => {
+                              const val = parseFloat(e.target.value) || 0;
+                              const updatedDemands = [...demands];
+                              if (originalIdx !== -1) {
+                                updatedDemands[originalIdx] = {
+                                  ...updatedDemands[originalIdx],
+                                  acceptedQty: val
+                                };
+                                setJcSession({ ...jcSession, demands: updatedDemands });
+                              }
+                            }}
+                            className={`w-[65px] text-center bg-background/50 border rounded py-1 px-1 text-[11px] font-mono outline-none focus:border-primary/50 transition-all ${isAccepted ? "border-border text-foreground" : "border-border/30 text-muted-foreground/30"}`}
+                          />
+                        </td>
+                        
+                        {/* REJECTION REASON */}
+                        <td className="px-3 py-2.5">
+                          {isAccepted ? (
+                            <span className="text-muted-foreground/60 font-mono text-[11px]">-</span>
+                          ) : (
+                            <input
+                              type="text"
+                              value={d.rejectionReason === "-" ? "Customer Refused" : d.rejectionReason}
+                              onChange={(e) => {
+                                const rText = e.target.value;
+                                const updatedDemands = [...demands];
+                                if (originalIdx !== -1) {
+                                  updatedDemands[originalIdx] = {
+                                    ...updatedDemands[originalIdx],
+                                    rejectionReason: rText
+                                  };
+                                  setJcSession({ ...jcSession, demands: updatedDemands });
+                                }
+                              }}
+                              className="w-full max-w-[130px] bg-background border border-destructive/20 text-foreground text-[11px] px-2 py-1 rounded outline-none focus:border-primary/40"
+                              placeholder="Reason..."
+                            />
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  });
+                })()}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Premium calculations styling exactly as shown in the image */}
+          <div className="mt-2 border-t border-border pt-4 flex flex-col gap-3 font-sans">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex justify-between items-baseline pb-1.5 border-b border-border">
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">SCHEDULED LABOUR AMT.</span>
+                <span className="text-[18px] font-bold text-foreground font-mono">
+                  ₹{labourTotal.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
+                </span>
               </div>
-            ))}
+              <div className="flex justify-between items-baseline pb-1.5 border-b border-border">
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">SCHEDULED PART AMT.</span>
+                <span className="text-[18px] font-bold text-foreground font-mono">
+                  ₹{partsTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </span>
+              </div>
+            </div>
           </div>
 
           {/* Delivery dates */}
@@ -6949,13 +7115,15 @@ function DashboardView({
   onReturnToChat, 
   theme, 
   setTheme,
-  onJobCardAction
+  onJobCardAction,
+  onSelectPanel
 }: { 
   onTileClick: (panel: PanelType) => void, 
   onReturnToChat: () => void, 
   theme: string, 
   setTheme: (val: string) => void,
-  onJobCardAction?: (action: 'history' | 'modify' | 'close', jc: any) => void
+  onJobCardAction?: (action: 'history' | 'modify' | 'close', jc: any) => void,
+  onSelectPanel?: (panel: PanelType) => void
 }) {
   const [tasks, setTasks] = useState(DASHBOARD_TASKS);
   const [search, setSearch] = useState("");
@@ -6992,37 +7160,76 @@ function DashboardView({
 
         {/* KPIs */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
-          <div className="bg-card border border-border p-4">
+          {/* Card 1: My Appointments */}
+          <div 
+            id="dashboard-kpi-appointments"
+            onClick={() => onSelectPanel?.("appointments")}
+            className="group bg-card border border-border p-4 hover:scale-[1.02] hover:shadow-lg hover:border-primary/50 transition-all duration-300 cursor-pointer select-none"
+          >
             <div className="flex justify-between items-center mb-2">
-              <span className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground">Active Job Cards</span>
-              <div className="w-8 h-8 flex items-center justify-center bg-primary/10 text-primary text-[14px]">📋</div>
+              <span className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground group-hover:text-primary transition-colors">My Appointments</span>
+              <div className="w-8 h-8 flex items-center justify-center bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-all rounded-md">
+                <Calendar size={16} strokeWidth={1.5} />
+              </div>
+            </div>
+            <div className="font-mono text-[26px] font-semibold leading-none text-foreground">7 Today</div>
+            <div className="text-[10px] text-emerald-600 font-semibold mt-1.5 flex items-center gap-1">
+              <span>🟢</span> 4 In-Service | 3 Confirmed
+            </div>
+          </div>
+
+          {/* Card 2: Job Cards */}
+          <div 
+            id="dashboard-kpi-jobcards"
+            onClick={() => onSelectPanel?.("all-jobcards")}
+            className="group bg-card border border-border p-4 hover:scale-[1.02] hover:shadow-lg hover:border-amber-500/50 transition-all duration-300 cursor-pointer select-none"
+          >
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground group-hover:text-amber-500 transition-colors">Job Cards</span>
+              <div className="w-8 h-8 flex items-center justify-center bg-amber-500/10 text-amber-500 group-hover:bg-amber-500 group-hover:text-black transition-all rounded-md">
+                <ClipboardList size={16} strokeWidth={1.5} />
+              </div>
             </div>
             <div className="font-mono text-[26px] font-semibold leading-none text-foreground">144</div>
-            <div className="text-[10px] text-emerald-600 font-semibold mt-1.5">🟢 98 In-Progress today</div>
-          </div>
-          <div className="bg-card border border-border p-4">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground">Today's Visits</span>
-              <div className="w-8 h-8 flex items-center justify-center bg-emerald-500/10 text-emerald-600 text-[14px]">📅</div>
+            <div className="text-[10px] text-emerald-600 font-semibold mt-1.5 flex items-center gap-1">
+              <span>🟢</span> 98 In-Progress active bays
             </div>
-            <div className="font-mono text-[26px] font-semibold leading-none text-foreground">24</div>
-            <div className="text-[10px] text-muted-foreground mt-1.5">16 pre-scheduled | 8 walk-ins</div>
           </div>
-          <div className="bg-card border border-border p-4">
+
+          {/* Card 3: My Task */}
+          <div 
+            id="dashboard-kpi-tasks"
+            onClick={() => onSelectPanel?.("tasks")}
+            className="group bg-card border border-border p-4 hover:scale-[1.02] hover:shadow-lg hover:border-violet-500/50 transition-all duration-300 cursor-pointer select-none"
+          >
             <div className="flex justify-between items-center mb-2">
-              <span className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground">Customer Score</span>
-              <div className="w-8 h-8 flex items-center justify-center bg-amber-500/10 text-amber-600 text-[14px]">⭐</div>
-            </div>
-            <div className="font-mono text-[26px] font-semibold leading-none text-foreground">9.8</div>
-            <div className="text-[10px] text-amber-600 font-semibold mt-1.5">★ Highly Satisfied NPS rating</div>
-          </div>
-          <div className="bg-card border border-border p-4">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground">Checklist Progress</span>
-              <div className="w-8 h-8 flex items-center justify-center bg-sky-500/10 text-sky-600 text-[14px]">✅</div>
+              <span className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground group-hover:text-violet-500 transition-colors">My Task</span>
+              <div className="w-8 h-8 flex items-center justify-center bg-violet-500/10 text-violet-400 group-hover:bg-violet-500 group-hover:text-white transition-all rounded-md">
+                <CheckSquare size={16} strokeWidth={1.5} />
+              </div>
             </div>
             <div className="font-mono text-[26px] font-semibold leading-none text-foreground">{doneTasks} / {tasks.length}</div>
-            <div className="text-[10px] text-muted-foreground mt-1.5">Advisor daily checkup targets</div>
+            <div className="text-[10px] text-muted-foreground mt-1.5 font-semibold">
+              Advisor daily checklist targets
+            </div>
+          </div>
+
+          {/* Card 4: Active Services Today */}
+          <div 
+            id="dashboard-kpi-active-services"
+            onClick={() => onSelectPanel?.("all-jobcards")}
+            className="group bg-card border border-border p-4 hover:scale-[1.02] hover:shadow-lg hover:border-emerald-500/50 transition-all duration-300 cursor-pointer select-none"
+          >
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground group-hover:text-emerald-500 transition-colors">Active Services Today</span>
+              <div className="w-8 h-8 flex items-center justify-center bg-emerald-500/10 text-emerald-500 group-hover:bg-emerald-500 group-hover:text-white transition-all rounded-md">
+                <Wrench size={16} strokeWidth={1.5} />
+              </div>
+            </div>
+            <div className="font-mono text-[26px] font-semibold leading-none text-foreground">24</div>
+            <div className="text-[10px] text-muted-foreground mt-1.5 font-semibold">
+              16 pre-scheduled | 8 walk-ins
+            </div>
           </div>
         </div>
 
@@ -7491,9 +7698,9 @@ function Sidebar({
         </div>
       </div>
 
-      {/* Quick nav */}
-      <div className="px-3 pb-3 shrink-0">
-        <p className="px-2 pb-1.5 text-[10px] uppercase tracking-widest text-slate-400 dark:text-slate-500 font-sans font-bold">Quick Access</p>
+      {/* Quick Access */}
+      <div className="px-3 pb-3 shrink-0 col-quick-nav">
+        <p className="px-2 pb-1.5 text-[10px] uppercase tracking-widest text-[#7c7cdf] dark:text-[#a0a0eb] font-sans font-bold">Quick Access</p>
         <div className="flex flex-col gap-0.5">
           {NAV_ITEMS.filter((item) => {
             if (activeChatType === "employee") {
@@ -7538,11 +7745,29 @@ function Sidebar({
                         className="flex-1 px-2.5 py-1.5 text-[12px] bg-card border border-primary/40 rounded-lg text-foreground outline-none font-sans min-w-0"
                       />
                     ) : (
-                      <button
-                        onClick={() => onSelectSession(h.id)}
-                        className={`flex-1 text-left px-3 py-1.5 text-[12px] font-sans truncate min-w-0 transition-colors ${activeSessionId === h.id ? "text-primary font-bold" : "text-muted-foreground group-hover:text-foreground"}`}>
-                        {h.label}
-                      </button>
+                      <>
+                        <button
+                          onClick={() => onSelectSession(h.id)}
+                          className={`flex-1 text-left pl-3 pr-14 py-1.5 text-[12px] font-sans truncate min-w-0 transition-colors ${activeSessionId === h.id ? "text-primary font-bold" : "text-muted-foreground group-hover:text-foreground"}`}>
+                          {h.label}
+                        </button>
+                        <div className="absolute right-1.5 px-1 py-0.5 rounded border border-slate-200/50 dark:border-slate-700/50 flex items-center gap-0.5 bg-slate-50 dark:bg-slate-800/95 shadow-sm z-10">
+                          <button
+                            onClick={(e) => startEdit(h.id, h.label, e)}
+                            className="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded text-slate-500 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer"
+                            title="Rename chat"
+                          >
+                            <Pencil size={11} strokeWidth={2} />
+                          </button>
+                          <button
+                            onClick={(e) => onDeleteSession(h.id, e)}
+                            className="p-1.5 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded text-slate-500 dark:text-slate-300 hover:text-rose-600 dark:hover:text-rose-400 transition-colors cursor-pointer"
+                            title="Delete chat"
+                          >
+                            <Trash2 size={11} strokeWidth={2} />
+                          </button>
+                        </div>
+                      </>
                     )}
                   </div>
                 ))}
@@ -7954,9 +8179,12 @@ export default function App() {
             tyreHealth: { fl: 4, fr: 4, rl: 4, rr: 4, spare: 4 },
             batteryHealth: "Good",
             demands: [
-              { id: "1", desc: "Engine Oil Change", code: "LOC001", type: "L" as const, qty: 1, price: 350, addedBy: "service_menu" },
-              { id: "2", desc: "Oil Filter", code: "68510-68L10", type: "P" as const, qty: 1, price: 285, addedBy: "service_menu" },
-              { id: "3", desc: "Air Filter Check", code: "68510-79J00", type: "P" as const, qty: 1, price: 540, addedBy: "service_menu" }
+              { id: "1", type: "L" as const, desc: "PMS – 1P 20K", code: "ZE6IL0P", qty: 1, price: 2390, accepted: "YES", acceptedQty: 1, rejectionReason: "-", addedBy: "service_menu" },
+              { id: "2", type: "P" as const, desc: "Brake Fluid Petrol", code: "99000M24120-579", qty: 0.5, price: 185, accepted: "YES", acceptedQty: 0.5, rejectionReason: "-", addedBy: "service_menu" },
+              { id: "3", type: "P" as const, desc: "Gasket – Oil Pan Drain Plug Petrol", code: "09168M14015", qty: 1, price: 9, accepted: "YES", acceptedQty: 1, rejectionReason: "-", addedBy: "service_menu" },
+              { id: "4", type: "P" as const, desc: "Engine Oil Petrol", code: "99999MN0W16-IDT", qty: 2.8, price: 1344, accepted: "YES", acceptedQty: 2.8, rejectionReason: "-", addedBy: "service_menu" },
+              { id: "5", type: "P" as const, desc: "Oil Filter Petrol", code: "16510M65L10", qty: 1, price: 94, accepted: "YES", acceptedQty: 1, rejectionReason: "-", addedBy: "service_menu" },
+              { id: "6", type: "P" as const, desc: "Coolant", code: "99000M24120-534", qty: 1.11, price: 260.85, accepted: "YES", acceptedQty: 1.11, rejectionReason: "-", addedBy: "service_menu" }
             ],
             promisedDateTime: "Tomorrow 5 PM",
             paymentMode: "Card",
@@ -8044,7 +8272,7 @@ export default function App() {
     fitments: string[];
     tyreHealth: { fl: number; fr: number; rl: number; rr: number; spare: number };
     batteryHealth: string;
-    demands: { id: string; desc: string; addedBy: string; code: string; type: "L" | "P"; qty: number; price: number }[];
+    demands: { id: string; desc: string; addedBy: string; code: string; type: "L" | "P"; qty: number; price: number; accepted?: string | boolean; acceptedQty?: number; rejectionReason?: string }[];
     promisedDateTime: string;
     paymentMode: string;
     signature?: string;
@@ -8150,9 +8378,12 @@ export default function App() {
       tyreHealth: { fl: 4, fr: 4, rl: 4, rr: 4, spare: 4 },
       batteryHealth: "Good",
       demands: [
-        { id: "1", desc: "Engine Oil Change", code: "LOC001", type: "L" as const, qty: 1, price: 350, addedBy: "service_menu" },
-        { id: "2", desc: "Oil Filter", code: "68510-68L10", type: "P" as const, qty: 1, price: 285, addedBy: "service_menu" },
-        { id: "3", desc: "Air Filter Check", code: "68510-79J00", type: "P" as const, qty: 1, price: 540, addedBy: "service_menu" }
+        { id: "1", type: "L" as const, desc: "PMS – 1P 20K", code: "ZE6IL0P", qty: 1, price: 2390, accepted: "YES", acceptedQty: 1, rejectionReason: "-", addedBy: "service_menu" },
+        { id: "2", type: "P" as const, desc: "Brake Fluid Petrol", code: "99000M24120-579", qty: 0.5, price: 185, accepted: "YES", acceptedQty: 0.5, rejectionReason: "-", addedBy: "service_menu" },
+        { id: "3", type: "P" as const, desc: "Gasket – Oil Pan Drain Plug Petrol", code: "09168M14015", qty: 1, price: 9, accepted: "YES", acceptedQty: 1, rejectionReason: "-", addedBy: "service_menu" },
+        { id: "4", type: "P" as const, desc: "Engine Oil Petrol", code: "99999MN0W16-IDT", qty: 2.8, price: 1344, accepted: "YES", acceptedQty: 2.8, rejectionReason: "-", addedBy: "service_menu" },
+        { id: "5", type: "P" as const, desc: "Oil Filter Petrol", code: "16510M65L10", qty: 1, price: 94, accepted: "YES", acceptedQty: 1, rejectionReason: "-", addedBy: "service_menu" },
+        { id: "6", type: "P" as const, desc: "Coolant", code: "99000M24120-534", qty: 1.11, price: 260.85, accepted: "YES", acceptedQty: 1.11, rejectionReason: "-", addedBy: "service_menu" }
       ],
       promisedDateTime: "Tomorrow 5 PM",
       paymentMode: "Card",
@@ -8207,9 +8438,12 @@ export default function App() {
       tyreHealth: { fl: 4, fr: 4, rl: 4, rr: 4, spare: 4 },
       batteryHealth: "Good",
       demands: [
-        { id: "1", desc: "Engine Oil Change", code: "LOC001", type: "L" as const, qty: 1, price: 350, addedBy: "service_menu" },
-        { id: "2", desc: "Oil Filter", code: "68510-68L10", type: "P" as const, qty: 1, price: 285, addedBy: "service_menu" },
-        { id: "3", desc: "Air Filter Check", code: "68510-79J00", type: "P" as const, qty: 1, price: 540, addedBy: "service_menu" }
+        { id: "1", type: "L" as const, desc: "PMS – 1P 20K", code: "ZE6IL0P", qty: 1, price: 2390, accepted: "YES", acceptedQty: 1, rejectionReason: "-", addedBy: "service_menu" },
+        { id: "2", type: "P" as const, desc: "Brake Fluid Petrol", code: "99000M24120-579", qty: 0.5, price: 185, accepted: "YES", acceptedQty: 0.5, rejectionReason: "-", addedBy: "service_menu" },
+        { id: "3", type: "P" as const, desc: "Gasket – Oil Pan Drain Plug Petrol", code: "09168M14015", qty: 1, price: 9, accepted: "YES", acceptedQty: 1, rejectionReason: "-", addedBy: "service_menu" },
+        { id: "4", type: "P" as const, desc: "Engine Oil Petrol", code: "99999MN0W16-IDT", qty: 2.8, price: 1344, accepted: "YES", acceptedQty: 2.8, rejectionReason: "-", addedBy: "service_menu" },
+        { id: "5", type: "P" as const, desc: "Oil Filter Petrol", code: "16510M65L10", qty: 1, price: 94, accepted: "YES", acceptedQty: 1, rejectionReason: "-", addedBy: "service_menu" },
+        { id: "6", type: "P" as const, desc: "Coolant", code: "99000M24120-534", qty: 1.11, price: 260.85, accepted: "YES", acceptedQty: 1.11, rejectionReason: "-", addedBy: "service_menu" }
       ],
       promisedDateTime: "Tomorrow 5 PM",
       paymentMode: "Card",
@@ -8886,6 +9120,93 @@ export default function App() {
               {view === "dashboard" ? <Bot size={18} strokeWidth={1.5} /> : <LayoutDashboard size={18} strokeWidth={1.5} />}
             </button>
 
+            {/* Notification Option Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setNotifDropdownOpen(!notifDropdownOpen)}
+                className="hover:text-[#3B82F6] transition-colors cursor-pointer flex items-center justify-center p-1.5 rounded-md hover:bg-muted relative"
+                title="Notifications"
+              >
+                <Bell size={18} strokeWidth={1.5} />
+                {sharedNotifs.filter(n => !n.read).length > 0 && (
+                  <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-rose-500 animate-bounce" />
+                )}
+              </button>
+
+              {notifDropdownOpen && (
+                <>
+                  <div 
+                    className="fixed inset-0 z-40" 
+                    onClick={() => setNotifDropdownOpen(false)} 
+                  />
+                  <div className="absolute right-0 mt-2 w-80 bg-white border border-[#c3c2c2] rounded-xl shadow-xl z-50 text-foreground overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
+                    <div className="p-3 border-b border-[#e2e8f0] flex items-center justify-between bg-slate-50">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[12px] font-sans font-bold text-slate-900 uppercase tracking-wide">Notifications</span>
+                        {sharedNotifs.filter(n => !n.read).length > 0 && (
+                          <span className="px-1.5 py-0.5 rounded-full bg-rose-500/10 text-rose-500 text-[9px] font-bold font-mono">
+                            {sharedNotifs.filter(n => !n.read).length}
+                          </span>
+                        )}
+                      </div>
+                      <button 
+                        onClick={() => {
+                          setSharedNotifs(ns => ns.map(n => ({ ...n, read: true })));
+                        }}
+                        className="text-[10px] text-blue-600 hover:text-blue-800 font-sans font-semibold transition-colors cursor-pointer"
+                      >
+                        Mark all read
+                      </button>
+                    </div>
+
+                    <div className="max-h-[280px] overflow-y-auto divide-y divide-slate-100">
+                      {sharedNotifs.length === 0 ? (
+                        <div className="p-6 text-center text-muted-foreground text-[11px] font-sans">
+                          No notifications found
+                        </div>
+                      ) : (
+                        sharedNotifs.map(n => {
+                          const isUnread = !n.read;
+                          return (
+                            <div 
+                              key={n.id} 
+                              onClick={() => {
+                                setSharedNotifs(ns => ns.map(x => x.id === n.id ? { ...x, read: true } : x));
+                              }}
+                              className={`p-3 text-[11.5px] cursor-pointer transition-all hover:bg-slate-50 flex gap-2.5 items-start ${!isUnread ? "bg-white opacity-60" : "bg-blue-50/20"}`}
+                            >
+                              <div className={`w-1.5 h-1.5 rounded-full shrink-0 mt-1.5 ${!isUnread ? "bg-transparent" : "bg-blue-500 animate-pulse"}`} />
+                              <div className="flex-1 min-w-0">
+                                <p className={`font-sans leading-relaxed ${!isUnread ? "text-slate-500 font-medium" : "text-slate-900 font-bold"}`}>
+                                  {n.text}
+                                </p>
+                                <span className="text-[9px] font-mono text-slate-400 mt-1 block">
+                                  {n.time}
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+
+                    <div className="p-2 border-t border-slate-100 bg-slate-50 text-center">
+                      <button 
+                        onClick={() => {
+                          setNotifDropdownOpen(false);
+                          setView("dashboard");
+                          setActiveDashPanel("notifications");
+                        }}
+                        className="w-full py-1.5 text-[10.5px] text-slate-600 hover:text-slate-900 font-semibold uppercase tracking-wider font-sans bg-white hover:bg-slate-100 border border-[#e2e8f0] rounded-lg shadow-sm transition-all cursor-pointer"
+                      >
+                        View All in Dashboard
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+
             {/* Logout Button */}
             <button
               onClick={() => { localStorage.removeItem("nexa-authenticated"); window.location.reload(); }}
@@ -8943,6 +9264,10 @@ export default function App() {
                   onReturnToChat={() => setView("chat")} 
                   theme={theme} 
                   setTheme={setTheme}
+                  onSelectPanel={(panel) => {
+                    setActiveDashPanel(panel);
+                    setActiveDashPanelData(undefined);
+                  }}
                   onJobCardAction={(act, jc) => {
                     if (act === "history") {
                       setActiveDashPanel("vehicle-history");
