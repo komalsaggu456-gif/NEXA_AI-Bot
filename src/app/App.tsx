@@ -351,11 +351,12 @@ const SERVICE_NEWS = [
 ]
 
 const JC_DEMANDS = [
-  { type: "L", desc: "PMS – 1P 20K", code: "ZE6IL0P", qty: 1, price: 2390, accepted: true },
-  { type: "P", desc: "Brake Fluid Petrol", code: "99000M24120-579", qty: 0.5, price: 185, accepted: true },
-  { type: "P", desc: "Gasket – Oil Pan Drain Plug Petrol", code: "09168M14015", qty: 1, price: 9, accepted: true },
-  { type: "P", desc: "Engine Oil Petrol", code: "99999MN0W16-IDT", qty: 2.8, price: 1344, accepted: true },
-  { type: "P", desc: "Oil Filter Petrol", code: "16510M65L10", qty: 1, price: 94, accepted: true },
+  { type: "L", desc: "PMS – 1P 20K", code: "ZE6IL0P", qty: 1, price: 2390, accepted: "YES", acceptedQty: 1, rejectionReason: "-" },
+  { type: "P", desc: "Brake Fluid Petrol", code: "99000M24120-579", qty: 0.5, price: 185, accepted: "YES", acceptedQty: 0.5, rejectionReason: "-" },
+  { type: "P", desc: "Gasket – Oil Pan Drain Plug Petrol", code: "09168M14015", qty: 1, price: 9, accepted: "YES", acceptedQty: 1, rejectionReason: "-" },
+  { type: "P", desc: "Engine Oil Petrol", code: "99999MN0W16-IDT", qty: 2.8, price: 1344, accepted: "YES", acceptedQty: 2.8, rejectionReason: "-" },
+  { type: "P", desc: "Oil Filter Petrol", code: "16510M65L10", qty: 1, price: 94, accepted: "YES", acceptedQty: 1, rejectionReason: "-" },
+  { type: "P", desc: "Coolant", code: "99000M24120-534", qty: 1.11, price: 260.85, accepted: "YES", acceptedQty: 1.11, rejectionReason: "-" },
 ]
 
 // ── Utilities ─────────────────────────────────────────────────────────────────
@@ -1959,8 +1960,9 @@ function JCOpeningPanel({ initialReg }: { initialReg?: string }) {
   const simulateScan = () => { setIsScanning(true) }
   const handleScanComplete = (res: string) => { setRegNo(res); setScanned(true); setIsScanning(false); }
   const fuelLevels = [0, 25, 50, 75, 100]
-  const labourTotal = demands.filter(d => d.type === "L").reduce((s, d) => s + d.price * d.qty, 0)
-  const partsTotal = demands.filter(d => d.type === "P").reduce((s, d) => s + d.price * d.qty, 0)
+  const isItemAccepted = (d: any) => d.accepted === "YES" || d.accepted === true;
+  const labourTotal = demands.filter(d => d.type === "L" && isItemAccepted(d)).reduce((s, d) => s + d.price, 0)
+  const partsTotal = demands.filter(d => d.type === "P" && isItemAccepted(d)).reduce((s, d) => s + d.price, 0)
 
   if (submitted) {
     const handleActionClick = (act: 'download' | 'print') => {
@@ -1987,22 +1989,22 @@ function JCOpeningPanel({ initialReg }: { initialReg?: string }) {
           model: "MARUTI BALENO PETROL",
         },
         demands: demands.map((d, s) => ({ ...d, sno: s + 1 })),
-        labour: demands.filter(d => d.type === 'L').map((d, s) => ({
+        labour: demands.filter(d => d.type === 'L' && isItemAccepted(d)).map((d, s) => ({
           sno: s + 1,
           code: d.code,
           desc: d.desc,
           qty: d.qty,
           prnHrs: 1.0,
           billableType: "Billable",
-          amount: d.price * d.qty
+          amount: d.price
         })),
-        parts: demands.filter(d => d.type === 'P').map((d, s) => ({
+        parts: demands.filter(d => d.type === 'P' && isItemAccepted(d)).map((d, s) => ({
           sno: s + 1,
           code: d.code,
           desc: d.desc,
           qty: d.qty,
-          price: d.price,
-          amount: d.price * d.qty
+          price: d.price / (d.qty || 1),
+          amount: d.price
         })),
         odometer: parseInt(odometer) || 40002
       };
@@ -2268,8 +2270,10 @@ function JCOpeningPanel({ initialReg }: { initialReg?: string }) {
                       desc: newDesc,
                       code: newCode || (newType === "L" ? "LBR" : "PRT") + Math.trunc(Math.random() * 900 + 100),
                       qty: newQty,
-                      price: newPrice,
-                      accepted: true
+                      price: newPrice * newQty,
+                      accepted: "YES",
+                      acceptedQty: newQty,
+                      rejectionReason: "-"
                     }]);
                     setShowAddDemandRow(false);
                   }} 
@@ -2286,39 +2290,171 @@ function JCOpeningPanel({ initialReg }: { initialReg?: string }) {
               </div>
             </div>
           )}
-          <div className="overflow-x-auto rounded-xl border border-border">
-            <table className="w-full text-[11.5px]">
+          <div className="overflow-x-auto rounded-xl border border-border bg-card/20 shadow-inner">
+            <table className="w-full text-left border-collapse text-[11px] font-sans">
               <thead>
-                <tr className="border-b border-border bg-card/60">
-                  {["Type", "Description", "Part/Labour Code", "QTY", "Price", "Accepted"].map(h => (
-                    <th key={h} className="px-3 py-2.5 text-left font-semibold text-muted-foreground font-sans text-[10px] tracking-wide uppercase whitespace-nowrap">{h}</th>
-                  ))}
+                <tr className="border-b border-border bg-card/75 font-bold text-muted-foreground uppercase text-[9.5px] tracking-wider">
+                  <th className="px-3 py-3 text-center w-[50px]">S.NO.</th>
+                  <th className="px-3 py-3 text-center w-[50px]">TYPE</th>
+                  <th className="px-3 py-3">DESCRIPTION</th>
+                  <th className="px-3 py-3 min-w-[130px]">PART NO./LABOUR CODE</th>
+                  <th className="px-3 py-3 text-right w-[60px]">QTY</th>
+                  <th className="px-3 py-3 text-right w-[95px]">PRICE</th>
+                  <th className="px-3 py-3 text-center w-[100px]">ACCEPTED</th>
+                  <th className="px-3 py-3 text-center w-[90px]">ACCEPTED QTY.</th>
+                  <th className="px-3 py-3">REJECTION REASON</th>
                 </tr>
               </thead>
               <tbody>
-                {demands.map((d, i) => (
-                  <tr key={i} className="border-b border-border">
-                    <td className="px-3 py-2.5">
-                      <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold font-sans ${d.type === "L" ? "bg-primary/20 text-primary" : "bg-accent/20 text-accent"}`}>{d.type}</span>
-                    </td>
-                    <td className="px-3 py-2.5 text-foreground max-w-[140px] truncate">{d.desc}</td>
-                    <td className="px-3 py-2.5 text-muted-foreground font-mono text-[10px]">{d.code}</td>
-                    <td className="px-3 py-2.5 text-foreground font-mono">{d.qty}</td>
-                    <td className="px-3 py-2.5 text-foreground font-mono">₹{d.price.toLocaleString()}</td>
-                    <td className="px-3 py-2.5">
-                      <span className="text-[#4ADE80] font-sans font-semibold text-[11px]">YES</span>
-                    </td>
-                  </tr>
-                ))}
+                {(() => {
+                  let lCount = 0;
+                  let pCount = 0;
+                  
+                  // Sort L items aggregate first, then P items
+                  const sortedDemands = [...demands].sort((a, b) => {
+                    if (a.type === "L" && b.type !== "L") return -1;
+                    if (a.type !== "L" && b.type === "L") return 1;
+                    return 0;
+                  });
+
+                  return sortedDemands.map((d) => {
+                    const originalIdx = demands.findIndex(orig => orig.code === d.code);
+                    const sNo = d.type === "L" ? ++lCount : ++pCount;
+                    const isAccepted = d.accepted === "YES" || d.accepted === true;
+
+                    return (
+                      <tr key={d.code} className="border-b border-border hover:bg-card/35 transition-colors align-middle">
+                        {/* S.NO. */}
+                        <td className="px-3 py-2.5 text-center font-mono text-muted-foreground">{sNo}</td>
+                        
+                        {/* TYPE */}
+                        <td className="px-3 py-2.5 text-center">
+                          <span className={`px-2 py-0.5 rounded text-[9.5px] font-bold font-mono tracking-wide ${d.type === "L" ? "bg-primary/10 border border-primary/20 text-primary" : "bg-emerald-500/10 border border-emerald-500/20 text-emerald-400"}`}>
+                            {d.type}
+                          </span>
+                        </td>
+                        
+                        {/* DESCRIPTION */}
+                        <td className="px-3 py-2.5 font-medium text-foreground max-w-[160px] truncate">{d.desc}</td>
+                        
+                        {/* PART NO./LABOUR CODE */}
+                        <td className="px-3 py-2.5 font-mono text-xs text-muted-foreground">
+                          <div className="flex items-center gap-1">
+                            <span>{d.code}</span>
+                            {d.type === "P" && (
+                              <span className="text-[9px] text-muted-foreground/60 select-none">▼</span>
+                            )}
+                          </div>
+                        </td>
+                        
+                        {/* QTY */}
+                        <td className="px-3 py-2.5 text-right font-mono text-foreground">
+                          {d.qty % 1 === 0 ? d.qty : d.qty.toFixed(2)}
+                        </td>
+                        
+                        {/* PRICE */}
+                        <td className="px-3 py-2.5 text-right font-mono font-medium text-foreground">
+                          ₹{d.price.toLocaleString('en-IN', { minimumFractionDigits: d.price % 1 === 0 ? 0 : 2, maximumFractionDigits: 2 })}
+                        </td>
+                        
+                        {/* ACCEPTED */}
+                        <td className="px-3 py-2.5 text-center">
+                          <select
+                            value={d.accepted === true ? "YES" : d.accepted === false ? "NO" : d.accepted}
+                            onChange={(e) => {
+                              const targetVal = e.target.value;
+                              setDemands(prev => {
+                                const copy = [...prev];
+                                copy[originalIdx] = {
+                                  ...copy[originalIdx],
+                                  accepted: targetVal,
+                                  acceptedQty: targetVal === "YES" ? d.qty : 0,
+                                  rejectionReason: targetVal === "YES" ? "-" : "Customer Refused"
+                                };
+                                return copy;
+                              });
+                            }}
+                            className={`px-2 py-1 text-[11px] font-bold rounded border cursor-pointer outline-none bg-background transition-all ${isAccepted ? "border-emerald-500/30 text-emerald-400" : "border-destructive/30 text-destructive/80"}`}
+                          >
+                            <option value="YES" className="text-emerald-400 font-sans font-semibold bg-background">YES</option>
+                            <option value="NO" className="text-destructive font-sans font-semibold bg-background">NO</option>
+                          </select>
+                        </td>
+                        
+                        {/* ACCEPTED QTY. */}
+                        <td className="px-3 py-2.5 text-center">
+                          <input
+                            type="number"
+                            step="0.01"
+                            disabled={!isAccepted}
+                            value={isAccepted ? (d.acceptedQty ?? d.qty) : 0}
+                            onChange={(e) => {
+                              const val = parseFloat(e.target.value) || 0;
+                              setDemands(prev => {
+                                const copy = [...prev];
+                                copy[originalIdx] = {
+                                  ...copy[originalIdx],
+                                  acceptedQty: val
+                                };
+                                return copy;
+                              });
+                            }}
+                            className={`w-[65px] text-center bg-background/50 border rounded py-1 px-1 text-[11px] font-mono outline-none focus:border-primary/50 transition-all ${isAccepted ? "border-border text-foreground" : "border-border/30 text-muted-foreground/30"}`}
+                          />
+                        </td>
+                        
+                        {/* REJECTION REASON */}
+                        <td className="px-3 py-2.5">
+                          {isAccepted ? (
+                            <span className="text-muted-foreground/60 font-mono text-[11px]">-</span>
+                          ) : (
+                            <input
+                              type="text"
+                              value={d.rejectionReason === "-" ? "Customer Refused" : d.rejectionReason}
+                              onChange={(e) => {
+                                const rText = e.target.value;
+                                setDemands(prev => {
+                                  const copy = [...prev];
+                                  copy[originalIdx] = {
+                                    ...copy[originalIdx],
+                                    rejectionReason: rText
+                                  };
+                                  return copy;
+                                });
+                              }}
+                              className="w-full max-w-[130px] bg-background border border-destructive/20 text-foreground text-[11px] px-2 py-1 rounded outline-none focus:border-primary/40"
+                              placeholder="Reason..."
+                            />
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  });
+                })()}
               </tbody>
             </table>
           </div>
-          <div className="flex justify-between items-center p-3 rounded-xl bg-card/40 border border-border text-[12px] font-mono">
-            <div className="flex gap-6">
-              <span className="text-muted-foreground">Labour: <span className="text-foreground font-semibold">₹{labourTotal.toLocaleString()}</span></span>
-              <span className="text-muted-foreground">Parts: <span className="text-foreground font-semibold">₹{partsTotal.toLocaleString()}</span></span>
+
+          {/* Premium calculations styling exactly as shown in the image */}
+          <div className="mt-2 border-t border-border pt-4 flex flex-col gap-3 font-sans">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex justify-between items-baseline pb-1.5 border-b border-border">
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">SCHEDULED LABOUR AMT.</span>
+                <span className="text-[18px] font-bold text-foreground font-mono">
+                  ₹{labourTotal.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
+                </span>
+              </div>
+              <div className="flex justify-between items-baseline pb-1.5 border-b border-border">
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">SCHEDULED PART AMT.</span>
+                <span className="text-[18px] font-bold text-foreground font-mono">
+                  ₹{partsTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </span>
+              </div>
             </div>
-            <span className="text-foreground font-bold text-[14px]">Grand Total: ₹{(labourTotal + partsTotal).toLocaleString()}</span>
+            <div className="flex justify-between items-center p-3 rounded-xl bg-primary/5 border border-primary/20 text-[12px] font-mono mt-1">
+              <span className="text-muted-foreground font-sans text-[11px]">Dynamic Live Estimate Breakdown</span>
+              <span className="text-foreground font-bold text-[14px]">Grand Total: ₹{(labourTotal + partsTotal).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+            </div>
           </div>
           <div className="flex justify-between">
             <button onClick={() => setStep(3)} className="flex items-center gap-2 px-4 py-2 bg-card text-foreground text-[12px] font-semibold rounded-lg hover:bg-muted font-sans"><ChevronLeft size={13} /> Back</button>
@@ -2342,12 +2478,20 @@ function JCOpeningPanel({ initialReg }: { initialReg?: string }) {
             </div>
             <div className="border-t border-border pt-3">
               <p className="text-[10px] uppercase font-sans font-semibold tracking-wide text-muted-foreground mb-2">Demand Repairs ({demands.length})</p>
-              {demands.map((d, i) => (
-                <div key={i} className="flex justify-between text-[11px] py-1 border-b border-border last:border-0">
-                  <span className="text-foreground">{d.desc}</span>
-                  <span className="text-muted-foreground font-mono">₹{(d.price * d.qty).toLocaleString()}</span>
-                </div>
-              ))}
+              {demands.map((d, i) => {
+                const isAcc = d.accepted === "YES" || d.accepted === true;
+                return (
+                  <div key={i} className="flex justify-between text-[11px] py-1 border-b border-border last:border-0 items-center">
+                    <span className={`${isAcc ? "text-foreground" : "text-muted-foreground line-through flex items-center gap-1.5"}`}>
+                      {d.desc}
+                      {!isAcc && <span className="text-[9px] uppercase px-1 py-0.2 rounded border border-rose-500/20 bg-rose-500/10 text-rose-400">REJECTED</span>}
+                    </span>
+                    <span className="text-muted-foreground font-mono">
+                      ₹{isAcc ? d.price.toLocaleString('en-IN', { minimumFractionDigits: d.price % 1 === 0 ? 0 : 2 }) : "0"}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           </div>
           <div className="p-3 rounded-xl bg-card/40 border border-border">
@@ -5472,6 +5616,8 @@ function JCChatStepRenderer({
   const [videoPlayProgress, setVideoPlayProgress] = useState(0);
   const [isSignCaptured, setIsSignCaptured] = useState(false);
   const [showLiveScanner, setShowLiveScanner] = useState(false);
+  const [newInvName, setNewInvName] = useState("");
+  const [newFitmentName, setNewFitmentName] = useState("");
 
   // Sync state if session updates
   useEffect(() => {
@@ -5843,31 +5989,43 @@ function JCChatStepRenderer({
     }
 
     case "INVENTORY": {
+      const inv = jcSession.inventory || { spareTyre: 1, jackWrench: 1, floorMats: 4, umbrella: 1 };
+
       const setInvQty = (key: string, v: number) => {
         const keyMap: any = { spareTyre: "spareTyre", jackWrench: "jackWrench", floorMats: "floorMats", umbrella: "umbrella" };
-        const realKey = keyMap[key];
+        const realKey = keyMap[key] || key;
         if (realKey) {
           setJcSession({
             ...jcSession,
             inventory: {
-              ...jcSession.inventory,
-              [realKey]: Math.max(0, (jcSession.inventory[realKey] || 0) + v)
+              ...inv,
+              [realKey]: Math.max(0, ((inv as any)[realKey] || 0) + v)
             }
           });
         }
       };
 
-      const inv = jcSession.inventory || { spareTyre: 1, jackWrench: 1, floorMats: 4, umbrella: 1 };
+      const standardItems = [
+        { label: "Spare Tyre in Boot", stateKey: "spareTyre", val: inv.spareTyre ?? 1 },
+        { label: "Jack & Toolkit", stateKey: "jackWrench", val: inv.jackWrench ?? 1 },
+        { label: "Custom floor Mats", stateKey: "floorMats", val: inv.floorMats ?? 4 },
+        { label: "Nexa Branded Umbrella", stateKey: "umbrella", val: inv.umbrella ?? 1 }
+      ];
+
+      const customItems = Object.keys(inv)
+        .filter(k => k !== "spareTyre" && k !== "jackWrench" && k !== "floorMats" && k !== "umbrella")
+        .map(k => ({
+          label: k,
+          stateKey: k,
+          val: (inv as any)[k] ?? 0
+        }));
+
+      const allItems = [...standardItems, ...customItems];
 
       return (
         <div className="mt-3 p-4 bg-card/90 rounded-xl border border-border shadow-xl flex flex-col gap-3 font-sans">
           <div className="flex flex-col gap-2">
-            {[
-              { label: "Spare Tyre in Boot", stateKey: "spareTyre", val: inv.spareTyre },
-              { label: "Jack & Toolkit", stateKey: "jackWrench", val: inv.jackWrench },
-              { label: "Custom floor Mats", stateKey: "floorMats", val: inv.floorMats },
-              { label: "Nexa Branded Umbrella", stateKey: "umbrella", val: inv.umbrella }
-            ].map((itm) => (
+            {allItems.map((itm) => (
               <div key={itm.stateKey} className="flex justify-between items-center bg-card/40 border border-border p-2 rounded-lg text-[12px]">
                 <span className="font-semibold text-foreground">{itm.label}</span>
                 <div className="flex items-center gap-2">
@@ -5886,9 +6044,76 @@ function JCChatStepRenderer({
                   >
                     <Plus size={11} />
                   </button>
+
+                  {customItems.some(ci => ci.stateKey === itm.stateKey) && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const nextInv = { ...inv };
+                        delete (nextInv as any)[itm.stateKey];
+                        setJcSession({
+                          ...jcSession,
+                          inventory: nextInv
+                        });
+                      }}
+                      className="ml-1 text-muted-foreground hover:text-destructive p-0.5 rounded transition-colors cursor-pointer"
+                      title="Delete custom item"
+                    >
+                      <X size={12} />
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
+          </div>
+
+          <div className="border-t border-border pt-3 mt-1 flex flex-col gap-2">
+            <span className="text-[10.5px] font-bold text-muted-foreground uppercase tracking-wide">Add Custom Inventory Item</span>
+            <div className="flex gap-2">
+              <input
+                id="new-inventory-name-input"
+                type="text"
+                placeholder="E.g. Warning Triangle, Perfume..."
+                value={newInvName}
+                onChange={(e) => setNewInvName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (newInvName.trim()) {
+                      const cleanKey = newInvName.trim();
+                      setJcSession({
+                        ...jcSession,
+                        inventory: {
+                          ...inv,
+                          [cleanKey]: 1
+                        }
+                      });
+                      setNewInvName("");
+                    }
+                  }
+                }}
+                className="flex-1 bg-card border border-border text-foreground text-[12px] px-3 py-1.5 rounded-lg outline-none focus:border-primary/50 font-medium"
+              />
+              <button
+                id="add-new-inventory-btn"
+                type="button"
+                onClick={() => {
+                  if (!newInvName.trim()) return;
+                  const cleanKey = newInvName.trim();
+                  setJcSession({
+                    ...jcSession,
+                    inventory: {
+                      ...inv,
+                      [cleanKey]: 1
+                    }
+                  });
+                  setNewInvName("");
+                }}
+                className="px-3 py-1.5 bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 rounded-lg text-[12px] font-bold transition-all cursor-pointer flex items-center gap-1.5"
+              >
+                <Plus size={13} /> Add
+              </button>
+            </div>
           </div>
 
           <button
@@ -5902,7 +6127,7 @@ function JCChatStepRenderer({
     }
 
     case "FITMENTS": {
-      const options = ["Aftermarket Alloy Wheels", "Non-OEM Rear Spoiler", "Stereo Music Upgrade", "Tinted Window Glass"];
+      const standardOptions = ["Aftermarket Alloy Wheels", "Non-OEM Rear Spoiler", "Stereo Music Upgrade", "Tinted Window Glass"];
       const current = jcSession.fitments || [];
 
       const selectFitment = (item: string) => {
@@ -5912,26 +6137,96 @@ function JCChatStepRenderer({
         setJcSession({ ...jcSession, fitments: nextFit });
       };
 
+      const customFitments = current.filter((f: string) => !standardOptions.includes(f));
+      const allFitmentsToShow = [...standardOptions, ...customFitments];
+
       return (
         <div className="mt-3 p-4 bg-card/90 rounded-xl border border-border shadow-xl flex flex-col gap-3 font-sans">
           <div className="flex flex-col gap-2">
-            {options.map((opt) => {
+            {allFitmentsToShow.map((opt) => {
               const checked = current.includes(opt);
+              const isCustom = !standardOptions.includes(opt);
               return (
-                <button
+                <div
                   key={opt}
-                  type="button"
-                  onClick={() => selectFitment(opt)}
-                  className={`p-2.5 text-left text-[12px] font-bold rounded-lg border transition-all flex items-center justify-between cursor-pointer ${checked ? "bg-primary/20 border-primary text-foreground" : "bg-card/40 border-border text-muted-foreground"}`}
+                  className={`p-2.5 rounded-lg border transition-all flex items-center justify-between ${checked ? "bg-primary/20 border-primary text-foreground" : "bg-card/40 border-border text-muted-foreground"}`}
                 >
-                  <span>{opt}</span>
-                  <div className={`w-4 h-4 rounded border flex items-center justify-center ${checked ? "bg-primary border-primary text-primary-foreground" : "border-border"}`}>
-                    {checked && <Check size={10} />}
-                  </div>
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => selectFitment(opt)}
+                    className="flex-1 text-left text-[12px] font-bold cursor-pointer outline-none select-none flex items-center justify-between"
+                  >
+                    <span>{opt}</span>
+                    <div className={`w-4 h-4 rounded border flex items-center justify-center ${checked ? "bg-primary border-primary text-primary-foreground" : "border-border"}`}>
+                      {checked && <Check size={10} />}
+                    </div>
+                  </button>
+
+                  {isCustom && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const nextFit = current.filter((f: string) => f !== opt);
+                        setJcSession({ ...jcSession, fitments: nextFit });
+                      }}
+                      className="ml-2 text-muted-foreground hover:text-destructive p-1 rounded transition-colors cursor-pointer"
+                      title="Delete custom fitment"
+                    >
+                      <X size={12} />
+                    </button>
+                  )}
+                </div>
               );
             })}
           </div>
+
+          <div className="border-t border-border pt-3 mt-1 flex flex-col gap-2">
+            <span className="text-[10.5px] font-bold text-muted-foreground uppercase tracking-wide">Add Custom Aftermarket Fitment</span>
+            <div className="flex gap-2">
+              <input
+                id="new-fitment-name-input"
+                type="text"
+                placeholder="E.g. Custom Horn, Seat Covers..."
+                value={newFitmentName}
+                onChange={(e) => setNewFitmentName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (newFitmentName.trim()) {
+                      const cleanItem = newFitmentName.trim();
+                      if (!current.includes(cleanItem)) {
+                        setJcSession({
+                          ...jcSession,
+                          fitments: [...current, cleanItem]
+                        });
+                      }
+                      setNewFitmentName("");
+                    }
+                  }
+                }}
+                className="flex-1 bg-card border border-border text-foreground text-[12px] px-3 py-1.5 rounded-lg outline-none focus:border-primary/50 font-medium"
+              />
+              <button
+                id="add-new-fitment-btn"
+                type="button"
+                onClick={() => {
+                  if (!newFitmentName.trim()) return;
+                  const cleanItem = newFitmentName.trim();
+                  if (!current.includes(cleanItem)) {
+                    setJcSession({
+                      ...jcSession,
+                      fitments: [...current, cleanItem]
+                    });
+                  }
+                  setNewFitmentName("");
+                }}
+                className="px-3 py-1.5 bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 rounded-lg text-[12px] font-bold transition-all cursor-pointer flex items-center gap-1.5"
+              >
+                <Plus size={13} /> Add
+              </button>
+            </div>
+          </div>
+
           <div className="flex gap-2">
             <button
               onClick={() => advanceJcChat(current.length ? `Fitments loaded: ${current.join(", ")}` : "Verified: No aftermarket additions", { fitments: current }, "TYRE_BATTERY")}
@@ -6186,8 +6481,9 @@ function JCChatStepRenderer({
 
     case "SUMMARY": {
       const activeDemands = jcSession.demands || [];
-      const labourEst = activeDemands.filter((d: any) => d.type === "L").reduce((sum: number, d: any) => sum + d.price * d.qty, 0);
-      const partsEst = activeDemands.filter((d: any) => d.type === "P").reduce((sum: number, d: any) => sum + d.price * d.qty, 0);
+      const isAcc = (d: any) => d.accepted === "YES" || d.accepted === true || d.accepted === undefined;
+      const labourEst = activeDemands.filter((d: any) => d.type === "L" && isAcc(d)).reduce((sum: number, d: any) => sum + d.price, 0);
+      const partsEst = activeDemands.filter((d: any) => d.type === "P" && isAcc(d)).reduce((sum: number, d: any) => sum + d.price, 0);
       const overall = labourEst + partsEst;
 
       return (
