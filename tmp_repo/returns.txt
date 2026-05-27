@@ -1,0 +1,169 @@
+301:    return raw ? JSON.parse(raw) : [...NOTIFS_DATA]
+303:    return [...NOTIFS_DATA]
+316:    return () => {
+333:  return [notifs, setNotifs] as const;
+362:  return map[status] || "bg-muted text-muted-foreground"
+366:  return p === "high" ? "bg-[#F87171]/20 text-[#F87171]" : p === "medium" ? "bg-[#FACC15]/20 text-[#FACC15]" : "bg-[#6A8FAB]/20 text-muted-foreground"
+376:  return styles[type] || styles.info
+382:    return { panel: "appointments", botText: "Here are your appointments for today, 21-May-2026. You have 7 scheduled visits." }
+384:    return { panel: "vehicle-history", botText: "Enter a registration number or VIN to pull the complete vehicle service history." }
+386:    return { panel: "jc-opening", botText: "Starting the Job Card Opening process. Please scan or enter the vehicle registration number." }
+388:    return { panel: "all-jobcards", botText: "Here are all your active and recent Job Cards." }
+390:    return { panel: "tasks", botText: "Here are your tasks for today, 21-May-2026. You have 6 pending items." }
+392:    return { panel: "notifications", botText: "You have 3 unread notifications — including 1 urgent." }
+394:    return { panel: "service-news", botText: "Latest service news, campaigns, and updates from NEXA." }
+395:  return {
+413:  return (
+445:      return cached ? JSON.parse(cached) : APPOINTMENTS
+447:      return APPOINTMENTS
+478:    return map[regNo] || { name: "VALUED NEXA CLIENT", phone: "+91 99999 88888" }
+545:    return matchesSearch && appDate === selectedDate
+564:  return (
+596:              if (parts.length !== 3) return dateStr
+604:              return `${day}-${months[monthIdx] || "April"}-${year}`
+606:              return dateStr
+623:          return (
+1355:  return (
+1404:    return () => {
+1414:    if (!isSimulated) return;
+1424:          return 100;
+1426:        return p + 4;
+1430:    return () => clearInterval(interval);
+1435:    if (!isSimulated) return;
+1447:  return (
+1612:    if (yearFilter === "5+") return diff > 5
+1613:    return diff <= cutoffs[yearFilter]
+1617:    if (regNo.trim().length < 4) return
+1629:  return (
+1766:    if (!canvas) return;
+1768:    if (!ctx) return;
+1777:    if (!canvas) return { x: 0, y: 0 };
+1780:      if (e.touches.length === 0) return { x: 0, y: 0 };
+1781:      return {
+1786:      return {
+1795:    if (!canvas) return;
+1797:    if (!ctx) return;
+1810:    if (!isDrawing) return;
+1812:    if (!canvas) return;
+1814:    if (!ctx) return;
+1826:    if (!isDrawing) return;
+1836:    if (!canvas) return;
+1838:    if (!ctx) return;
+1843:  return (
+1953:    return (
+1973:  return (
+2206:                    if (!newDesc.trim()) return;
+2564:  if (!jc) return null
+2578:  return (
+2866:  return (
+2962:    return jc.demands ? jc.demands.map((d, i) => ({
+2986:    return jc.labour ? jc.labour.map((l, i) => ({
+2999:    return jc.parts ? jc.parts.map((p, i) => ({
+3072:        return;
+3078:        return;
+3084:        return;
+3090:        return;
+3096:        return;
+3104:        return;
+3140:  return (
+3540:                        return (
+3634:                          return (
+4432:      return cached ? JSON.parse(cached) : JOB_CARDS
+4434:      return JOB_CARDS
+4454:  return (
+4553:      return cached ? JSON.parse(cached) : TASKS_DATA
+4555:      return TASKS_DATA
+4563:  return (
+4611:  return (
+4629:          return (
+4653:  return (
+4700:      return cached ? JSON.parse(cached) : INITIAL_CALLS
+4702:      return INITIAL_CALLS
+4723:    return () => clearInterval(timer);
+4733:    return () => clearTimeout(connectTimer);
+4754:    if (filter === "all") return true;
+4755:    return c.status === filter;
+4761:    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+4764:  return (
+4930:            return 100
+4936:          return next
+4945:          return parseFloat(Math.min(100, Math.max(80, prev + change)).toFixed(2));
+4950:    return () => clearInterval(interval)
+4953:  return (
+5147:  return (
+5208:                          return n
+5223:                            return n
+5244:  if (panel === "welcome") return <WelcomePanel onAction={onAction} />
+5245:  if (panel === "appointments") return <AppointmentsPanel onAction={onAction} />
+5246:  if (panel === "vehicle-history") return <VehicleHistoryPanel initialReg={initialData?.regNo as string} />
+5247:  if (panel === "jc-opening") return <JCOpeningPanel initialReg={initialData?.regNo as string} />
+5248:  if (panel === "all-jobcards") return <AllJobCardsPanel onAction={onAction} />
+5249:  if (panel === "tasks") return <TasksPanel />
+5250:  if (panel === "notifications") return <NotificationsPanel />
+5251:  if (panel === "service-news") return <ServiceNewsPanel />
+5252:  if (panel === "my-calls") return <CallsPanel />
+5253:  if (panel === "suzuki-connect-form") return <SuzukiConnectFormPanel onAction={onAction} />
+5254:  if (panel === "suzuki-connect-advice") return <SuzukiConnectAdvicePanel onAction={onAction} />
+5255:  if (panel === "close-jobcard") return <CloseJobCardPanel initialReg={initialData?.regNo as string} initialJcNo={initialData?.jcNo as string} onBack={() => onAction("all-jobcards")} />
+5256:  return null
+5273:  if (!jcSession) return null;
+5305:        return (
+5311:        return (
+5317:        return (
+5323:        return (
+5329:        return (
+5335:        return (
+5341:        return (
+5347:        return (
+5353:        return (
+5359:        return (
+5365:        return (
+5371:        return (
+5377:        return (
+5383:        return null;
+5390:      return (
+5422:      return (
+5457:      return (
+5499:      return (
+5536:      return (
+5593:              return 100;
+5595:            return prev + 10;
+5606:      return (
+5764:      return (
+5817:      return (
+5822:              return (
+5872:      return (
+5878:              return (
+5955:      return (
+5986:      return (
+6054:      return (
+6060:              return (
+6095:      return (
+6204:      return (
+6247:      return null;
+6252:  return (
+6330:  return (
+6378:                  return (
+6450:  return (
+6513:    return () => clearInterval(timer);
+6538:  return (
+6928:  return (
+6985:          if (!items.length) return null
+6986:          return (
+7049:  return (
+7094:    return () => clearTimeout(timer);
+7096:  return (
+7112:  return (
+7207:    return (saved as "light" | "dark") || "dark"
+7411:          return updated;
+7413:          return [...prev, {
+7499:      return
+7531:    if (!window.speechSynthesis) return;
+7561:    if (!text.trim()) return
+7585:      return;
+7614:      return;
+7676:    if (!trimmed && !attachedFile) return
+7728:      return;
+7768:      return;
+7788:  return (
+7895:                          return (

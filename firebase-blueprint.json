@@ -1,0 +1,78 @@
+{
+  "entities": {
+    "chat_session": {
+      "title": "Chat Session",
+      "description": "Represents a chat conversation session.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique ID for the chat session."
+        },
+        "label": {
+          "type": "string",
+          "description": "The title or subject line summarized for the session."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when the session was created."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when the session was last updated."
+        }
+      },
+      "required": ["id", "label", "createdAt", "updatedAt"]
+    },
+    "chat_message": {
+      "title": "Chat Message",
+      "description": "Represents an individual message inside a chat session.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique ID for the message."
+        },
+        "role": {
+          "type": "string",
+          "enum": ["user", "bot"],
+          "description": "The sender type of the message."
+        },
+        "text": {
+          "type": "string",
+          "description": "The textual content of the message."
+        },
+        "panel": {
+          "type": "string",
+          "description": "Associated UI panel Type, if any."
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the message was sent."
+        },
+        "isJcStep": {
+          "type": "boolean",
+          "description": "Whether this message belongs to a Job Card setup step."
+        },
+        "jcStepCode": {
+          "type": "string",
+          "description": "Specific code identifier for the Job Card setup step."
+        }
+      },
+      "required": ["id", "role", "text", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/chat_sessions/{sessionId}": {
+      "schema": "chat_session",
+      "description": "User's individual chat session nodes."
+    },
+    "/chat_sessions/{sessionId}/messages/{messageId}": {
+      "schema": "chat_message",
+      "description": "Individual messages organized chronologically as a subcollection of the chat session."
+    }
+  }
+}

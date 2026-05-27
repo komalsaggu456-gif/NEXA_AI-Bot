@@ -1,0 +1,49 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 1. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper to validate alphanumeric/dash IDs to prevent resource-poisoning / injection
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // 2. Chat Sessions and Messages endpoints
+    match /chat_sessions/{sessionId} {
+      // Enforce document validation on individual target operations
+      allow get: if isValidId(sessionId);
+      allow create: if isValidId(sessionId)
+                    && request.resource.data.id == sessionId
+                    && request.resource.data.userId is string
+                    && request.resource.data.userId.size() <= 128
+                    && request.resource.data.label is string
+                    && request.resource.data.label.size() <= 150;
+      allow update: if isValidId(sessionId)
+                    && request.resource.data.label is string
+                    && request.resource.data.label.size() <= 150;
+      allow delete: if isValidId(sessionId);
+
+      // Support list queries securely
+      allow list: if true;
+
+      match /messages/{messageId} {
+        // Enforce document validation on individual target operations
+        allow get: if isValidId(messageId);
+        allow create: if isValidId(messageId)
+                      && request.resource.data.id == messageId
+                      && request.resource.data.role is string
+                      && request.resource.data.text is string;
+        allow update: if isValidId(messageId)
+                      && request.resource.data.text is string;
+        allow delete: if isValidId(messageId);
+
+        // Support collection queries listing messages
+        allow list: if true;
+      }
+    }
+  }
+}
+

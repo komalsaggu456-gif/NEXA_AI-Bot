@@ -1,0 +1,152 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 40% 98%; /* #f8fafc */
+    --foreground: 222 47% 11%; /* #0f172a */
+
+    --card: 0 0% 100%;
+    --card-foreground: 215 25% 27%; /* #1e293b */
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    --primary: 243 75% 59%; /* #4f46e5 */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 240 100% 98%; /* #eef2ff */
+    --secondary-foreground: 243 75% 59%;
+
+    --muted: 210 40% 96%; /* #f1f5f9 */
+    --muted-foreground: 215 16% 47%; /* #64748b */
+
+    --accent: 243 75% 59%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 20% 98%;
+
+    --border: 214 32% 91%; /* #e2e8f0 */
+    --input: 210 40% 96%;
+    --ring: 243 75% 59%;
+
+    --radius: 0.75rem; /* Elegant rounded borders */
+  }
+
+  .dark {
+    color-scheme: dark;
+    --background: 222 47% 11%; /* Slate/navy dark #0f172a */
+    --foreground: 210 40% 98%; /* #f1f5f9 */
+
+    --card: 217 32% 17%; /* #1e293b */
+    --card-foreground: 210 40% 98%;
+
+    --popover: 217 32% 17%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 244 75% 65%; /* Soft indigo for dark contrast */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 244 47% 16%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217 32% 14%;
+    --muted-foreground: 215 16% 70%;
+
+    --accent: 244 75% 65%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 62% 38%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 217 32% 22%; /* Slate border #334155 */
+    --input: 217 32% 17%;
+    --ring: 244 75% 65%;
+    
+    --radius: 0.75rem;
+  }
+}
+
+/* Custom Scrollbars to prevent white scrollbars in dark mode */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(120, 120, 120, 0.2);
+  border: none;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(120, 120, 120, 0.4);
+}
+
+.dark ::-webkit-scrollbar-track,
+.dark::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+.dark ::-webkit-scrollbar-thumb,
+.dark::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15) !important;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover,
+.dark::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3) !important;
+}
+
+* {
+  scrollbar-width: thin;
+}
+
+.dark, .dark * {
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent !important;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    transition-property: background-color, border-color, color, fill, stroke, text-decoration-color;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 200ms;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+}
+
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}

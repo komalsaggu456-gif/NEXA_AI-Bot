@@ -1,0 +1,11 @@
+{
+  "name": "Remix: NEXA AI-Chatbot",
+  "description": "",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

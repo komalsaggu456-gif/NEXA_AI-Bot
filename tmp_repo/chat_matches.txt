@@ -1,0 +1,48 @@
+6848:  { id: "h1", label: "JC opening for HR26CW7677 Baleno", section: "Today", chatType: "work" },
+6849:  { id: "h2", label: "Vehicle history – DL6CR1517", section: "Today", chatType: "work" },
+6850:  { id: "h3", label: "OCAS approval for JH10CK2349", section: "Yesterday", chatType: "work" },
+6851:  { id: "h4", label: "Customer follow-up task list", section: "Yesterday", chatType: "work" },
+6852:  { id: "h5", label: "PMS schedule – June 2026 update", section: "7 Days", chatType: "work" },
+6853:  { id: "h6", label: "Battery OCAS – Rahul Mehta Baleno", section: "7 Days", chatType: "work" },
+6854:  { id: "h7", label: "Jimny campaign inspection list", section: "7 Days", chatType: "work" },
+6855:  { id: "he1", label: "My appointments & schedule today", section: "Today", chatType: "employee" },
+6856:  { id: "he2", label: "Steps to open a new Job Card", section: "Today", chatType: "employee" },
+6857:  { id: "he3", label: "How to process customer callbacks", section: "Yesterday", chatType: "employee" },
+6888:  history: { id: string; label: string; section: string; isDb?: boolean; chatType?: "work" | "employee" }[]
+6904:    .filter(h => (h.chatType || "work") === activeChatType)
+6957:        <div className="flex flex-col gap-0.5" id="work-chat-modes">
+6959:            id="work-chat-mode-btn"
+6970:            id="employee-chat-mode-btn"
+7104:  chatType: "work" | "employee";
+7108:function WelcomeScreen({ onNavToPanel, chatType, theme = "light" }: WelcomeScreenProps) {
+7155:  const cards = chatType === "work" ? workCards : employeeCards;
+7372:  const [view, setView] = useState<"dashboard" | "chat">("chat")
+7399:      console.error("Failed to load chat history sessions:", err)
+7403:  // Reload real chat sessions on startup or when authenticated
+7445:    setView("chat")
+7456:      setActiveChatType(dbSess.chatType || "work")
+7460:        setActiveChatType(staticSess.chatType || "work")
+7532:      console.error("Failed to delete chat session from Firestore:", err)
+7539:          await saveChatSession(sessId, newLabel, existingSess?.chatType || "work")
+7542:      console.error("Failed to rename chat session inside Firestore:", err)
+7550:  const chatRef = useRef<HTMLDivElement>(null)
+7943:    if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight
+8019:      const response = await fetch("/api/chat", {
+8022:        body: JSON.stringify({ prompt: trimmed, chatType: activeChatType }),
+8035:        // Let employee chat users read and converse without being hijacked to the dashboard automatically,
+8258:    if (activeChatType === "work" && view !== "chat") setView("chat")
+8266:    // Reset messages and session states to start a fresh, separately recorded chat session
+8291:    setView("chat")
+8303:    setView("chat")
+8315:    setView("chat")
+8322:      chatType: s.chatType || "work",
+8331:    ...CHAT_HISTORY.map(h => ({ ...h, isDb: false, chatType: h.chatType || "work" }))
+8334:  const showWelcome = messages.length === 0 && view === "chat" && activeChatType !== "work"
+8358:        {sidebarOpen && view === "chat" && (
+8390:              {view === "chat" && !sidebarOpen && (
+8475:                <DashboardView onTileClick={(panel) => handleTileClick(panel)} onReturnToChat={() => setView("chat")} theme={theme} setTheme={setTheme} />
+8479:            <motion.div key="chat" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+8628:                  {/* Welcome or chat messages */}
+8642:                        }} chatType={activeChatType} theme={theme} />
+8646:                        ref={chatRef} className="flex-1 overflow-y-auto py-8 flex flex-col gap-7 scrollbar-none">
+8910:                    Direct access workshop control panel. Open job cards, check service items, scan licenses, and view vehicle history without AI chatting.
