@@ -8284,13 +8284,26 @@ export default function App() {
   const [speechError, setSpeechError] = useState<string | null>(null)
   const recognitionRef = useRef<any>(null)
   
-  const theme = "light"
-  const setTheme = () => {}
+  const [theme, setThemeState] = useState<"light" | "dark" | string>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("nexa-theme");
+      if (saved === "dark" || saved === "light") return saved;
+    }
+    return "light";
+  })
+
+  const setTheme = (val: string) => {
+    setThemeState(val === "dark" ? "dark" : "light");
+  }
 
   useEffect(() => {
-    document.documentElement.classList.remove("dark")
-    localStorage.setItem("nexa-theme", "light")
-  }, [])
+    if (theme === "dark") {
+      document.documentElement.classList.add("dark")
+    } else {
+      document.documentElement.classList.remove("dark")
+    }
+    localStorage.setItem("nexa-theme", theme)
+  }, [theme])
 
   useEffect(() => {
     // Initialize Speech Recognition natively in-browser
@@ -9088,7 +9101,7 @@ export default function App() {
       <div className="flex-1 flex flex-col min-h-0 min-w-0">
 
         {/* Top bar (Persistent across views) */}
-        <div className="shrink-0 h-[64px] flex items-center justify-between px-8 border-b border-[#c3c2c2] bg-white z-20 relative transition-colors">
+        <div className="shrink-0 h-[64px] flex items-center justify-between px-8 border-b border-[#c3c2c2] dark:border-slate-800 bg-white dark:bg-slate-900 z-20 relative transition-colors">
           {/* Active workspace identification on the left */}
           <div className="flex items-center gap-3">
             {!sidebarOpen && view !== "dashboard" && (
@@ -9100,7 +9113,7 @@ export default function App() {
                 <ChevronRight size={18} />
               </button>
             )}
-            <span className="text-[13px] font-bold text-[#000000] tracking-wide uppercase font-sans">
+            <span className="text-[13px] font-bold text-[#000000] dark:text-slate-100 tracking-wide uppercase font-sans">
               {view === "dashboard" ? "DMS Dashboard Central" : activeChatType === "work" ? "NEXA Workshop Suite" : "Employee Engagement Engine"}
             </span>
           </div>
@@ -9110,6 +9123,20 @@ export default function App() {
               <div className="w-1.5 h-1.5 rounded-full bg-[#4ADE80] animate-pulse" />
               <span className="text-[10.5px] text-slate-500 dark:text-slate-400 font-mono">21 May 2026 · 10:32 AM</span>
             </div>
+
+            {/* Theme Toggle Button */}
+            <button
+              id="theme-toggle"
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="hover:text-foreground transition-colors cursor-pointer flex items-center justify-center p-1.5 rounded-md hover:bg-muted dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400"
+              title={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            >
+              {theme === "dark" ? (
+                <Sun size={18} strokeWidth={1.5} className="text-amber-500" />
+              ) : (
+                <Moon size={18} strokeWidth={1.5} className="text-indigo-600 dark:text-indigo-400" />
+              )}
+            </button>
 
             {/* Dashboard Toggle Button */}
             <button
