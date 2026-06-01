@@ -3,46 +3,46 @@ import { ChevronDown, ChevronRight, CheckCircle, Database } from "lucide-react";
 
 const OPEN_STEPS = [
   {
-    step: 0, label: "Scan vehicle registration plate", tag: "Step 1 of 8", color: "#854F0B", dotBg: "#FAEEDA",
-    inputs: ["Scan Registration No (barcode / RFID)*", "Scan Chassis VIN (optional)"],
-    outputs: ["jobCardData.registrationNo populated"],
-    note: "Gate: next button disabled until registrationNo is set. Triggers ScannerModal with type REG_NO or VIN_NO.",
-    guard: "!jobCardData.registrationNo → disabled"
+    step: 0, label: "Scan vehicle VIN & capture photos", tag: "Step 1 of 6", color: "#854F0B", dotBg: "#FAEEDA",
+    inputs: ["Registration Number/Code", "Scan VIN (barcode/RFID)", "Capture Vehicle Photo Snap"],
+    outputs: ["jobCardData.registrationNo set", "photoCaptured verified"],
+    note: "Point scanning system or manual insertion activates DMS records automatically to locate consumer info and vehicle metadata.",
+    guard: "!regNo → disabled"
   },
   {
-    step: 1, label: "Enter customer & vehicle details", tag: "Step 2 of 6", color: "#185FA5", dotBg: "#E6F1FB",
-    inputs: ["Registration No (Read-only)", "Odometer Reading (KMS)*", "Service Type* (Dropdown: PAID SERVICE, FREE SERVICE, RUNNING REPAIR)", "Gate In Date/Time*", "CNG Vehicle Toggle", "Customer Name (Read-only from DMS)", "Mobile No. 1*", "Mobile No. 2 (Optional)", "Email*"],
-    outputs: ["jobCardData.customerName, customerMobile, customerEmail, odometerReading, serviceType, isCng, gateInDate"],
-    note: "Many background fields auto-populated from DMS. Sub-Service Type auto-populated based on Service Type. Replaces previous separate Odometer and Service Type steps.",
-    guard: "!odometerReading || !serviceType → disabled"
+    step: 1, label: "Enter customer details & validate Gate-In", tag: "Step 2 of 6", color: "#185FA5", dotBg: "#E6F1FB",
+    inputs: ["Odometer Reading Required", "Service Type (Dropdown)", "Sub-Service Type", "Customer Details", "Gate In DateTime & RFID Tag *"],
+    outputs: ["customerDetails verified", "gateInDateTime set", "rfidTagNo registered"],
+    note: "Gate In Validation checks if Gate In Date/Time and RFID Tag Number are filled. Next button checks validation.",
+    guard: "!gateInDateTime || !rfidTagNo → warning / block next"
   },
   {
-    step: 2, label: "Inspect vehicle damage & register car images", tag: "Step 3 of 6", color: "#854F0B", dotBg: "#FAEEDA",
-    inputs: ["CarSchematic interactive damage nodes (SCRATCH / DENT / BROKEN / NOT_FOUND)", "Scan Barcode → adds image URL", "Upload File → adds image URL", "Capture Live → adds image URL from camera"],
-    outputs: ["jobCardData.damages[] — array of {id, part, type, nodeId}", "jobCardData.carImages.exterior[] — array of image URLs"],
-    note: "At least 1 photo required. Photos can be removed per-item. Uses CarSchematic component for visual damage marking.",
-    guard: "No explicit guard — user can proceed without damage"
+    step: 2, label: "Vehicle Status & 14 Damage zone images", tag: "Step 3 of 6", color: "#854F0B", dotBg: "#FAEEDA",
+    inputs: ["Fuel Indicator Bar (0-100%)", "Cabin Accessory checklist checkboxes", "Overhead Car Diagram (S/D hotspots)", "14 Panel image slot captures"],
+    outputs: ["jobCardData.damages[] (scratches / dents list)", "exteriorPhotos[] logged"],
+    note: "Select open camera framework or choose local assets from disk. Touch overlay dots inside car view layout to register localized scratches (Orange, 'S') and dents (Red, 'D') manually.",
+    guard: "No explicit guard — user can proceed"
   },
   {
-    step: 3, label: "Add customer demanded repairs", tag: "Step 4 of 6", color: "#185FA5", dotBg: "#E6F1FB",
-    inputs: ["Repair Description (free text)", "Labor Code (e.g. ZA11L0)", "Estimate Price (₹, number)"],
-    outputs: ["jobCardData.demandedRepairs[] — {id, description, code, price, customerVoice}"],
-    note: "Each entry is added via an Add button. Items can be deleted. The list is scrollable and persists across steps.",
-    guard: "None — can proceed with 0 repairs"
-  },
-  {
-    step: 4, label: "Specify estimate labor checklists", tag: "Step 5 of 6", color: "#185FA5", dotBg: "#E6F1FB",
-    inputs: ["Quick-select labor presets (checkbox toggle)", "Custom entries via Add flow (same pattern as repairs)"],
-    outputs: ["jobCardData.laborDetails[] — {id, description, code, price, hours, billableType}"],
-    note: "Presets: ZA11L0 Wheel Alignment ₹575, ZA04L0 Wheel Balancing ₹400, ZA15L0 Washing ₹665. Toggling a preset adds/removes from laborDetails.",
+    step: 3, label: "Tyre tread mm & battery rating health", tag: "Step 4 of 6", color: "#185FA5", dotBg: "#E6F1FB",
+    inputs: ["Tread depth (mm) check values", "Battery performance health rating"],
+    outputs: ["tyreHealth statuses set", "batteryCondition logged", "optional Exide Battery replacement added to demands if Poor"],
+    note: "If tread depth falls below 3mm, critical wear replaces. If battery rated poor, starter labour automatically injects.",
     guard: "None"
   },
   {
-    step: 5, label: "Audit summary, sign & transmit", tag: "Step 6 of 6", color: "#993C1D", dotBg: "#FAECE7",
-    inputs: ["Customer Signature (click-to-sign simulation)", "Print Summary action", "Email copy to customer action"],
-    outputs: ["Calculated totals: totalLabor + totalParts = grandEst", "onFlowCompleted() callback triggered"],
-    note: "Summary card shows: reg no, vehicle model, customer name, service type, labor subtotal, parts subtotal, grand total. Signature captures first name. TRANSMIT button fires the completion callback.",
-    guard: "Signature not required to submit (no guard)"
+    step: 4, label: "Repair estimation list & scheduled bays", tag: "Step 5 of 6", color: "#185FA5", dotBg: "#E6F1FB",
+    inputs: ["Add customized repairs", "Demanded Repair grid table", "Scheduling teams & Allocated Bay selection", "Promised DateTime scroll wheel picker"],
+    outputs: ["Scheduled Labour Amount calculated", "Scheduled Parts Amount", "Estimated Grand Total", "promisedTime registered"],
+    note: "Dynamic calculations and scheduler. Interactive table manages accepted repairs, acceptance quantities, and rejection reasons.",
+    guard: "None"
+  },
+  {
+    step: 5, label: "Drawing client signature & finalize card", tag: "Step 6 of 6", color: "#993C1D", dotBg: "#FAECE7",
+    inputs: ["Customer Digital Signature Pad", "Send OCAS transmission checker"],
+    outputs: ["Job Card Created Successfully (JC26000271)", "CONFID-19 diagnostic verified", "Print, Download, View capabilities"],
+    note: "Displays structured success dashboard. Generate button compiles all checklists, registers rfid gate-pass, uploads diagnostics in real-time.",
+    guard: "Signature optional to compile"
   }
 ];
 
@@ -191,7 +191,7 @@ export default function FlowViewerPanel() {
                 {!isLast && <div className="w-[1.5px] flex-1 bg-border/80 min-h-[8px]" />}
               </div>
               <div 
-                className={`flex-1 ml-3 mb-2.5 p-3 rounded-lg border transition-all cursor-pointer ${expanded ? 'border-[#185FA5] bg-[#E6F1FB] dark:bg-primary/10' : 'border-border bg-card hover:border-primary'}`}
+                className={`flex-1 ml-3 mb-2.5 p-3 rounded-lg border transition-all cursor-pointer ${expanded ? 'border-[#185FA5] dark:border-indigo-500 bg-[#E6F1FB] dark:bg-primary/10' : 'border-border bg-card hover:border-primary'}`}
                 onClick={() => toggleExpand(key)}
               >
                 <div className="flex items-center justify-between">
@@ -296,7 +296,7 @@ export default function FlowViewerPanel() {
         {activeTab === "close" && (
           <div className="animate-fade-in">
             <div className="flex items-start gap-3 mb-5 pb-4 border-b border-border/50">
-              <span className="px-3 py-1 rounded-full text-[11px] font-medium bg-[#EAF3DE] text-[#3B6D11] whitespace-nowrap">6 steps</span>
+              <span className="px-3 py-1 rounded-full text-[11px] font-medium bg-[#EAF3DE] text-[#3B6D11] dark:bg-emerald-950/45 dark:text-emerald-400 whitespace-nowrap">6 steps</span>
               <div>
                 <div className="text-[15px] font-medium text-foreground">Close Job Card Flow</div>
                 <div className="text-[12px] text-muted-foreground mt-1 leading-relaxed">activeFlow = "close_job_card" · steps 0–5 · selects an active job card, allocates bay & technician, verifies odometer + payment, reviews labor, confirms TCS tax, generates invoice</div>
@@ -309,7 +309,7 @@ export default function FlowViewerPanel() {
         {activeTab === "history" && (
           <div className="animate-fade-in">
             <div className="flex items-start gap-3 mb-5 pb-4 border-b border-border/50">
-              <span className="px-3 py-1 rounded-full text-[11px] font-medium bg-[#FAEEDA] text-[#854F0B] whitespace-nowrap">Single view</span>
+              <span className="px-3 py-1 rounded-full text-[11px] font-medium bg-[#FAEEDA] text-[#854F0B] dark:bg-amber-950/45 dark:text-amber-400 whitespace-nowrap">Single view</span>
               <div>
                 <div className="text-[15px] font-medium text-foreground">Vehicle History View</div>
                 <div className="text-[12px] text-muted-foreground mt-1 leading-relaxed">activeFlow = "vehicle_history" · no sub-steps · lookup past service records by registration plate, with scan support</div>

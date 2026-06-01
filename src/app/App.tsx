@@ -11,7 +11,7 @@ import {
   Zap, LogOut, Settings, RefreshCw, Hash, MessageSquare,
   Phone, LayoutDashboard, ChevronRight, Menu,
   Wifi, Lightbulb, X, Camera, CameraOff, Mic, Volume2, VolumeX,
-  Sun, Moon, Pencil, Trash2
+  Sun, Moon, Pencil, Trash2, Info, History
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { 
@@ -76,6 +76,7 @@ const VEHICLE_HISTORY: Record<string, { model: string; vin: string; records: Veh
   "DL6CR1517": {
     model: "MARUTI BALENO PETROL", vin: "MA3FJEB1SND123456",
     records: [
+      { date: "18-MAY-2026 08:55", serviceType: "RUNNING REPAIR", mileage: 54321, dealer: "PREM MOTORS PVT. LTD., GURGAON-2S(NEXA)", jcNo: "JC26000445" },
       { date: "30-MAY-2024 09:44", serviceType: "RUNNING REPAIR", mileage: 54321, dealer: "MAGIC AUTO PVT LTD, METRO PARKING-2S(NEXA)", jcNo: "JC25000890" },
       { date: "29-DEC-2023 16:19", serviceType: "RUNNING REPAIR", mileage: 48120, dealer: "PREM MOTORS PVT. LTD., GURGAON-2S(NEXA)", jcNo: "JC24001145" },
       { date: "20-DEC-2023 10:36", serviceType: "BODY REPAIR", mileage: 48105, dealer: "PREM MOTORS PVT. LTD., OPP SECTOR-14-SRV", jcNo: "JC24001090" },
@@ -92,6 +93,41 @@ const VEHICLE_HISTORY: Record<string, { model: string; vin: string; records: Veh
       { date: "15-FEB-2026 10:00", serviceType: "PMS", mileage: 39800, dealer: "PREM MOTORS PVT. LTD., GURGAON-2S(NEXA)", jcNo: "JC26000312" },
       { date: "10-SEP-2025 14:30", serviceType: "RUNNING REPAIR", mileage: 32100, dealer: "PREM MOTORS PVT. LTD., GURGAON-2S(NEXA)", jcNo: "JC25001890" },
       { date: "22-APR-2025 09:15", serviceType: "PAID SERVICE", mileage: 28450, dealer: "PREM MOTORS PVT. LTD., GURGAON-2S(NEXA)", jcNo: "JC25000780" },
+    ]
+  },
+  "HR26CW7677": {
+    model: "MARUTI BALENO PETROL", vin: "MA3FJEB1SND789012",
+    records: [
+      { date: "21-MAY-2026 09:10", serviceType: "PAID SERVICE", mileage: 39998, dealer: "PREM MOTORS PVT. LTD., GURGAON-2S(NEXA)", jcNo: "JC26000501" },
+      { date: "10-SEP-2025 11:30", serviceType: "RUNNING REPAIR", mileage: 32100, dealer: "PREM MOTORS PVT. LTD., GURGAON-2S(NEXA)", jcNo: "JC25000102" }
+    ]
+  },
+  "MH10CK2349": {
+    model: "NEW WAGON R 1L PETROL", vin: "MA3FHEB1SND334521",
+    records: [
+      { date: "21-MAY-2026 08:42", serviceType: "PAID SERVICE", mileage: 40125, dealer: "PREM MOTORS PVT. LTD., GURGAON-2S(NEXA)", jcNo: "JH10CK2349" },
+      { date: "20-NOV-2025 15:00", serviceType: "RUNNING REPAIR", mileage: 30120, dealer: "PREM MOTORS PVT. LTD., GURGAON-2S(NEXA)", jcNo: "JC25000994" }
+    ]
+  },
+  "HR05AB1234": {
+    model: "MARUTI ERTIGA PETROL", vin: "MA3FJEB1SND445566",
+    records: [
+      { date: "21-MAY-2026 10:15", serviceType: "RUNNING REPAIR", mileage: 12450, dealer: "PREM MOTORS PVT. LTD., GURGAON-2S(NEXA)", jcNo: "JC26000499" },
+      { date: "15-JAN-2025 09:00", serviceType: "1ST FREE SERVICE", mileage: 1020, dealer: "PREM MOTORS PVT. LTD., GURGAON-2S(NEXA)", jcNo: "JC25000004" }
+    ]
+  },
+  "HR10X2772": {
+    model: "BREZZA S-CNG", vin: "MA3FJEB1SND112233",
+    records: [
+      { date: "20-MAY-2026 11:45", serviceType: "3RD FREE SERVICE", mileage: 9999, dealer: "PREM MOTORS PVT. LTD., GURGAON-2S(NEXA)", jcNo: "JC26000490" },
+      { date: "11-DEC-2025 14:00", serviceType: "2ND FREE SERVICE", mileage: 5012, dealer: "PREM MOTORS PVT. LTD., GURGAON-2S(NEXA)", jcNo: "JC25000551" }
+    ]
+  },
+  "HR26FN1234": {
+    model: "NEW SWIFT PETROL", vin: "MA3FJEB1SND667788",
+    records: [
+      { date: "17-MAY-2026 13:30", serviceType: "PMS", mileage: 15420, dealer: "PREM MOTORS PVT. LTD., GURGAON-2S(NEXA)", jcNo: "JC26000420" },
+      { date: "12-NOV-2025 11:00", serviceType: "RUNNING REPAIR", mileage: 8120, dealer: "PREM MOTORS PVT. LTD., GURGAON-2S(NEXA)", jcNo: "JC25001223" }
     ]
   },
 }
@@ -1658,6 +1694,7 @@ function VehicleHistoryPanel({ initialReg }: { initialReg?: string }) {
   const [yearFilter, setYearFilter] = useState<"2" | "5" | "5+">("2")
   const [showConfirm, setShowConfirm] = useState<"5" | "5+" | null>(null)
   const [selectedRecord, setSelectedRecord] = useState<VehicleRecord | null>(null)
+  const [localSelectedJc, setLocalSelectedJc] = useState<string | null>(null)
   
   // Camera scanning state variable
   const [isScanningPlate, setIsScanningPlate] = useState(false)
@@ -1799,9 +1836,74 @@ function VehicleHistoryPanel({ initialReg }: { initialReg?: string }) {
                   <p className="text-foreground">{selectedRecord.dealer}</p>
                 </div>
                 <div className="flex gap-2">
-                  <button className="flex items-center gap-1.5 px-3 py-1.5 bg-card text-foreground text-[11px] font-semibold rounded-lg hover:bg-muted font-sans"><Eye size={12} /> View JC</button>
-                  <button className="flex items-center gap-1.5 px-3 py-1.5 bg-card text-foreground text-[11px] font-semibold rounded-lg hover:bg-muted font-sans"><Download size={12} /> Download</button>
-                  <button className="flex items-center gap-1.5 px-3 py-1.5 bg-card text-foreground text-[11px] font-semibold rounded-lg hover:bg-muted font-sans"><Printer size={12} /> Print</button>
+                  <button
+                    onClick={() => setLocalSelectedJc(selectedRecord.jcNo)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-card hover:bg-muted text-foreground text-[11px] font-semibold rounded-lg font-sans cursor-pointer transition-colors"
+                  >
+                    <Eye size={12} /> View JC
+                  </button>
+                  <button
+                    onClick={() => {
+                      const existingJc = JC_DETAILS[selectedRecord.jcNo];
+                      if (existingJc) {
+                        generateJcPdf(existingJc, 'download');
+                      } else {
+                        const mockJc = {
+                          jcNo: selectedRecord.jcNo,
+                          dealer: selectedRecord.dealer,
+                          visitDate: selectedRecord.date.split(" ")[0] || "21-MAY-2026",
+                          gateIn: selectedRecord.date.split(" ")[1] || "08:30",
+                          serviceType: selectedRecord.serviceType,
+                          odometer: selectedRecord.mileage,
+                          customer: {
+                            name: "Customer Name",
+                            regNo: regNo.toUpperCase(),
+                            model: vehicleData?.model || "MARUTI BALENO",
+                            vin: vehicleData?.vin || "MA3FJEB1SND123456",
+                            mobile1: "+91 99999 88888",
+                            email: "customer@gmail.com",
+                            address: "NEXA Sector-14, Gurgaon",
+                            city: "Gurgaon"
+                          }
+                        };
+                        generateJcPdf(mockJc, 'download');
+                      }
+                    }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-card hover:bg-muted text-foreground text-[11px] font-semibold rounded-lg font-sans cursor-pointer transition-colors"
+                  >
+                    <Download size={12} /> Download
+                  </button>
+                  <button
+                    onClick={() => {
+                      const existingJc = JC_DETAILS[selectedRecord.jcNo];
+                      if (existingJc) {
+                        generateJcPdf(existingJc, 'print');
+                      } else {
+                        const mockJc = {
+                          jcNo: selectedRecord.jcNo,
+                          dealer: selectedRecord.dealer,
+                          visitDate: selectedRecord.date.split(" ")[0] || "21-MAY-2026",
+                          gateIn: selectedRecord.date.split(" ")[1] || "08:30",
+                          serviceType: selectedRecord.serviceType,
+                          odometer: selectedRecord.mileage,
+                          customer: {
+                            name: "Customer Name",
+                            regNo: regNo.toUpperCase(),
+                            model: vehicleData?.model || "MARUTI BALENO",
+                            vin: vehicleData?.vin || "MA3FJEB1SND123456",
+                            mobile1: "+91 99999 88888",
+                            email: "customer@gmail.com",
+                            address: "NEXA Sector-14, Gurgaon",
+                            city: "Gurgaon"
+                          }
+                        };
+                        generateJcPdf(mockJc, 'print');
+                      }
+                    }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-card hover:bg-muted text-foreground text-[11px] font-semibold rounded-lg font-sans cursor-pointer transition-colors"
+                  >
+                    <Printer size={12} /> Print
+                  </button>
                 </div>
               </motion.div>
             )}
@@ -1809,7 +1911,11 @@ function VehicleHistoryPanel({ initialReg }: { initialReg?: string }) {
         </>
       )}
       {!searched && (
-        <p className="text-[12px] text-muted-foreground">Try: <span className="text-primary font-mono cursor-pointer" onClick={() => { setRegNo("DL6CR1517"); setSearched(true) }}>DL6CR1517</span> or <span className="text-primary font-mono cursor-pointer" onClick={() => { setRegNo("HR26DS6144"); setSearched(true) }}>HR26DS6144</span></p>
+        <p className="text-[12px] text-muted-foreground">Try: <span className="text-primary font-mono cursor-pointer" onClick={() => { setRegNo("DL6CR1517"); setSearched(true) }}>DL6CR1517</span>, <span className="text-primary font-mono cursor-pointer" onClick={() => { setRegNo("HR26CW7677"); setSearched(true) }}>HR26CW7677</span> or <span className="text-primary font-mono cursor-pointer" onClick={() => { setRegNo("HR26DS6144"); setSearched(true) }}>HR26DS6144</span></p>
+      )}
+
+      {localSelectedJc && (
+        <JCDetailModal jcNo={localSelectedJc} onClose={() => setLocalSelectedJc(null)} />
       )}
     </div>
   )
@@ -1935,56 +2041,376 @@ function SignaturePad({ value, onChange }: { value: string | null; onChange: (v:
   );
 }
 
-const STEP_LABELS = ["VIN / Reg", "Details", "Vehicle Status", "Tyre & Battery", "Demands", "Summary"]
+const STEP_LABELS = ["VIN & Photo", "Details & Gate-In", "Vehicle Status", "Tyre & Battery", "Demands & Scheduling", "Generate"];
 
-function JCOpeningPanel({ initialReg }: { initialReg?: string }) {
-  const [step, setStep] = useState(initialReg ? 1 : 0)
-  const [regNo, setRegNo] = useState(initialReg || "")
-  const [scanned, setScanned] = useState(!!initialReg)
-  const [isScanning, setIsScanning] = useState(false)
-  const [odometer, setOdometer] = useState("40002")
-  const [serviceType, setServiceType] = useState("PAID SERVICE")
-  const [fuel, setFuel] = useState(50)
-  const [tyre, setTyre] = useState({ fl: "4", fr: "fr", rl: "3", rr: "4" })
-  const [battery, setBattery] = useState("Good")
-  const [demands, setDemands] = useState(JC_DEMANDS)
-  const [showAddDemandRow, setShowAddDemandRow] = useState(false)
-  const [newType, setNewType] = useState<"L" | "P">("L")
-  const [newDesc, setNewDesc] = useState("")
-  const [newCode, setNewCode] = useState("")
-  const [newQty, setNewQty] = useState(1)
-  const [newPrice, setNewPrice] = useState(0)
-  const [submitted, setSubmitted] = useState(false)
-  const [signatureData, setSignatureData] = useState<string | null>(null)
+function JCOpeningPanel({ 
+  initialReg,
+  jcSession,
+  setJcSession
+}: { 
+  initialReg?: string;
+  jcSession?: any;
+  setJcSession?: any;
+}) {
+  const getMappedStep = () => {
+    if (!jcSession) return initialReg ? 1 : 0;
+    switch (jcSession.step) {
+      case "VIN_SCAN":
+      case "CONFIRM_VEHICLE":
+        return 0;
+      case "CUSTOMER_DETAILS":
+        return 1;
+      case "INVENTORY":
+      case "FITMENTS":
+      case "DENT_VIDEO":
+        return 2;
+      case "TYRE_BATTERY":
+        return 3;
+      case "SERVICE_MENU":
+      case "DEMANDS_LIST":
+      case "LABOUR_PARTS":
+        return 4;
+      case "SUMMARY":
+      case "COMPLETED":
+        return 5;
+      default:
+        return initialReg ? 1 : 0;
+    }
+  };
 
-  const simulateScan = () => { setIsScanning(true) }
-  const handleScanComplete = (res: string) => { setRegNo(res); setScanned(true); setIsScanning(false); }
-  const fuelLevels = [0, 25, 50, 75, 100]
+  const [step, setStep] = useState(getMappedStep);
+  const [regNo, setRegNo] = useState(() => jcSession?.regNo || initialReg || "UP80FY6289");
+  const [scanned, setScanned] = useState(() => !!(jcSession?.regNo || initialReg));
+  const [isScanning, setIsScanning] = useState(false);
+  const [photoCaptured, setPhotoCaptured] = useState(() => !!(jcSession?.interiorImages?.length) || false);
+  const [showCameraOverlay, setShowCameraOverlay] = useState(false);
+  const [activePhotoZone, setActivePhotoZone] = useState<string | null>(null);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+
+  // Step 1 states: Customer & Basic Details
+  const [reportedThrough, setReportedThrough] = useState("Walk-in");
+  const [serviceType, setServiceType] = useState(() => jcSession?.serviceType || "PAID SERVICE");
+  const [subServiceType, setSubServiceType] = useState(() => jcSession?.subServiceType || "PMS-Standard");
+  const [timeSlot, setTimeSlot] = useState("12:00 PM - 01:00 PM");
+  const [appointmentRemark, setAppointmentRemark] = useState("Periodic Maintenance");
+  const [campaign, setCampaign] = useState("Recall-991A Active");
+  const [prevVisit, setPrevVisit] = useState("29-Jan-2026 At Prem Motors");
+  const [odometer, setOdometer] = useState(() => jcSession?.odometer || "40002");
+  const [name, setName] = useState(() => jcSession?.customerName || "Rishav Garg");
+  const [mobile, setMobile] = useState(() => jcSession?.customerMobile || "9911003322");
+  const [altMobile, setAltMobile] = useState("9911004455");
+  const [email, setEmail] = useState(() => jcSession?.customerEmail || "rishav.garg@gmail.com");
+  const [ewType, setEwType] = useState("Platinum Theme");
+  const [mcpPackage, setMcpPackage] = useState("Petrol MCP 20K");
+  const [nexaPoints, setNexaPoints] = useState(1450);
+  const [mmsSow, setMmsSow] = useState(true);
+
+  // Address & Detail states
+  const [address, setAddress] = useState("DLF Phase 3, Cyber City");
+  const [state, setState] = useState("Haryana");
+  const [city, setCity] = useState("Gurugram");
+  const [pincode, setPincode] = useState("122002");
+  const [customerCategory, setCustomerCategory] = useState("Retail");
+  const [fsCouponNo, setFsCouponNo] = useState("FS-99C12");
+  const [smartSticker, setSmartSticker] = useState("Yes");
+  const [washType, setWashType] = useState("Foam Wash");
+  const [cylinderTestingDate, setCylinderTestingDate] = useState("15-Aug-2025");
+
+  // Gate-In Check elements
+  const [gateInDateTime, setGateInDateTime] = useState("");
+  const [rfidTagNo, setRfidTagNo] = useState("");
+  const [gateInValidated, setGateInValidated] = useState(false);
+
+  // Step 2: Vehicle Status
+  const [fuel, setFuel] = useState(() => {
+    if (!jcSession?.fuelLevel) return 50;
+    if (jcSession.fuelLevel === "E") return 10;
+    if (jcSession.fuelLevel === "1/4") return 25;
+    if (jcSession.fuelLevel === "1/2") return 50;
+    if (jcSession.fuelLevel === "3/4") return 75;
+    if (jcSession.fuelLevel === "F") return 100;
+    return 50;
+  });
+  const [inventory, setInventory] = useState(() => {
+    if (!jcSession?.inventory) {
+      return {
+        "Spare Tyre": true,
+        "Service Schedule": true,
+        "Wheel Cover": true,
+        "Toolkit": true,
+        "Music System": true,
+        "Floor Mats": true,
+        "Jack & Wrench": true,
+        "Perfume": false,
+      };
+    }
+    const inv = jcSession.inventory;
+    return {
+      "Spare Tyre": inv.spareTyre > 0,
+      "Service Schedule": true,
+      "Wheel Cover": true,
+      "Toolkit": true,
+      "Music System": true,
+      "Floor Mats": inv.floorMats > 0,
+      "Jack & Wrench": inv.jackWrench > 0,
+      "Perfume": inv.umbrella > 0,
+    };
+  });
+  const [scratchDot, setScratchDot] = useState<number[]>([3, 7]);
+  const [dentDot, setDentDot] = useState<number[]>([1, 10]);
+  const [showLiveScanner, setShowLiveScanner] = useState(false);
+
+  // 14 Exterior Photo Zones & uploads state
+  const [exteriorPhotos, setExteriorPhotos] = useState<Record<string, string | null>>({
+    "Bonnet": null,
+    "Center Front Bumper": null,
+    "Right Edge Front Bumper": null,
+    "Right Fender": null,
+    "Right Front Door": null,
+    "Right Rear Door": null,
+    "Left Fender": null,
+    "Left Front Door": null,
+    "Left Rear Door": null,
+    "Tailgate/Trunk": null,
+    "Roof": null,
+    "Windshield": null,
+    "Underbody": null,
+    "Interior Dashboard": null,
+  });
+
+  const [additionalPhotos, setAdditionalPhotos] = useState<string[]>([]);
+
+  // Step 3: Tyre & Battery
+  const [tyre, setTyre] = useState<Record<string, string>>(() => {
+    if (!jcSession?.tyreHealth) return { fl: "4", fr: "4", rl: "3", rr: "4", spare: "4" };
+    return {
+      fl: String(jcSession.tyreHealth.fl),
+      fr: String(jcSession.tyreHealth.fr),
+      rl: String(jcSession.tyreHealth.rl),
+      rr: String(jcSession.tyreHealth.rr),
+      spare: String(jcSession.tyreHealth.spare),
+    };
+  });
+  const [battery, setBattery] = useState(() => jcSession?.batteryHealth || "Good");
+
+  // Step 4: Demanded Repairs
+  const [demands, setDemands] = useState(() => {
+    if (!jcSession?.demands || jcSession.demands.length === 0) {
+      return [
+        { type: "L", desc: "Diagnosis Fee (Body Check)", code: "ZE75L0", qty: 1, price: 600, accepted: "YES", acceptedQty: 1, rejectionReason: "-" },
+        { type: "L", desc: "Bonnet Painting & Polish - Hygiene", code: "ZZ07H", qty: 1, price: 175, accepted: "YES", acceptedQty: 1, rejectionReason: "-" },
+        { type: "P", desc: "Front Door Hinge Broken Element", code: "FDH01", qty: 1, price: 1450, accepted: "YES", acceptedQty: 1, rejectionReason: "-" },
+        { type: "L", desc: "Noise from Suspension System", code: "NS01", qty: 1, price: 1200, accepted: "NO", acceptedQty: 0, rejectionReason: "Customer Refused" },
+      ];
+    }
+    return jcSession.demands.map((d: any) => ({
+      type: d.type || "L",
+      desc: d.desc,
+      code: d.code,
+      qty: d.qty || 1,
+      price: d.price || 0,
+      accepted: d.accepted === "YES" || d.accepted === true ? "YES" : "NO",
+      acceptedQty: d.acceptedQty || 0,
+      rejectionReason: d.rejectionReason || "-"
+    }));
+  });
+  const [showAddDemandRow, setShowAddDemandRow] = useState(false);
+  const [newType, setNewType] = useState<"L" | "P">("L");
+  const [newDesc, setNewDesc] = useState("");
+  const [newCode, setNewCode] = useState("");
+  const [newQty, setNewQty] = useState(1);
+  const [newPrice, setNewPrice] = useState(0);
+
+  // Scheduling states
+  const [assignedGroup, setAssignedGroup] = useState("Group A");
+  const [technician, setTechnician] = useState("VISHAL ADITYA");
+  const [allocatedBay, setAllocatedBay] = useState("BAY-04");
+  const [promisedDateTime, setPromisedDateTime] = useState(() => jcSession?.promisedDateTime || "30-May-2026 15:14");
+  const [paymentMode, setPaymentMode] = useState(() => jcSession?.paymentMode || "ONLINE");
+  const [showDateTimePicker, setShowDateTimePicker] = useState(false);
+
+  // Signature & generation elements
+  const [signatureData, setSignatureData] = useState<string | null>(() => jcSession?.signature || null);
+  const [sendApproval, setSendApproval] = useState(true);
+  const [submitted, setSubmitted] = useState(() => jcSession?.step === "COMPLETED");
+  const [generating, setGenerating] = useState(false);
+
+  // Sync state changes back to parent jcSession
+  useEffect(() => {
+    if (!setJcSession) return;
+
+    let mappedJcStep: typeof jcSession.step = "VIN_SCAN";
+    if (step === 0) mappedJcStep = "VIN_SCAN";
+    else if (step === 1) mappedJcStep = "CUSTOMER_DETAILS";
+    else if (step === 2) mappedJcStep = "INVENTORY";
+    else if (step === 3) mappedJcStep = "TYRE_BATTERY";
+    else if (step === 4) mappedJcStep = "LABOUR_PARTS";
+    else if (step === 5) {
+      mappedJcStep = submitted ? "COMPLETED" : "SUMMARY";
+    }
+
+    let fuelStr = "1/2";
+    if (fuel <= 15) fuelStr = "E";
+    else if (fuel <= 35) fuelStr = "1/4";
+    else if (fuel <= 65) fuelStr = "1/2";
+    else if (fuel <= 85) fuelStr = "3/4";
+    else fuelStr = "F";
+
+    const updatedSess = {
+      step: mappedJcStep,
+      regNo,
+      customerName: name,
+      customerMobile: mobile,
+      customerEmail: email,
+      odometer: odometer,
+      serviceType,
+      subServiceType,
+      isCng: subServiceType.toLowerCase().includes("cng") || serviceType.toLowerCase().includes("cng"),
+      fuelLevel: fuelStr,
+      dents: jcSession?.dents || [],
+      interiorImages: photoCaptured ? ["/captured_interior.jpg"] : [],
+      inventory: {
+        spareTyre: inventory["Spare Tyre"] ? 1 : 0,
+        jackWrench: inventory["Jack & Wrench"] ? 1 : 0,
+        floorMats: inventory["Floor Mats"] ? 4 : 0,
+        umbrella: inventory["Perfume"] ? 1 : 0,
+      },
+      fitments: jcSession?.fitments || [],
+      tyreHealth: {
+        fl: parseInt(tyre.fl) || 4,
+        fr: parseInt(tyre.fr) || 4,
+        rl: parseInt(tyre.rl) || 4,
+        rr: parseInt(tyre.rr) || 4,
+        spare: parseInt(tyre.spare) || 4,
+      },
+      batteryHealth: battery,
+      demands: demands.map((d: any, index: number) => ({
+        id: d.code || `d_${index}`,
+        desc: d.desc,
+        addedBy: d.type === "L" ? "labour" : "part",
+        code: d.code,
+        type: d.type as "L" | "P",
+        qty: d.qty,
+        price: d.price,
+        accepted: d.accepted === "YES",
+        acceptedQty: d.acceptedQty,
+        rejectionReason: d.rejectionReason
+      })),
+      promisedDateTime,
+      paymentMode,
+      signature: signatureData || undefined
+    };
+
+    if (
+      jcSession?.step !== updatedSess.step ||
+      jcSession?.regNo !== updatedSess.regNo ||
+      jcSession?.customerName !== updatedSess.customerName ||
+      jcSession?.customerMobile !== updatedSess.customerMobile ||
+      jcSession?.customerEmail !== updatedSess.customerEmail ||
+      jcSession?.odometer !== updatedSess.odometer ||
+      jcSession?.serviceType !== updatedSess.serviceType ||
+      jcSession?.fuelLevel !== updatedSess.fuelLevel ||
+      jcSession?.batteryHealth !== updatedSess.batteryHealth ||
+      jcSession?.promisedDateTime !== updatedSess.promisedDateTime ||
+      jcSession?.paymentMode !== updatedSess.paymentMode ||
+      jcSession?.signature !== updatedSess.signature ||
+      JSON.stringify(jcSession?.tyreHealth) !== JSON.stringify(updatedSess.tyreHealth) ||
+      JSON.stringify(jcSession?.inventory) !== JSON.stringify(updatedSess.inventory) ||
+      jcSession?.demands?.length !== updatedSess.demands.length
+    ) {
+      setJcSession(updatedSess);
+    }
+  }, [
+    step,
+    regNo,
+    name,
+    mobile,
+    email,
+    odometer,
+    serviceType,
+    subServiceType,
+    fuel,
+    inventory,
+    tyre,
+    battery,
+    demands,
+    promisedDateTime,
+    paymentMode,
+    signatureData,
+    photoCaptured,
+    submitted,
+    setJcSession,
+    jcSession
+  ]);
+
+  const simulateScan = () => { setIsScanning(true); };
+  const handleScanComplete = (res: string) => { setRegNo(res); setScanned(true); setIsScanning(false); };
+
   const isItemAccepted = (d: any) => d.accepted === "YES" || d.accepted === true;
-  const labourTotal = demands.filter(d => d.type === "L" && isItemAccepted(d)).reduce((s, d) => s + d.price, 0)
-  const partsTotal = demands.filter(d => d.type === "P" && isItemAccepted(d)).reduce((s, d) => s + d.price, 0)
+  const labourTotal = demands.filter(d => d.type === "L" && isItemAccepted(d)).reduce((sum, d) => sum + d.price, 0);
+  const partsTotal = demands.filter(d => d.type === "P" && isItemAccepted(d)).reduce((sum, d) => sum + d.price, 0);
+  const grandTotal = labourTotal + partsTotal;
+
+  // Auto-fill Gate-In details action helper
+  const handleAutoGateIn = () => {
+    setGateInDateTime(new Date().toLocaleString("en-IN", { hour12: false }));
+    setRfidTagNo("RFID-MH12-984210");
+    setGateInValidated(true);
+  };
+
+  const handleCapturePhoto = (zone: string) => {
+    setActivePhotoZone(zone);
+    setShowCameraOverlay(true);
+  };
+
+  const saveCapturedPhoto = () => {
+    if (activePhotoZone) {
+      setExteriorPhotos(prev => ({
+        ...prev,
+        [activePhotoZone]: `/zone_${activePhotoZone.toLowerCase().replace(/\s+/g, "_")}.jpg`
+      }));
+    }
+    setShowCameraOverlay(false);
+    setActivePhotoZone(null);
+  };
+
+  if (generating) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+          className="w-12 h-12 rounded-full border-4 border-primary border-t-transparent mb-4"
+        />
+        <h3 className="text-base font-bold text-foreground font-sans animate-pulse">Compiling Job Card Creation Flow...</h3>
+        <p className="text-xs text-muted-foreground mt-2 max-w-sm">
+          Registering Gate-In timestamp, validation indicators, uploading outer panel diagnostics, and building estimation report.
+        </p>
+      </div>
+    );
+  }
 
   if (submitted) {
     const handleActionClick = (act: 'download' | 'print') => {
       const mockCreatedJC = {
-        jcNo: "JC26000512",
+        jcNo: "JC26000271",
         dealer: "PREM MOTORS PVT. LTD., GURGAON-2S(NEXA)",
         dealerMapCode: "PMG2S001",
-        visitDate: "21-MAY-2026",
-        gateIn: "09:42",
+        visitDate: "29-MAY-2026",
+        gateIn: gateInDateTime || "15:11",
         serviceType: serviceType,
-        techName: "VISHAL ADITYA",
-        bay: "BAY-04",
-        paymentMode: "ONLINE / CASH",
-        promisedDate: "21-MAY-2026",
-        promisedTime: "06:00 PM",
+        techName: technician,
+        bay: allocatedBay,
+        paymentMode: paymentMode,
+        promisedDate: "30-MAY-2026",
+        promisedTime: promisedDateTime.split(" ")[1] || "03:14 PM",
         customer: {
-          name: "RAJAT AGARWAL",
-          mobile1: "+91 99110 03322",
-          email: "rajat.agarwal@gmail.com",
-          address: "DLF Phase 3, Cyber City",
-          city: "Gurugram",
-          regNo: regNo || "HR26CW7677",
+          name: name,
+          mobile1: mobile,
+          email: email,
+          address: address,
+          city: city,
+          regNo: regNo,
           vin: "MA3YFDS75K008432",
           model: "MARUTI BALENO PETROL",
         },
@@ -2012,257 +2438,639 @@ function JCOpeningPanel({ initialReg }: { initialReg?: string }) {
     };
 
     return (
-      <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }}
-        className="flex flex-col items-center gap-4 py-8">
-        <div className="w-16 h-16 rounded-full bg-[#4ADE80]/20 flex items-center justify-center">
-          <CheckCircle size={32} className="text-[#4ADE80]" />
+      <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }}
+        className="flex flex-col items-center gap-5 py-6">
+        <div className="w-14 h-14 rounded-full bg-[#4ADE80]/10 flex items-center justify-center border border-[#4ADE80]/30">
+          <CheckCircle size={28} className="text-[#4ADE80]" />
         </div>
-        <div className="text-center">
-          <p className="text-lg font-bold text-foreground font-sans">Job Card Generated!</p>
-          <p className="text-[13px] text-muted-foreground">JC26000512 — {regNo}</p>
-          <p className="text-[12px] text-muted-foreground mt-1">OCAS sent to customer for approval</p>
+        <div className="text-center font-sans">
+          <span className="px-2 py-0.5 rounded bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-wider">CREATION SUCCESSFUL</span>
+          <p className="text-lg font-bold text-foreground mt-2">Job Card created successfully!</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Job Card No: <strong className="text-primary font-mono select-all">JC26000271</strong></p>
+          <p className="text-xs text-muted-foreground mt-1">Promised Time: {promisedDateTime} | Drop Location: {address}</p>
         </div>
-        <div className="flex gap-2 mt-2">
-          <button onClick={() => handleActionClick('print')} className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground text-[12px] font-semibold rounded-lg font-sans cursor-pointer"><Eye size={13} /> View JC</button>
-          <button onClick={() => handleActionClick('download')} className="flex items-center gap-2 px-4 py-2 bg-card text-foreground text-[12px] font-semibold rounded-lg font-sans cursor-pointer"><Download size={13} /> Download</button>
-          <button onClick={() => handleActionClick('print')} className="flex items-center gap-2 px-4 py-2 bg-card text-foreground text-[12px] font-semibold rounded-lg font-sans cursor-pointer"><Printer size={13} /> Print</button>
+
+        <div className="flex flex-col gap-2 w-full max-w-sm mt-3 font-sans">
+          <button onClick={() => handleActionClick('print')} className="w-full flex items-center justify-center gap-2 py-2.5 bg-primary text-primary-foreground text-[12px] font-bold rounded-lg cursor-pointer transition-all hover:brightness-105"><Eye size={13} /> View Registered Job Card</button>
+          <div className="grid grid-cols-2 gap-2">
+            <button onClick={() => handleActionClick('download')} className="flex items-center justify-center gap-1.5 py-2 px-3 bg-card border border-border text-foreground text-[11px] font-bold rounded-lg cursor-pointer hover:bg-muted transition-all"><Download size={13} /> Download PDF</button>
+            <button onClick={() => handleActionClick('print')} className="flex items-center justify-center gap-1.5 py-2 px-3 bg-card border border-border text-foreground text-[11px] font-bold rounded-lg cursor-pointer hover:bg-muted transition-all"><Printer size={13} /> Print Job Card</button>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <button onClick={() => handleActionClick('print')} className="flex items-center justify-center gap-1.5 py-1.5 px-3 bg-muted/40 text-muted-foreground hover:text-foreground text-[10px] font-medium rounded-lg cursor-pointer border border-border/60 transition-all"><ClipboardList size={11} /> Print Inventory</button>
+            <button onClick={() => handleActionClick('print')} className="flex items-center justify-center gap-1.5 py-1.5 px-3 bg-muted/40 text-muted-foreground hover:text-foreground text-[10px] font-medium rounded-lg cursor-pointer border border-border/60 transition-all"><CheckSquare size={11} /> Print Probing Sheet</button>
+          </div>
         </div>
       </motion.div>
-    )
+    );
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      {/* Stepper */}
-      <div className="flex items-center gap-0">
+    <div className="flex flex-col gap-4 font-sans text-foreground relative">
+      {/* Header action bar with active CTA to open vehicle history popup */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-card border border-border p-3 rounded-xl">
+        <div className="min-w-0">
+          <h4 className="text-sm font-bold text-foreground">New Job Card Registration</h4>
+          <p className="text-[11.5px] text-muted-foreground truncate">
+            {regNo ? `Active Vehicle Ref: ${regNo}` : "Comprehensive active DMS registration flow"}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setShowHistoryModal(true)}
+          className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 hover:border-primary/30 rounded-lg text-xs font-bold font-sans cursor-pointer transition-all shrink-0"
+        >
+          <History size={13} className="text-primary animate-pulse" /> View Vehicle History
+        </button>
+      </div>
+
+      {/* Dynamic Progress Stepper Bar exactly matching custom layout */}
+      <div className="grid grid-cols-6 gap-1 w-full border-b border-border pb-3 select-none">
         {STEP_LABELS.map((label, i) => (
-          <div key={i} className="flex items-center flex-1 last:flex-none">
-            <div className="flex flex-col items-center gap-1">
-              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold font-sans transition-all ${i < step ? "bg-[#4ADE80] text-[#070C16]" : i === step ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground"}`}>
-                {i < step ? <Check size={13} /> : i + 1}
-              </div>
-              <p className={`text-[10px] font-sans font-semibold whitespace-nowrap ${i === step ? "text-primary" : i < step ? "text-[#4ADE80]" : "text-muted-foreground"}`}>{label}</p>
-            </div>
-            {i < STEP_LABELS.length - 1 && (
-              <div className={`flex-1 h-px mx-1 transition-all ${i < step ? "bg-[#4ADE80]/50" : "bg-border"}`} />
-            )}
+          <div
+            key={i}
+            onClick={() => { if (i < step || (i === 1 && regNo)) setStep(i); }}
+            className={`flex flex-col gap-1 items-start pl-2 py-1.5 border-l-2 transition-all cursor-pointer ${
+              i === step
+                ? "border-primary bg-primary/5"
+                : i < step
+                ? "border-emerald-400 bg-emerald-500/5"
+                : "border-border hover:bg-card/30"
+            }`}
+          >
+            <span className="text-[9px] font-semibold text-muted-foreground uppercase tracking-widest leading-none">Step {i + 1}</span>
+            <span className={`text-[11px] font-bold truncate max-w-full ${i === step ? "text-primary" : i < step ? "text-emerald-400" : "text-muted-foreground"}`}>
+              {label}
+            </span>
           </div>
         ))}
       </div>
 
-      {/* Step 0: Scan */}
+      {/* Step 0: VIN Scan & Plate Capture */}
       {step === 0 && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-3">
-          <p className="text-[12px] text-muted-foreground">Scan the VIN barcode or enter registration number manually.</p>
-          
-          {isScanning ? (
-            <PlateScanner onScan={handleScanComplete} onClose={() => setIsScanning(false)} />
-          ) : (
-            <>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-4">
+          <div className="p-3 bg-[#3d8ef0]/10 border border-[#3d8ef0]/20 rounded-xl text-xs text-[#3d8ef0] flex items-start gap-2 max-w-2xl">
+            <Info size={14} className="shrink-0 mt-0.5" />
+            <p>
+              <strong>VIN SCAN & MANUALLY INPUT</strong>: Point scanning system or manual insertion activates DMS records automatically to locate consumer info, campaign history, and vehicle metadata.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex flex-col gap-3">
+              <label className="text-[11px] uppercase font-bold text-muted-foreground tracking-wider">Scan Barcode / Enter Reg Plate</label>
               <div className="flex gap-2">
-                <input value={regNo} onChange={e => setRegNo(e.target.value.toUpperCase())} placeholder="Enter Reg No or VIN…"
-                  className="flex-1 px-3 py-2.5 text-[13px] bg-card border border-border rounded-lg text-foreground placeholder:text-muted-foreground outline-none focus:border-primary/50 font-mono uppercase" />
-                <button onClick={simulateScan}
-                  className="px-4 py-2.5 bg-card border border-border text-foreground text-[12px] font-semibold rounded-lg hover:bg-muted transition-all font-sans flex items-center gap-2">
-                  <Camera size={13} /> Scan
+                <input
+                  value={regNo}
+                  onChange={e => setRegNo(e.target.value.toUpperCase())}
+                  placeholder="Enter registration or chassis…"
+                  className="flex-1 px-3.5 py-2.5 text-[13px] bg-card border border-border rounded-xl text-foreground outline-none focus:border-primary font-mono uppercase"
+                />
+                <button
+                  onClick={() => handleCapturePhoto("Odometer")}
+                  className="px-4 py-2 bg-card border border-border text-[11px] font-semibold text-foreground rounded-xl flex items-center gap-1.5 hover:bg-muted font-sans cursor-pointer"
+                >
+                  <Camera size={13} className="text-secondary" /> Scan VIN
                 </button>
               </div>
-              {scanned && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                  className="flex items-center gap-2 p-3 rounded-lg bg-[#0D2E1A]/60 border border-[#4ADE80]/20 text-[#4ADE80] text-[12px]">
-                  <CheckCircle size={14} /> Scanned: <span className="font-mono font-medium">{regNo}</span>
-                </motion.div>
+
+              {photoCaptured ? (
+                <div className="flex items-center gap-2 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs">
+                  <CheckCircle size={14} /> Registered Snapshot Verified Successfully!
+                </div>
+              ) : (
+                <button
+                  onClick={() => { setPhotoCaptured(true); }}
+                  className="py-2.5 bg-card hover:bg-muted border border-border text-[11px] font-bold rounded-xl text-foreground font-sans cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <Camera size={13} /> Capture Vehicle Photo Snap
+                </button>
               )}
-            </>
-          )}
-          
-          <button disabled={!regNo} onClick={() => setStep(1)}
-            className="self-end flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground text-[13px] font-bold rounded-lg hover:bg-primary/90 transition-all disabled:opacity-40 disabled:cursor-not-allowed font-sans">
-            Next <ArrowRight size={14} />
+            </div>
+
+            <div className="p-4 bg-card/40 border border-border rounded-xl flex flex-col justify-center gap-2.5 text-xs text-muted-foreground">
+              <span className="text-[10px] uppercase tracking-wider font-extrabold text-foreground mb-1">Detected DMS Match</span>
+              <p>🚘 Model: <strong className="text-foreground">MARUTI GRAND SWIFT PETROL VXI</strong></p>
+              <p>🗄️ Chassis: <strong className="text-foreground font-mono">MA3EWDE1S00924081</strong></p>
+              <p>🏷️ Registration Number: <strong className="text-primary font-mono uppercase text-sm select-all">{regNo}</strong></p>
+            </div>
+          </div>
+
+          <button
+            disabled={!regNo}
+            onClick={() => setStep(1)}
+            className="self-end flex items-center gap-1.5 px-5 py-2.5 bg-primary text-primary-foreground text-[12px] font-bold rounded-xl hover:bg-primary/95 transition-all disabled:opacity-40 disabled:cursor-not-allowed font-sans cursor-pointer"
+          >
+            Next (Basic Details) <ArrowRight size={13} />
           </button>
         </motion.div>
       )}
 
-      {/* Step 1: Customer & Vehicle Details */}
+      {/* Step 1: Customer Info & Gate In Validation */}
       {step === 1 && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-3">
-          <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-[12px]">
-            <div className="col-span-2 p-3 rounded-xl bg-card/40 border border-border flex gap-6">
-              <div><p className="text-muted-foreground text-[10px] uppercase font-sans tracking-wide mb-0.5">Model</p><p className="text-foreground font-semibold">MARUTI BALENO PETROL</p></div>
-              <div><p className="text-muted-foreground text-[10px] uppercase font-sans tracking-wide mb-0.5">Reg No</p><p className="text-primary font-mono">{regNo}</p></div>
-              <div><p className="text-muted-foreground text-[10px] uppercase font-sans tracking-wide mb-0.5">VIN</p><p className="text-foreground font-mono">MA3FJEB1SND789012</p></div>
-              <div><p className="text-muted-foreground text-[10px] uppercase font-sans tracking-wide mb-0.5">FC OK Date</p><p className="text-foreground">21-MAY-27</p></div>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-4">
+          {/* Gate-In Validation Banner */}
+          {!gateInValidated ? (
+            <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 flex flex-col gap-2">
+              <div className="flex gap-2 items-start text-xs text-amber-500 font-bold">
+                <AlertTriangle size={15} className="shrink-0 mt-0.5" />
+                <span>Gate In Date/Time or RFID Tag No. required Please check fields</span>
+              </div>
+              <div className="flex gap-4 items-end mt-1 flex-wrap">
+                <div className="flex-1 min-w-[150px]">
+                  <label className="text-[9px] uppercase tracking-wide font-extrabold block mb-1 text-muted-foreground">GATE IN DATE/TIME *</label>
+                  <input
+                    type="text"
+                    value={gateInDateTime}
+                    onChange={e => { setGateInDateTime(e.target.value); if (e.target.value && rfidTagNo) setGateInValidated(true); }}
+                    placeholder="DD-MM-YYYY HH:MM:SS"
+                    className="w-full text-[11px] px-3 py-1.5 bg-card border border-border rounded-lg outline-none font-mono"
+                  />
+                </div>
+                <div className="flex-1 min-w-[150px]">
+                  <label className="text-[9px] uppercase tracking-wide font-extrabold block mb-1 text-muted-foreground">RFID TAG NUMBER *</label>
+                  <input
+                    type="text"
+                    value={rfidTagNo}
+                    onChange={e => { setRfidTagNo(e.target.value); if (e.target.value && gateInDateTime) setGateInValidated(true); }}
+                    placeholder="E.g. RFID-879B"
+                    className="w-full text-[11px] px-3 py-1.5 bg-card border border-border rounded-lg outline-none font-mono"
+                  />
+                </div>
+                <button
+                  onClick={handleAutoGateIn}
+                  className="px-3 py-1.5 bg-primary/10 border border-primary/20 text-primary hover:bg-primary/25 text-[10px] font-bold rounded-lg cursor-pointer font-sans transition-all"
+                >
+                  ⚡ Auto-fill Registration Ticket
+                </button>
+              </div>
             </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-[10px] uppercase font-sans font-semibold tracking-wide text-muted-foreground">Odometer Reading *</label>
-              <input value={odometer} onChange={e => setOdometer(e.target.value)}
-                className="px-3 py-2 bg-card border border-border rounded-lg text-foreground outline-none focus:border-primary/50 font-mono" />
+          ) : (
+            <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs flex justify-between items-center">
+              <span className="font-sans font-semibold flex items-center gap-1.5"><CheckCircle size={14} /> Gate-In Validations OK: {rfidTagNo} at {gateInDateTime}</span>
+              <button onClick={() => { setGateInValidated(false); setGateInDateTime(""); setRfidTagNo(""); }} className="text-[10px] text-muted-foreground underline">Reset</button>
             </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-[10px] uppercase font-sans font-semibold tracking-wide text-muted-foreground">Service Type *</label>
-              <div className="relative">
-                <select value={serviceType} onChange={e => setServiceType(e.target.value)}
-                  className="w-full appearance-none px-3 py-2 bg-card border border-border rounded-lg text-foreground outline-none font-sans">
+          )}
+
+          {/* Form Content */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4 text-xs">
+            {/* Column 1: Basic Service info */}
+            <div className="flex flex-col gap-3 p-3.5 bg-card/30 border border-border rounded-xl">
+              <p className="text-[10px] uppercase font-black tracking-wider text-secondary">Basic Service Parameters</p>
+              <div className="flex flex-col gap-1">
+                <label className="text-[9px] uppercase font-extrabold text-muted-foreground">Odometer Reading (KM) *</label>
+                <input value={odometer} onChange={e => setOdometer(e.target.value)} className="px-2.5 py-1.5 bg-card border border-border rounded-lg font-mono text-[13px] text-foreground outline-none" />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-[9px] uppercase font-extrabold text-muted-foreground">Reported Through *</label>
+                <select value={reportedThrough} onChange={e => setReportedThrough(e.target.value)} className="px-2.5 py-1.5 bg-card border border-border rounded-lg outline-none">
+                  {["Walk-in", "Appointment Booking", "Dealer Driver Pickup", "Suzuki Concierge"].map(s => <option key={s}>{s}</option>)}
+                </select>
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-[9px] uppercase font-extrabold text-muted-foreground">Service Type *</label>
+                <select value={serviceType} onChange={e => setServiceType(e.target.value)} className="px-2.5 py-1.5 bg-card border border-border rounded-lg outline-none">
                   {["PAID SERVICE", "1ST FREE SERVICE", "2ND FREE SERVICE", "3RD FREE SERVICE", "RUNNING REPAIR", "PMS"].map(s => <option key={s}>{s}</option>)}
                 </select>
-                <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-[9px] uppercase font-extrabold text-muted-foreground">Sub-Service Type</label>
+                <select value={subServiceType} onChange={e => setSubServiceType(e.target.value)} className="px-2.5 py-1.5 bg-card border border-border rounded-lg outline-none">
+                  {["PMS-Standard", "PMS-Express Advantage", "Body-Repair Only", "Cylinder Hydrotesting Combo"].map(s => <option key={s}>{s}</option>)}
+                </select>
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-[9px] uppercase font-extrabold text-muted-foreground">Desired Time Slot *</label>
+                <input value={timeSlot} onChange={e => setTimeSlot(e.target.value)} className="px-2.5 py-1.5 bg-card border border-border rounded-lg" />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-[9px] uppercase font-extrabold text-muted-foreground">Appointment Remarks</label>
+                <textarea value={appointmentRemark} onChange={e => setAppointmentRemark(e.target.value)} rows={2} className="px-2.5 py-1.5 bg-card border border-border rounded-lg text-xs" />
               </div>
             </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-[10px] uppercase font-sans font-semibold tracking-wide text-muted-foreground">Customer Name</label>
-              <input defaultValue="PREM MOTORS TRUE VALUE" className="px-3 py-2 bg-card/50 border border-border rounded-lg text-muted-foreground outline-none font-sans cursor-not-allowed" readOnly />
+
+            {/* Column 2: Customer Data */}
+            <div className="flex flex-col gap-3 p-3.5 bg-card/30 border border-border rounded-xl">
+              <p className="text-[10px] uppercase font-black tracking-wider text-secondary">Customer Primary Data</p>
+              <div className="flex flex-col gap-1">
+                <label className="text-[9px] uppercase font-extrabold text-muted-foreground">Customer Full Name *</label>
+                <input value={name} onChange={e => setName(e.target.value)} className="px-2.5 py-1.5 bg-card border border-border rounded-lg" />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-[9px] uppercase font-extrabold text-muted-foreground">Mobile Phone Number *</label>
+                <input value={mobile} onChange={e => setMobile(e.target.value)} className="px-2.5 py-1.5 bg-card border border-border rounded-lg font-mono text-[13px]" />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-[9px] uppercase font-extrabold text-muted-foreground">Secondary Alternative Contact</label>
+                <input value={altMobile} onChange={e => setAltMobile(e.target.value)} className="px-2.5 py-1.5 bg-card border border-border rounded-lg font-mono text-[13px]" />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-[9px] uppercase font-extrabold text-muted-foreground">Primary Email Address *</label>
+                <input type="email" value={email} onChange={e => setEmail(e.target.value)} className="px-2.5 py-1.5 bg-card border border-border rounded-lg" />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-[9px] uppercase font-extrabold text-muted-foreground">Extended Warranty (EW) Type</label>
+                <select value={ewType} onChange={e => setEwType(e.target.value)} className="px-2.5 py-1.5 bg-card border border-border rounded-lg outline-none">
+                  {["None Active", "Gold Program 1Y", "Platinum Program 2Y", "Royal Gold Unlimited"].map(s => <option key={s}>{s}</option>)}
+                </select>
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-[9px] uppercase font-extrabold text-muted-foreground">MCP Maintenance Package</label>
+                <select value={mcpPackage} onChange={e => setMcpPackage(e.target.value)} className="px-2.5 py-1.5 bg-card border border-border rounded-lg outline-none">
+                  {["None Selected", "Petrol MCP Regular", "CNG MCP Special", "Platinum Plus Premium"].map(s => <option key={s}>{s}</option>)}
+                </select>
+              </div>
+              <div className="flex items-center justify-between mt-1 pt-1 border-t border-border/60">
+                <span className="text-[9px] font-black text-muted-foreground">NEXA CARD BALANCE</span>
+                <span className="font-mono font-bold text-primary">{nexaPoints} Auto Points</span>
+              </div>
             </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-[10px] uppercase font-sans font-semibold tracking-wide text-muted-foreground">Mobile No. *</label>
-              <input defaultValue="8708 467 728" className="px-3 py-2 bg-card border border-border rounded-lg text-foreground outline-none focus:border-primary/50 font-mono" />
-            </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-[10px] uppercase font-sans font-semibold tracking-wide text-muted-foreground">Email *</label>
-              <input defaultValue="ab@123gmail.com" className="px-3 py-2 bg-card border border-border rounded-lg text-foreground outline-none focus:border-primary/50 font-mono" />
-            </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-[10px] uppercase font-sans font-semibold tracking-wide text-muted-foreground">Gate In Date / Time</label>
-              <input defaultValue="21-May-2026 10:30" className="px-3 py-2 bg-card border border-border rounded-lg text-foreground outline-none focus:border-primary/50 font-mono" />
+
+            {/* Column 3: Logistics & Legal Address info */}
+            <div className="flex flex-col gap-3 p-3.5 bg-card/30 border border-border rounded-xl">
+              <p className="text-[10px] uppercase font-black tracking-wider text-secondary">Address, Stickers & Services</p>
+              <div className="flex flex-col gap-1">
+                <label className="text-[9px] uppercase font-extrabold text-muted-foreground">Customer Address Street</label>
+                <input value={address} onChange={e => setAddress(e.target.value)} className="px-2.5 py-1.5 bg-card border border-border rounded-lg" />
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="flex flex-col gap-1">
+                  <label className="text-[9px] uppercase font-extrabold text-muted-foreground">State</label>
+                  <input value={state} onChange={e => setState(e.target.value)} className="px-2.5 py-1.5 bg-card border border-border rounded-lg text-[11px]" />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-[9px] uppercase font-extrabold text-muted-foreground">City</label>
+                  <input value={city} onChange={e => setCity(e.target.value)} className="px-2.5 py-1.5 bg-card border border-border rounded-lg text-[11px]" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="flex flex-col gap-1">
+                  <label className="text-[9px] uppercase font-extrabold text-muted-foreground">Pin Code *</label>
+                  <input value={pincode} onChange={e => setPincode(e.target.value)} className="px-2.5 py-1.5 bg-card border border-border rounded-lg font-mono text-[11px]" />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-[9px] uppercase font-extrabold text-muted-foreground">Customer ID Category</label>
+                  <select value={customerCategory} onChange={e => setCustomerCategory(e.target.value)} className="px-2.5 py-1.5 bg-card border border-border rounded-lg text-[11px] outline-none">
+                    <option value="Retail">Retail Consumer</option>
+                    <option value="Corporate">Corporate Account</option>
+                    <option value="Fleet">Govt/Fleet Fleet</option>
+                    <option value="Employee">Nexa Staff Profile</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="flex flex-col gap-1">
+                  <label className="text-[9px] uppercase font-extrabold text-muted-foreground">Coupon Number</label>
+                  <input value={fsCouponNo} onChange={e => setFsCouponNo(e.target.value)} className="px-2.5 py-1.5 bg-card border border-border rounded-lg font-mono text-[11px]" />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-[9px] uppercase font-extrabold text-muted-foreground">Smart Sticker ID</label>
+                  <select value={smartSticker} onChange={e => setSmartSticker(e.target.value)} className="px-2.5 py-1.5 bg-card border border-border rounded-lg text-[11px]">
+                    <option value="Yes">Applied & Active</option>
+                    <option value="No">No RFID Sticker</option>
+                  </select>
+                </div>
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-[9px] uppercase font-extrabold text-muted-foreground">Washing Strategy</label>
+                <select value={washType} onChange={e => setWashType(e.target.value)} className="px-2.5 py-1.5 bg-card border border-border rounded-lg outline-none">
+                  {["Dry Dust Vacuuming", "Body Foam Shampoo Wash", "Full Underbody Jet Wash", "No Washing Preferred"].map(s => <option key={s}>{s}</option>)}
+                </select>
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-[9px] uppercase font-extrabold text-muted-foreground">LPG Testing validation date</label>
+                <input type="text" value={cylinderTestingDate} onChange={e => setCylinderTestingDate(e.target.value)} placeholder="If applicable" className="px-2.5 py-1.5 bg-card border border-border rounded-lg font-mono" />
+              </div>
             </div>
           </div>
-          <div className="flex justify-between mt-2">
-            <button onClick={() => setStep(0)} className="flex items-center gap-2 px-4 py-2 bg-card text-foreground text-[12px] font-semibold rounded-lg hover:bg-muted font-sans"><ChevronLeft size={13} /> Back</button>
-            <button onClick={() => setStep(2)} className="flex items-center gap-2 px-5 py-2 bg-primary text-primary-foreground text-[12px] font-bold rounded-lg hover:bg-primary/90 font-sans">Next <ArrowRight size={13} /></button>
+
+          <div className="flex justify-between mt-3">
+            <button onClick={() => setStep(0)} className="flex items-center gap-1.5 px-4 py-2 bg-card text-foreground text-[11px] font-bold rounded-xl border border-border hover:bg-muted font-sans cursor-pointer"><ChevronLeft size={13} /> Back</button>
+            <button
+              onClick={() => {
+                if (!gateInDateTime || !rfidTagNo) {
+                  setGateInValidated(false);
+                } else {
+                  setStep(2);
+                }
+              }}
+              className="flex items-center gap-1.5 px-5 py-2.5 bg-primary text-primary-foreground text-[12px] font-bold rounded-xl hover:bg-primary/95 font-sans cursor-pointer"
+            >
+              Next (Vehicle Inspection & Photos) <ArrowRight size={13} />
+            </button>
           </div>
         </motion.div>
       )}
 
-      {/* Step 2: Vehicle Status */}
+      {/* Step 2: Vehicle Status (Interactive car diagram & 14 exterior image slots) */}
       {step === 2 && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="p-4 rounded-xl bg-card/40 border border-border">
-              <p className="text-[11px] uppercase font-sans font-semibold tracking-wide text-muted-foreground mb-3 flex items-center gap-1.5"><Fuel size={12} /> Fuel Level</p>
-              <div className="flex gap-2 mb-3">
-                {fuelLevels.map(level => (
-                  <button key={level} onClick={() => setFuel(level)}
-                    className={`flex-1 py-2 text-[11px] font-bold rounded-lg transition-all font-sans ${fuel === level ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground hover:text-foreground"}`}>
-                    {level}%
-                  </button>
-                ))}
+          <div className="text-xs text-muted-foreground p-3.5 bg-card/20 border border-border rounded-xl">
+            <p className="font-extrabold text-foreground mb-1 font-sans">📸 EXTERIOR WORKFLOW DIAGNOSTIC ZONES:</p>
+            Capture outer perimeter panels below. Select open camera framework or choose local assets from disk. Touch overlay dots inside car view layout to register localized scratches and paint issues manually. Includes underbody review elements.
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Hand-marked Scratch/Dent Panel */}
+            <div className="p-4 bg-card/30 border border-border rounded-xl flex flex-col gap-3">
+              <div className="flex justify-between items-center pb-2 border-b border-border">
+                <p className="text-[12px] font-bold tracking-tight text-white uppercase">Interactive Panel Layout</p>
+                <button
+                  onClick={() => { setScratchDot([2, 5, 11]); setDentDot([4, 8]); }}
+                  className="text-[9px] bg-card border border-border px-2 py-0.5 rounded font-black cursor-pointer hover:border-white transition-colors"
+                >
+                  RESET SPOTS
+                </button>
               </div>
-              <div className="h-3 rounded-full bg-card overflow-hidden">
-                <motion.div animate={{ width: `${fuel}%` }} className="h-full rounded-full bg-gradient-to-r from-primary to-accent transition-all" />
+
+              {/* 14 Hotspot Overhead diagram */}
+              <div className="relative border border-border rounded-xl bg-black/90 p-4 select-none flex items-center justify-center">
+                <svg viewBox="0 0 400 160" className="w-full h-[120px] filter drop-shadow(0 0 8px rgba(61,142,240,0.1))">
+                  <rect x="60" y="40" width="280" height="80" rx="36" fill="#0c192d" stroke="#3D8EF0" strokeWidth="2.5" />
+                  <path d="M120 40 C140 10, 260 10, 280 40 Z" fill="#040914" stroke="#3D8EF0" strokeWidth="1.5" />
+                  <line x1="120" y1="40" x2="280" y2="40" stroke="#3D8EF0" strokeWidth="2" />
+                  <line x1="120" y1="120" x2="280" y2="120" stroke="#3D8EF0" strokeWidth="2" />
+                  <rect x="90" y="55" width="220" height="50" rx="15" fill="#040914" stroke="#1d2e47" strokeWidth="1" />
+
+                  {Array.from({ length: 14 }).map((_, i) => {
+                    const hNo = i + 1;
+                    const rx = 80 + i * 19;
+                    const ry = 48 + (i % 3) * 32;
+                    const isScratch = scratchDot.includes(hNo);
+                    const isDent = dentDot.includes(hNo);
+
+                    let color = "fill-slate-600/45 stroke-slate-500/30";
+                    let label = String(hNo);
+                    if (isScratch) { color = "fill-amber-500 stroke-amber-300"; label = "S"; }
+                    if (isDent) { color = "fill-rose-500 stroke-rose-300"; label = "D"; }
+
+                    return (
+                      <g key={hNo} className="cursor-pointer" onClick={() => {
+                        if (isScratch) {
+                          setScratchDot(prev => prev.filter(x => x !== hNo));
+                          setDentDot(prev => [...prev, hNo]);
+                        } else if (isDent) {
+                          setDentDot(prev => prev.filter(x => x !== hNo));
+                        } else {
+                          setScratchDot(prev => [...prev, hNo]);
+                        }
+                      }}>
+                        <circle cx={rx} cy={ry} r="7.5" className={`${color} transition-all`} strokeWidth="1" />
+                        <text x={rx} y={ry + 2.5} fill="#ffffff" fontSize="8" fontWeight="bold" textAnchor="middle" pointerEvents="none">{label}</text>
+                      </g>
+                    );
+                  })}
+                </svg>
+              </div>
+
+              <div className="flex gap-4 justify-between text-[11px] bg-card/60 p-2 rounded-xl border border-border select-none font-sans font-semibold">
+                <span className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-amber-500" /> Scratches Identified: <strong className="font-mono text-amber-400">{scratchDot.length}</strong></span>
+                <span className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-rose-500" /> Dents: <strong className="font-mono text-rose-400">{dentDot.length}</strong></span>
+                <span className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded bg-blue-500" /> Total Hotspots: <strong className="font-mono">{scratchDot.length + dentDot.length}</strong></span>
+              </div>
+
+              {/* Cabin Accessories Inventory Checklist */}
+              <div className="mt-2 border-t border-border/60 pt-3">
+                <p className="text-[10px] font-black uppercase text-secondary tracking-wider mb-2">Cabin Equipment Inventory</p>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  {Object.entries(inventory).map(([item, checked]) => (
+                    <label key={item} className="flex items-center gap-2 text-foreground cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={() => setInventory(prev => ({ ...prev, [item]: !checked }))}
+                        className="w-3.5 h-3.5 accent-primary cursor-pointer border border-border rounded"
+                      />
+                      <span>{item}</span>
+                    </label>
+                  ))}
+                </div>
               </div>
             </div>
-            <div className="p-4 rounded-xl bg-card/40 border border-border">
-              <p className="text-[11px] uppercase font-sans font-semibold tracking-wide text-muted-foreground mb-3 flex items-center gap-1.5"><Wrench size={12} /> Vehicle Inventory</p>
-              <div className="flex flex-col gap-2">
-                {["Spare Tyre", "Service Schedule", "Wheel Cover", "Toolkit", "Music System"].map((item, i) => (
-                  <label key={item} className="flex items-center gap-2 text-[12px] text-foreground cursor-pointer">
-                    <input type="checkbox" defaultChecked={i < 3} className="w-3.5 h-3.5 accent-primary" />
-                    {item}
-                  </label>
+
+            {/* 14 Exterior Photo Slots Panel */}
+            <div className="p-4 bg-card/30 border border-border rounded-xl flex flex-col gap-3">
+              <div className="flex justify-between items-center pb-2 border-b border-border">
+                <p className="text-[12px] font-bold tracking-tight text-white uppercase">Vehicle Damage Zone Snapshots (14 Panels)</p>
+                <span className="text-[10px] px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-amber-400 font-mono font-bold">14 REQUIRED CLS</span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 overflow-y-auto max-h-[300px] pr-1 scrollbar-thin scrollbar-thumb-card select-none">
+                {Object.entries(exteriorPhotos).map(([zone, pic]) => (
+                  <div key={zone} className="p-2 border border-border rounded-lg bg-card/45 flex items-center justify-between text-[11px]">
+                    <div className="flex flex-col gap-0.5 max-w-[120px] truncate">
+                      <span className="font-medium text-foreground">{zone}</span>
+                      {pic ? (
+                        <span className="text-[9px] text-[#4ADE80] font-bold flex items-center gap-1">✓ Active Spec Logged</span>
+                      ) : (
+                        <span className="text-[9px] text-muted-foreground/60 font-sans">Pending Image</span>
+                      )}
+                    </div>
+
+                    <div className="flex gap-1">
+                      {pic ? (
+                        <>
+                          <div className="w-10 h-7 rounded border border-border overflow-hidden bg-cover bg-center" style={{ backgroundImage: `url('/dummy_car.jpg')` }} />
+                          <button
+                            onClick={() => setExteriorPhotos(prev => ({ ...prev, [zone]: null }))}
+                            className="p-1 bg-rose-500/20 border border-rose-500/30 rounded text-rose-400 hover:text-rose-300 cursor-pointer"
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => handleCapturePhoto(zone)}
+                            className="p-1 px-1.5 bg-primary/10 border border-primary/20 text-primary hover:bg-primary/25 rounded font-mono font-bold cursor-pointer"
+                          >
+                            CAM
+                          </button>
+                          <button
+                            onClick={() => setExteriorPhotos(prev => ({ ...prev, [zone]: "/dummy_gallery.jpg" }))}
+                            className="p-1 px-1.5 bg-slate-500/10 border border-slate-500/20 text-muted-foreground hover:bg-slate-500/25 rounded font-mono font-bold cursor-pointer"
+                          >
+                            FILE
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
                 ))}
+              </div>
+
+              {/* Fuel Level Slider */}
+              <div className="border-t border-border/60 pt-3 flex flex-col gap-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-[10px] uppercase font-black text-secondary tracking-wider">Fuel Level indicator (% slider)</span>
+                  <strong className="text-xs font-mono font-bold text-primary">{fuel}% Full</strong>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="25"
+                  value={fuel}
+                  onChange={e => setFuel(parseInt(e.target.value))}
+                  className="w-full accent-primary h-1 bg-card rounded-lg outline-none cursor-pointer"
+                />
+                <div className="flex justify-between text-[9px] font-mono text-muted-foreground px-1">
+                  <span>E</span>
+                  <span>1/4</span>
+                  <span>1/2</span>
+                  <span>3/4</span>
+                  <span>F</span>
+                </div>
               </div>
             </div>
           </div>
-          <div className="p-3 rounded-xl bg-[#1A1A0D]/40 border border-[#FACC15]/20 text-[#FACC15] text-[12px] flex items-start gap-2">
-            <AlertTriangle size={14} className="mt-0.5 shrink-0" />
-            Please capture at least 3 interior images before proceeding. Smart Eye process recommended for exterior.
-          </div>
+
           <div className="flex justify-between">
-            <button onClick={() => setStep(1)} className="flex items-center gap-2 px-4 py-2 bg-card text-foreground text-[12px] font-semibold rounded-lg hover:bg-muted font-sans"><ChevronLeft size={13} /> Back</button>
-            <button onClick={() => setStep(3)} className="flex items-center gap-2 px-5 py-2 bg-primary text-primary-foreground text-[12px] font-bold rounded-lg hover:bg-primary/90 font-sans">Next <ArrowRight size={13} /></button>
+            <button onClick={() => setStep(1)} className="flex items-center gap-1.5 px-4 py-2 bg-card text-foreground text-[11px] font-bold rounded-xl border border-border hover:bg-muted font-sans cursor-pointer"><ChevronLeft size={13} /> Back</button>
+            <button onClick={() => setStep(3)} className="flex items-center gap-1.5 px-5 py-2.5 bg-primary text-primary-foreground text-[12px] font-bold rounded-xl hover:bg-primary/95 font-sans cursor-pointer">Next (Tyre & Battery) <ArrowRight size={13} /></button>
           </div>
         </motion.div>
       )}
 
-      {/* Step 3: Tyre & Battery */}
+      {/* Step 3: Tyre & Battery Health */}
       {step === 3 && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="p-4 rounded-xl bg-card/40 border border-border">
-              <p className="text-[11px] uppercase font-sans font-semibold tracking-wide text-muted-foreground mb-4">Tyre Health (mm)</p>
-              <div className="grid grid-cols-2 gap-3">
-                {(["fl", "fr", "rl", "rr"] as const).map(k => (
-                  <div key={k} className="flex flex-col gap-1">
-                    <label className="text-[10px] uppercase font-sans font-semibold text-muted-foreground tracking-wide">{k.toUpperCase()}</label>
-                    <div className="flex items-center gap-1">
-                      <button onClick={() => setTyre(t => ({ ...t, [k]: String(Math.max(0, parseInt(t[k]) - 1)) }))}
-                        className="w-7 h-7 rounded-lg bg-card text-muted-foreground hover:text-foreground flex items-center justify-center"><Minus size={11} /></button>
-                      <input value={tyre[k]} onChange={e => setTyre(t => ({ ...t, [k]: e.target.value }))}
-                        className="flex-1 px-2 py-1.5 bg-card border border-border rounded-lg text-foreground text-center text-[13px] outline-none font-mono" />
-                      <button onClick={() => setTyre(t => ({ ...t, [k]: String(parseInt(t[k]) + 1) }))}
-                        className="w-7 h-7 rounded-lg bg-card text-muted-foreground hover:text-foreground flex items-center justify-center"><Plus size={11} /></button>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Tyre tread element */}
+            <div className="p-4 bg-card/30 border border-border rounded-xl flex flex-col gap-4">
+              <h4 className="text-[12px] font-bold tracking-tight text-white uppercase pb-1 border-b border-border">Tread Depth Tyre Health (mm check)</h4>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                Log residual tread depth thicknesses in millimeters. Values below <strong className="text-rose-400">3mm</strong> are flagged critical, initiating recommendations in customer quotation.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-1">
+                {["fl", "fr", "rl", "rr", "spare"].map(k => (
+                  <div key={k} className="p-2.5 rounded-lg border border-border bg-card/35 flex flex-col gap-1.5">
+                    <label className="text-[10px] uppercase font-black text-muted-foreground tracking-wider">{k.toUpperCase()} TYRE POSITION</label>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setTyre(prev => ({ ...prev, [k]: String(Math.max(0, parseInt(prev[k] || "4") - 1)) }))}
+                        className="w-7 h-7 rounded bg-card hover:bg-muted text-foreground flex items-center justify-center font-bold text-xs select-none border border-border"
+                      >
+                        -
+                      </button>
+                      <input
+                        value={tyre[k]}
+                        onChange={e => { const val = e.target.value; setTyre(prev => ({ ...prev, [k]: val })); }}
+                        className="flex-1 w-12 text-center bg-transparent border-0 outline-none text-[13px] font-mono text-foreground font-extrabold focus:ring-0"
+                      />
+                      <button
+                        onClick={() => setTyre(prev => ({ ...prev, [k]: String(Math.min(12, parseInt(prev[k] || "4") + 1)) }))}
+                        className="w-7 h-7 rounded bg-card hover:bg-muted text-foreground flex items-center justify-center font-bold text-xs select-none border border-border"
+                      >
+                        +
+                      </button>
                     </div>
-                    {parseInt(tyre[k]) < 3 && (
-                      <p className="text-[#F87171] text-[10px] font-sans">Critical — replacement needed</p>
+                    {parseInt(tyre[k] || "4") < 3 && (
+                      <span className="text-[9px] text-[#F87171] font-black uppercase tracking-wider mt-1 block">⚠️ Critical Wear - Replace!</span>
                     )}
                   </div>
                 ))}
               </div>
             </div>
-            <div className="p-4 rounded-xl bg-card/40 border border-border">
-              <p className="text-[11px] uppercase font-sans font-semibold tracking-wide text-muted-foreground mb-4">Battery Health</p>
+
+            {/* Battery condition health */}
+            <div className="p-4 bg-card/30 border border-border rounded-xl flex flex-col gap-4">
+              <h4 className="text-[12px] font-bold tracking-tight text-white uppercase pb-1 border-b border-border">Lead-Acid Battery Health (Performance metrics)</h4>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                Audit starting voltages and plate contamination health rating. If rated poor, starter labour elements get injected into summary.
+              </p>
+
               <div className="flex flex-col gap-2">
-                {["Good", "Charge and Test", "Poor"].map(opt => (
-                  <label key={opt} onClick={() => setBattery(opt)}
-                    className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${battery === opt ? "border-primary bg-primary/10" : "border-border hover:border-border"}`}>
-                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${battery === opt ? "border-primary" : "border-muted-foreground"}`}>
-                      {battery === opt && <div className="w-2 h-2 rounded-full bg-primary" />}
+                {[
+                  { value: "Good", label: "✓ Battery Healthy & Fully Charged", sub: "Charge state over 85%, starting voltage 12.6V+" },
+                  { value: "Charge and Test", label: "⚡ Charge & Retest Advised", sub: "Voltage below 12.2V, high starter resistance detected" },
+                  { value: "Poor", label: "⚠️ Poor Contaminated Plates", sub: "Internal short-circuit, immediate replacement required" }
+                ].map(opt => (
+                  <label
+                    key={opt.value}
+                    onClick={() => {
+                      setBattery(opt.value);
+                      if (opt.value === "Poor") {
+                        // Insert poor battery item into checklist demands
+                        if (!demands.some(d => d.code === "BATT-REP")) {
+                          setDemands(prev => [
+                            ...prev,
+                            { type: "P", desc: "Exide Nexa Dry Battery Upgrade (Poor Health replacement)", code: "BATT-REP", qty: 1, price: 5400, accepted: "YES", acceptedQty: 1, rejectionReason: "-" }
+                          ]);
+                        }
+                      } else {
+                        setDemands(prev => prev.filter(d => d.code !== "BATT-REP"));
+                      }
+                    }}
+                    className={`flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer select-none transition-all ${battery === opt.value ? "border-primary bg-primary/10" : "border-border hover:border-border/60 bg-card/20"}`}
+                  >
+                    <div className={`w-4 h-4 rounded-full border-2 mt-0.5 flex items-center justify-center shrink-0 ${battery === opt.value ? "border-primary" : "border-muted-foreground"}`}>
+                      {battery === opt.value && <div className="w-2 h-2 rounded-full bg-primary" />}
                     </div>
-                    <span className={`text-[13px] font-sans font-semibold ${battery === opt ? "text-primary" : "text-foreground"}`}>{opt}</span>
+                    <div className="flex flex-col gap-0.5">
+                      <span className={`text-[12.5px] font-semibold ${battery === opt.value ? "text-primary" : "text-foreground"}`}>{opt.label}</span>
+                      <span className="text-[10px] text-muted-foreground/80 leading-snug">{opt.sub}</span>
+                    </div>
                   </label>
                 ))}
               </div>
+
               {battery === "Poor" && (
-                <p className="text-[#F87171] text-[11px] mt-2 font-sans">Battery replacement demand will be auto-added.</p>
+                <div className="p-3 bg-rose-500/10 border border-rose-500/20 text-[#F87171] text-[11px] rounded-lg mt-1 font-mono font-bold leading-relaxed">
+                  [REDUNDANCY ENGINE ACTIVE]: New Battery Part replacement demand of ₹5,400 has has been injected automatically to Step 4 draft.
+                </div>
               )}
             </div>
           </div>
+
           <div className="flex justify-between">
-            <button onClick={() => setStep(2)} className="flex items-center gap-2 px-4 py-2 bg-card text-foreground text-[12px] font-semibold rounded-lg hover:bg-muted font-sans"><ChevronLeft size={13} /> Back</button>
-            <button onClick={() => setStep(4)} className="flex items-center gap-2 px-5 py-2 bg-primary text-primary-foreground text-[12px] font-bold rounded-lg hover:bg-primary/90 font-sans">Next <ArrowRight size={13} /></button>
+            <button onClick={() => setStep(2)} className="flex items-center gap-1.5 px-4 py-2 bg-card text-foreground text-[11px] font-bold rounded-xl border border-border hover:bg-muted font-sans cursor-pointer"><ChevronLeft size={13} /> Back</button>
+            <button onClick={() => setStep(4)} className="flex items-center gap-1.5 px-5 py-2.5 bg-primary text-primary-foreground text-[12px] font-bold rounded-xl hover:bg-primary/95 font-sans cursor-pointer">Next (Demands & Estimator) <ArrowRight size={13} /></button>
           </div>
         </motion.div>
       )}
 
-      {/* Step 4: Demands */}
+      {/* Step 4: Demands, Parts checklist details & Scheduling */}
       {step === 4 && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-3">
-          <div className="flex items-center justify-between mb-1">
-            <p className="text-[11px] text-muted-foreground uppercase font-sans font-semibold tracking-wide">Service Menu Detail List (Demanded Repair)</p>
-            <button 
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-4">
+          <div className="flex justify-between items-center">
+            <p className="text-[11px] uppercase font-black text-secondary tracking-wider">Demanded Repair & Labor Parts Estimation list</p>
+            <button
               onClick={() => { setShowAddDemandRow(!showAddDemandRow); setNewDesc(""); setNewCode(""); setNewPrice(0); setNewQty(1); }}
-              className="flex items-center gap-1.5 text-primary text-[11px] font-semibold font-sans hover:text-accent transition-colors cursor-pointer"
+              className="flex items-center gap-1 bg-primary/15 border border-primary/20 text-primary text-[10px] font-black uppercase px-2.5 py-1 rounded-lg hover:bg-primary/25 cursor-pointer"
             >
-              <Plus size={12} /> Add Demand
+              <Plus size={12} /> Add Demand Item
             </button>
           </div>
 
           {showAddDemandRow && (
-            <div className="p-4 rounded-xl border border-primary/20 bg-card flex flex-wrap gap-3 items-end transition-all">
-              <div className="flex-1 min-w-[100px]">
-                <label className="text-[10px] uppercase font-sans text-muted-foreground block mb-1 font-bold">Type</label>
-                <select value={newType} onChange={e => setNewType(e.target.value as "L" | "P")} className="w-full text-[12px] px-3.5 py-2 bg-card border border-border rounded focus:border-primary/50 text-foreground outline-none cursor-pointer">
+            <div className="p-4 rounded-xl border border-primary/25 bg-card flex flex-wrap gap-3 items-end transition-all">
+              <div className="flex-1 min-w-[80px]">
+                <label className="text-[9px] uppercase font-extrabold text-muted-foreground block mb-1">TYPE</label>
+                <select value={newType} onChange={e => setNewType(e.target.value as "L" | "P")} className="w-full text-xs px-2.5 py-1.5 bg-card border border-border rounded-lg outline-none cursor-pointer">
                   <option value="L">Labour (L)</option>
                   <option value="P">Part (P)</option>
                 </select>
               </div>
-              <div className="flex-[3] min-w-[200px]">
-                <label className="text-[10px] uppercase font-sans text-muted-foreground block mb-1 font-bold">Description</label>
-                <input value={newDesc} onChange={e => setNewDesc(e.target.value)} placeholder="e.g. Front Brake Pads Replacement" className="w-full text-[12px] px-3.5 py-2 bg-card border border-border rounded focus:border-primary/50 text-foreground outline-none font-sans" />
+              <div className="flex-[3] min-w-[180px]">
+                <label className="text-[9px] uppercase font-extrabold text-muted-foreground block mb-1">DESCRIPTION</label>
+                <input value={newDesc} onChange={e => setNewDesc(e.target.value)} placeholder="E.g. Front Right Side Bumper paint" className="w-full text-xs px-2.5 py-1.5 bg-card border border-border rounded-lg outline-none font-sans" />
               </div>
-              <div className="flex-1 min-w-[120px]">
-                <label className="text-[10px] uppercase font-sans text-muted-foreground block mb-1 font-bold">Code</label>
-                <input value={newCode} onChange={e => setNewCode(e.target.value.toUpperCase())} placeholder="e.g. BRK-PAD-01" className="w-full text-[12px] px-3.5 py-2 bg-card border border-border rounded focus:border-primary/50 text-foreground outline-none font-mono" />
+              <div className="flex-1 min-w-[100px]">
+                <label className="text-[9px] uppercase font-extrabold text-muted-foreground block mb-1">DMS CODE</label>
+                <input value={newCode} onChange={e => setNewCode(e.target.value.toUpperCase())} placeholder="E.g. ZE75L0" className="w-full text-xs px-2.5 py-1.5 bg-card border border-border rounded-lg outline-none font-mono" />
               </div>
-              <div className="w-[70px]">
-                <label className="text-[10px] uppercase font-sans text-muted-foreground block mb-1 font-bold">Qty</label>
-                <input type="number" value={newQty} onChange={e => setNewQty(parseInt(e.target.value) || 1)} className="w-full text-[12px] px-3.5 py-2 bg-card border border-border rounded focus:border-primary/50 text-foreground outline-none font-mono" />
+              <div className="w-[60px]">
+                <label className="text-[9px] uppercase font-extrabold text-muted-foreground block mb-1">QTY</label>
+                <input type="number" value={newQty} onChange={e => setNewQty(parseInt(e.target.value) || 1)} className="w-full text-xs px-2.5 py-1.5 bg-card border border-border rounded-lg text-center font-mono" />
               </div>
-              <div className="w-[100px]">
-                <label className="text-[10px] uppercase font-sans text-muted-foreground block mb-1 font-bold">Price (₹)</label>
-                <input type="number" value={newPrice} onChange={e => setNewPrice(parseInt(e.target.value) || 0)} className="w-full text-[12px] px-3.5 py-2 bg-card border border-border rounded focus:border-primary/50 text-foreground outline-none font-mono" />
+              <div className="w-[85px]">
+                <label className="text-[9px] uppercase font-extrabold text-muted-foreground block mb-1">PRICE (₹)</label>
+                <input type="number" value={newPrice} onChange={e => setNewPrice(parseInt(e.target.value) || 0)} className="w-full text-xs px-2.5 py-1.5 bg-card border border-border rounded-lg font-mono text-right" />
               </div>
-              <div className="flex gap-2">
-                <button 
+              <div className="flex gap-1.5 shrink-0">
+                <button
                   onClick={() => {
                     if (!newDesc.trim()) return;
                     setDemands(prev => [...prev, {
@@ -2276,239 +3084,375 @@ function JCOpeningPanel({ initialReg }: { initialReg?: string }) {
                       rejectionReason: "-"
                     }]);
                     setShowAddDemandRow(false);
-                  }} 
-                  className="px-4 py-2 bg-primary hover:bg-primary/95 text-white font-bold text-[12px] rounded font-sans cursor-pointer animate-pulse"
+                  }}
+                  className="px-3.5 py-1.5 bg-primary text-primary-foreground font-black text-[10px] rounded-lg tracking-wider uppercase cursor-pointer hover:bg-primary/90"
                 >
                   ADD
                 </button>
-                <button 
-                  onClick={() => setShowAddDemandRow(false)} 
-                  className="px-4 py-2 bg-card border border-border text-foreground font-bold text-[12px] rounded font-sans cursor-pointer"
+                <button
+                  onClick={() => setShowAddDemandRow(false)}
+                  className="px-3 py-1.5 bg-card border border-border text-foreground text-[10px] font-bold rounded-lg cursor-pointer"
                 >
                   CANCEL
                 </button>
               </div>
             </div>
           )}
-          <div className="overflow-x-auto rounded-xl border border-border bg-card/20 shadow-inner">
+
+          {/* Demands Table Grid */}
+          <div className="overflow-x-auto rounded-xl border border-border bg-card/15 shadow-inner">
             <table className="w-full text-left border-collapse text-[11px] font-sans">
               <thead>
-                <tr className="border-b border-border bg-card/75 font-bold text-muted-foreground uppercase text-[9.5px] tracking-wider">
-                  <th className="px-3 py-3 text-center w-[50px]">S.NO.</th>
-                  <th className="px-3 py-3 text-center w-[50px]">TYPE</th>
-                  <th className="px-3 py-3">DESCRIPTION</th>
-                  <th className="px-3 py-3 min-w-[130px]">PART NO./LABOUR CODE</th>
-                  <th className="px-3 py-3 text-right w-[60px]">QTY</th>
-                  <th className="px-3 py-3 text-right w-[95px]">PRICE</th>
-                  <th className="px-3 py-3 text-center w-[100px]">ACCEPTED</th>
-                  <th className="px-3 py-3 text-center w-[90px]">ACCEPTED QTY.</th>
-                  <th className="px-3 py-3">REJECTION REASON</th>
+                <tr className="border-b border-border bg-card/60 font-bold text-muted-foreground uppercase text-[9px] tracking-wider">
+                  <th className="px-3 py-2.5 text-center w-[45px]">S.No.</th>
+                  <th className="px-3 py-2.5 text-center w-[45px]">Type</th>
+                  <th className="px-3 py-2.5">Description</th>
+                  <th className="px-3 py-2.5">Part No. / Labour Code</th>
+                  <th className="px-3 py-2.5 text-right w-[55px]">Qty</th>
+                  <th className="px-3 py-2.5 text-right w-[85px]">Price</th>
+                  <th className="px-3 py-2.5 text-center w-[85px]">Accepted</th>
+                  <th className="px-3 py-2.5 text-center w-[75px]">Acc Qty</th>
+                  <th className="px-3 py-2.5">Rejection Reason</th>
                 </tr>
               </thead>
               <tbody>
-                {(() => {
-                  let lCount = 0;
-                  let pCount = 0;
-                  
-                  // Sort L items aggregate first, then P items
-                  const sortedDemands = [...demands].sort((a, b) => {
-                    if (a.type === "L" && b.type !== "L") return -1;
-                    if (a.type !== "L" && b.type === "L") return 1;
-                    return 0;
-                  });
-
-                  return sortedDemands.map((d) => {
-                    const originalIdx = demands.findIndex(orig => orig.code === d.code);
-                    const sNo = d.type === "L" ? ++lCount : ++pCount;
-                    const isAccepted = d.accepted === "YES" || d.accepted === true;
-
-                    return (
-                      <tr key={d.code} className="border-b border-border hover:bg-card/35 transition-colors align-middle">
-                        {/* S.NO. */}
-                        <td className="px-3 py-2.5 text-center font-mono text-muted-foreground">{sNo}</td>
-                        
-                        {/* TYPE */}
-                        <td className="px-3 py-2.5 text-center">
-                          <span className={`px-2 py-0.5 rounded text-[9.5px] font-bold font-mono tracking-wide ${d.type === "L" ? "bg-primary/10 border border-primary/20 text-primary" : "bg-emerald-500/10 border border-emerald-500/20 text-emerald-400"}`}>
-                            {d.type}
-                          </span>
-                        </td>
-                        
-                        {/* DESCRIPTION */}
-                        <td className="px-3 py-2.5 font-medium text-foreground max-w-[160px] truncate">{d.desc}</td>
-                        
-                        {/* PART NO./LABOUR CODE */}
-                        <td className="px-3 py-2.5 font-mono text-xs text-muted-foreground">
-                          <div className="flex items-center gap-1">
-                            <span>{d.code}</span>
-                            {d.type === "P" && (
-                              <span className="text-[9px] text-muted-foreground/60 select-none">▼</span>
-                            )}
-                          </div>
-                        </td>
-                        
-                        {/* QTY */}
-                        <td className="px-3 py-2.5 text-right font-mono text-foreground">
-                          {d.qty % 1 === 0 ? d.qty : d.qty.toFixed(2)}
-                        </td>
-                        
-                        {/* PRICE */}
-                        <td className="px-3 py-2.5 text-right font-mono font-medium text-foreground">
-                          ₹{d.price.toLocaleString('en-IN', { minimumFractionDigits: d.price % 1 === 0 ? 0 : 2, maximumFractionDigits: 2 })}
-                        </td>
-                        
-                        {/* ACCEPTED */}
-                        <td className="px-3 py-2.5 text-center">
-                          <select
-                            value={d.accepted === true ? "YES" : d.accepted === false ? "NO" : d.accepted}
-                            onChange={(e) => {
-                              const targetVal = e.target.value;
-                              setDemands(prev => {
-                                const copy = [...prev];
-                                copy[originalIdx] = {
-                                  ...copy[originalIdx],
-                                  accepted: targetVal,
-                                  acceptedQty: targetVal === "YES" ? d.qty : 0,
-                                  rejectionReason: targetVal === "YES" ? "-" : "Customer Refused"
-                                };
-                                return copy;
-                              });
-                            }}
-                            className={`px-2 py-1 text-[11px] font-bold rounded border cursor-pointer outline-none bg-background transition-all ${isAccepted ? "border-emerald-500/30 text-emerald-400" : "border-destructive/30 text-destructive/80"}`}
-                          >
-                            <option value="YES" className="text-emerald-400 font-sans font-semibold bg-background">YES</option>
-                            <option value="NO" className="text-destructive font-sans font-semibold bg-background">NO</option>
-                          </select>
-                        </td>
-                        
-                        {/* ACCEPTED QTY. */}
-                        <td className="px-3 py-2.5 text-center">
+                {demands.map((d, sNo) => {
+                  const isAccepted = d.accepted === "YES" || d.accepted === true;
+                  return (
+                    <tr key={sNo} className="border-b border-border hover:bg-card/25 transition-colors align-middle">
+                      <td className="px-3 py-2 text-center font-mono text-muted-foreground">{sNo + 1}</td>
+                      <td className="px-3 py-2 text-center">
+                        <span className={`px-1.5 py-0.2 select-none text-[8.5px] font-black rounded font-mono ${d.type === "L" ? "bg-amber-400/10 border border-amber-500/20 text-amber-400" : "bg-emerald-400/10 border border-emerald-500/20 text-emerald-400"}`}>
+                          {d.type}
+                        </span>
+                      </td>
+                      <td className="px-3 py-2 font-medium text-foreground max-w-[150px] truncate">{d.desc}</td>
+                      <td className="px-3 py-2 font-mono text-xs text-muted-foreground select-all">{d.code}</td>
+                      <td className="px-3 py-2 text-right font-mono">{d.qty}</td>
+                      <td className="px-3 py-2 text-right font-mono text-foreground font-semibold">₹{d.price}</td>
+                      <td className="px-3 py-2 text-center">
+                        <select
+                          value={d.accepted}
+                          onChange={e => {
+                            const val = e.target.value;
+                            setDemands(prev => {
+                              const copy = [...prev];
+                              copy[sNo] = {
+                                ...copy[sNo],
+                                accepted: val,
+                                acceptedQty: val === "YES" ? d.qty : 0,
+                                rejectionReason: val === "YES" ? "-" : "Customer Refused"
+                              };
+                              return copy;
+                            });
+                          }}
+                          className={`px-1.5 py-0.5 rounded text-[10px] font-bold border outline-none bg-background cursor-pointer ${isAccepted ? "border-emerald-500/30 text-emerald-400" : "border-rose-500/20 text-rose-400"}`}
+                        >
+                          <option value="YES">YES</option>
+                          <option value="NO">NO</option>
+                        </select>
+                      </td>
+                      <td className="px-3 py-2 text-center">
+                        <input
+                          type="number"
+                          disabled={!isAccepted}
+                          value={isAccepted ? (d.acceptedQty ?? d.qty) : 0}
+                          onChange={e => {
+                            const val = parseFloat(e.target.value) || 0;
+                            setDemands(prev => {
+                              const copy = [...prev];
+                              copy[sNo].acceptedQty = val;
+                              return copy;
+                            });
+                          }}
+                          className="w-12 text-center bg-background/30 border border-border rounded py-0.5 text-[10px] font-mono outline-none"
+                        />
+                      </td>
+                      <td className="px-3 py-2 truncate max-w-[110px]">
+                        {isAccepted ? (
+                          <span className="text-muted-foreground/45 font-mono">-</span>
+                        ) : (
                           <input
-                            type="number"
-                            step="0.01"
-                            disabled={!isAccepted}
-                            value={isAccepted ? (d.acceptedQty ?? d.qty) : 0}
-                            onChange={(e) => {
-                              const val = parseFloat(e.target.value) || 0;
+                            value={d.rejectionReason}
+                            onChange={e => {
+                              const text = e.target.value;
                               setDemands(prev => {
                                 const copy = [...prev];
-                                copy[originalIdx] = {
-                                  ...copy[originalIdx],
-                                  acceptedQty: val
-                                };
+                                copy[sNo].rejectionReason = text;
                                 return copy;
                               });
                             }}
-                            className={`w-[65px] text-center bg-background/50 border rounded py-1 px-1 text-[11px] font-mono outline-none focus:border-primary/50 transition-all ${isAccepted ? "border-border text-foreground" : "border-border/30 text-muted-foreground/30"}`}
+                            className="bg-transparent border-0 border-b border-rose-500/10 text-rose-300 text-[10px]"
                           />
-                        </td>
-                        
-                        {/* REJECTION REASON */}
-                        <td className="px-3 py-2.5">
-                          {isAccepted ? (
-                            <span className="text-muted-foreground/60 font-mono text-[11px]">-</span>
-                          ) : (
-                            <input
-                              type="text"
-                              value={d.rejectionReason === "-" ? "Customer Refused" : d.rejectionReason}
-                              onChange={(e) => {
-                                const rText = e.target.value;
-                                setDemands(prev => {
-                                  const copy = [...prev];
-                                  copy[originalIdx] = {
-                                    ...copy[originalIdx],
-                                    rejectionReason: rText
-                                  };
-                                  return copy;
-                                });
-                              }}
-                              className="w-full max-w-[130px] bg-background border border-destructive/20 text-foreground text-[11px] px-2 py-1 rounded outline-none focus:border-primary/40"
-                              placeholder="Reason..."
-                            />
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  });
-                })()}
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
 
-          {/* Premium calculations styling exactly as shown in the image */}
-          <div className="mt-2 border-t border-border pt-4 flex flex-col gap-3 font-sans">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="flex justify-between items-baseline pb-1.5 border-b border-border">
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">SCHEDULED LABOUR AMT.</span>
-                <span className="text-[18px] font-bold text-foreground font-mono">
-                  ₹{labourTotal.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
-                </span>
+          {/* Pricing calculations exactly as shown in the image */}
+          <div className="border-t border-border/80 pt-3 flex flex-col gap-2 bg-card/10 p-3 rounded-xl border border-border">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex justify-between items-baseline border-b border-border pb-1 text-xs">
+                <span className="text-[9px] font-black text-muted-foreground tracking-wider uppercase">Scheduled Labour Amt</span>
+                <span className="font-mono font-bold text-white">₹{labourTotal.toLocaleString("en-IN")}</span>
               </div>
-              <div className="flex justify-between items-baseline pb-1.5 border-b border-border">
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">SCHEDULED PART AMT.</span>
-                <span className="text-[18px] font-bold text-foreground font-mono">
-                  ₹{partsTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </span>
+              <div className="flex justify-between items-baseline border-b border-border pb-1 text-xs">
+                <span className="text-[9px] font-black text-muted-foreground tracking-wider uppercase">Scheduled Parts Amt</span>
+                <span className="font-mono font-bold text-white">₹{partsTotal.toLocaleString("en-IN")}</span>
               </div>
             </div>
-            <div className="flex justify-between items-center p-3 rounded-xl bg-primary/5 border border-primary/20 text-[12px] font-mono mt-1">
-              <span className="text-muted-foreground font-sans text-[11px]">Dynamic Live Estimate Breakdown</span>
-              <span className="text-foreground font-bold text-[14px]">Grand Total: ₹{(labourTotal + partsTotal).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+            <div className="flex justify-between items-center text-xs font-bold font-mono mt-1 pt-1">
+              <span className="text-muted-foreground font-sans text-[10px]">Dynamic Live Estimate Gross</span>
+              <span className="text-primary text-[14px]">Grand Estimate: ₹{grandTotal.toLocaleString("en-IN")} <span className="text-[9px] text-muted-foreground">(Excl. Taxes)</span></span>
             </div>
           </div>
+
+          {/* Scheduling controls */}
+          <div className="p-3.5 bg-card/30 border border-border rounded-xl flex flex-col gap-3 font-sans">
+            <p className="text-[10px] font-black uppercase text-secondary tracking-wider">Bay Scheduling & Promised metrics</p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+              <div className="flex flex-col gap-1">
+                <label className="text-[9px] uppercase font-extrabold text-muted-foreground">Assigned Group</label>
+                <select value={assignedGroup} onChange={e => setAssignedGroup(e.target.value)} className="px-2 py-1.5 bg-card border border-border rounded-lg text-[11px] outline-none">
+                  <option value="Group A">Team Alpha (Group A)</option>
+                  <option value="Group B">Team Bravo (Group B)</option>
+                  <option value="Group C">Team Specialists (Group C)</option>
+                </select>
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-[9px] uppercase font-extrabold text-muted-foreground">Technician *</label>
+                <select value={technician} onChange={e => setTechnician(e.target.value)} className="px-2 py-1.5 bg-card border border-border rounded-lg text-[11px] outline-none">
+                  {["VISHAL ADITYA", "MADAN KUMAR", "AMIT SINGH", "SUDHIR CHARAN"].map(s => <option key={s}>{s}</option>)}
+                </select>
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-[9px] uppercase font-extrabold text-muted-foreground">Service Bay *</label>
+                <select value={allocatedBay} onChange={e => setAllocatedBay(e.target.value)} className="px-2 py-1.5 bg-card border border-border rounded-lg text-[11px] outline-none">
+                  {["BAY-04", "BAY-02", "BAY-08", "BAY-10"].map(s => <option key={s}>{s}</option>)}
+                </select>
+              </div>
+              <div className="flex flex-col gap-1 relative">
+                <label className="text-[9px] uppercase font-extrabold text-[#FACC15]">Promised DateTime *</label>
+                <button
+                  type="button"
+                  onClick={() => setShowDateTimePicker(true)}
+                  className="px-2.5 py-1.5 bg-card border border-[#FACC15]/40 text-left font-mono text-[11.5px] rounded-lg text-[#FACC15] flex justify-between items-center"
+                >
+                  <span>{promisedDateTime}</span>
+                  <Calendar size={13} />
+                </button>
+
+                {/* Simulated Scroll wheel Date-picker dialog exactly like phone apps */}
+                {showDateTimePicker && (
+                  <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="absolute bottom-[105%] right-0 z-50 bg-card border border-border p-3 rounded-xl shadow-2xl w-[220px] flex flex-col gap-2.5">
+                    <p className="text-[10px] uppercase font-bold text-muted-foreground text-center tracking-wider pb-1.5 border-b border-border">Service Promising Wheels</p>
+                    <div className="flex gap-1 justify-center">
+                      <div className="flex flex-col items-center gap-1">
+                        <span className="text-[8px] text-muted-foreground">MONTH-DAY</span>
+                        <select className="bg-background border border-border py-0.5 px-1 font-mono text-[11px] outline-none" onChange={e => {
+                          const datePart = e.target.value;
+                          setPromisedDateTime(prev => datePart + " " + prev.split(" ")[1]);
+                        }}>
+                          <option value="30-May-2026">30-May</option>
+                          <option value="31-May-2026">31-May</option>
+                          <option value="01-Jun-2026">01-Jun</option>
+                        </select>
+                      </div>
+                      <div className="flex flex-col items-center gap-1">
+                        <span className="text-[8px] text-muted-foreground">HOUR-MIN</span>
+                        <select className="bg-background border border-border py-0.5 px-1 font-mono text-[11px] outline-none" onChange={e => {
+                          const timePart = e.target.value;
+                          setPromisedDateTime(prev => prev.split(" ")[0] + " " + timePart);
+                        }}>
+                          <option value="15:14">15:14</option>
+                          <option value="16:00">16:00</option>
+                          <option value="18:30">18:30</option>
+                        </select>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowDateTimePicker(false)}
+                      className="w-full py-1 bg-primary text-primary-foreground text-[10px] font-bold rounded cursor-pointer"
+                    >
+                      ✓ Select Done
+                    </button>
+                  </motion.div>
+                )}
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4 mt-1 border-t border-border/40 pt-2.5">
+              <div className="flex flex-col gap-1">
+                <label className="text-[9px] uppercase font-extrabold text-muted-foreground">Technical Expert Analyst</label>
+                <input readOnly value="MADAN KUMAR (PRO-TESTER)" className="px-2 py-1.5 bg-muted/30 border border-border rounded-lg text-muted-foreground cursor-not-allowed" />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-[9px] uppercase font-extrabold text-muted-foreground">Estimate Payment Mode *</label>
+                <select value={paymentMode} onChange={e => setPaymentMode(e.target.value)} className="px-2 py-1.5 bg-card border border-border rounded-lg text-[11px] outline-none">
+                  {["ONLINE", "CARD PAYMENTS", "CASH ON DELIVERY", "NEXA REWARDS POINTS"].map(s => <option key={s}>{s}</option>)}
+                </select>
+              </div>
+            </div>
+          </div>
+
           <div className="flex justify-between">
-            <button onClick={() => setStep(3)} className="flex items-center gap-2 px-4 py-2 bg-card text-foreground text-[12px] font-semibold rounded-lg hover:bg-muted font-sans"><ChevronLeft size={13} /> Back</button>
-            <button onClick={() => setStep(5)} className="flex items-center gap-2 px-5 py-2 bg-primary text-primary-foreground text-[12px] font-bold rounded-lg hover:bg-primary/90 font-sans">Next <ArrowRight size={13} /></button>
+            <button onClick={() => setStep(3)} className="flex items-center gap-1.5 px-4 py-2 bg-card text-foreground text-[11px] font-bold rounded-xl border border-border hover:bg-muted font-sans cursor-pointer"><ChevronLeft size={13} /> Back</button>
+            <button onClick={() => setStep(5)} className="flex items-center gap-1.5 px-5 py-2.5 bg-primary text-primary-foreground text-[12px] font-bold rounded-xl hover:bg-primary/95 font-sans cursor-pointer">Next (Summary & Sign) <ArrowRight size={13} /></button>
           </div>
         </motion.div>
       )}
 
-      {/* Step 5: Summary */}
+      {/* Step 5: Summary Drawing & Jobcard Generation */}
       {step === 5 && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-4">
-          <div className="p-4 rounded-xl bg-card/40 border border-border">
-            <p className="text-[11px] uppercase font-sans font-semibold tracking-wide text-muted-foreground mb-3">Job Card Summary</p>
-            <div className="grid grid-cols-3 gap-3 text-[12px] mb-4">
-              <div><p className="text-muted-foreground text-[10px] uppercase font-sans tracking-wide mb-0.5">Registration</p><p className="text-primary font-mono">{regNo}</p></div>
-              <div><p className="text-muted-foreground text-[10px] uppercase font-sans tracking-wide mb-0.5">Model</p><p className="text-foreground">MARUTI BALENO PETROL</p></div>
-              <div><p className="text-muted-foreground text-[10px] uppercase font-sans tracking-wide mb-0.5">Service Type</p><p className="text-foreground">{serviceType}</p></div>
-              <div><p className="text-muted-foreground text-[10px] uppercase font-sans tracking-wide mb-0.5">Odometer</p><p className="text-foreground font-mono">{parseInt(odometer).toLocaleString()} KMS</p></div>
-              <div><p className="text-muted-foreground text-[10px] uppercase font-sans tracking-wide mb-0.5">Total Est. Amount</p><p className="text-foreground font-mono font-bold">₹{(labourTotal + partsTotal).toLocaleString()}</p></div>
-              <div><p className="text-muted-foreground text-[10px] uppercase font-sans tracking-wide mb-0.5">Battery</p><p className="text-foreground">{battery}</p></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="p-4 rounded-xl bg-card/30 border border-border flex flex-col gap-3">
+              <span className="text-[10px] font-black uppercase text-secondary tracking-widest block border-b border-border pb-1">Review Final Audit Report</span>
+              <div className="grid grid-cols-2 gap-y-2 gap-x-4 text-xs font-sans mt-1">
+                <div><span className="text-muted-foreground block text-[9.5px] uppercase">Service Advisor</span><strong>{technician}</strong></div>
+                <div><span className="text-muted-foreground block text-[9.5px] uppercase">Reg Plate Number</span><strong className="text-primary font-mono">{regNo}</strong></div>
+                <div><span className="text-muted-foreground block text-[9.5px] uppercase">Odometer Readings</span><strong className="font-mono">{parseInt(odometer).toLocaleString()} KM</strong></div>
+                <div><span className="text-muted-foreground block text-[9.5px] uppercase">Assigned WorkBay</span><strong className="text-secondary">{allocatedBay}</strong></div>
+                <div><span className="text-muted-foreground block text-[9.5px] uppercase">Promised Delivery</span><strong className="text-[#FACC15] font-mono">{promisedDateTime}</strong></div>
+                <div><span className="text-muted-foreground block text-[9.5px] uppercase">Grand Total Estimate</span><strong className="text-emerald-400 font-mono">₹{grandTotal.toLocaleString("en-IN")}</strong></div>
+              </div>
+
+              <div className="flex items-center gap-2.5 p-3 rounded-lg bg-card/45 border border-border mt-2">
+                <input
+                  type="checkbox"
+                  id="send-approval-tick"
+                  checked={sendApproval}
+                  onChange={e => setSendApproval(e.target.checked)}
+                  className="w-4 h-4 accent-primary cursor-pointer"
+                />
+                <label htmlFor="send-approval-tick" className="text-xs text-muted-foreground selection:bg-transparent cursor-pointer font-medium leading-snug">
+                  Transmit jobcard demands copy to mobile <strong className="text-white">{mobile}</strong> for customer instant approval (OCAS) via SMS & Whatsapp?
+                </label>
+              </div>
             </div>
-            <div className="border-t border-border pt-3">
-              <p className="text-[10px] uppercase font-sans font-semibold tracking-wide text-muted-foreground mb-2">Demand Repairs ({demands.length})</p>
-              {demands.map((d, i) => {
-                const isAcc = d.accepted === "YES" || d.accepted === true;
-                return (
-                  <div key={i} className="flex justify-between text-[11px] py-1 border-b border-border last:border-0 items-center">
-                    <span className={`${isAcc ? "text-foreground" : "text-muted-foreground line-through flex items-center gap-1.5"}`}>
-                      {d.desc}
-                      {!isAcc && <span className="text-[9px] uppercase px-1 py-0.2 rounded border border-rose-500/20 bg-rose-500/10 text-rose-400">REJECTED</span>}
-                    </span>
-                    <span className="text-muted-foreground font-mono">
-                      ₹{isAcc ? d.price.toLocaleString('en-IN', { minimumFractionDigits: d.price % 1 === 0 ? 0 : 2 }) : "0"}
-                    </span>
-                  </div>
-                );
-              })}
+
+            <div className="p-4 bg-card/30 border border-border rounded-xl flex flex-col gap-2 bg-card">
+              <span className="text-[10px] font-black uppercase text-secondary tracking-widest block border-b border-border pb-1">Customer Digital Signature</span>
+              <p className="text-[11px] text-muted-foreground leading-snug">Please draw inside the panel area to sign digital vehicle authorization terms:</p>
+              <SignaturePad value={signatureData} onChange={setSignatureData} />
             </div>
           </div>
-          <div className="p-3 rounded-xl bg-card/40 border border-border">
-            <p className="text-[10px] uppercase font-sans font-semibold tracking-wide text-muted-foreground mb-2">Customer Signature</p>
-            <SignaturePad value={signatureData} onChange={setSignatureData} />
-          </div>
-          <div className="flex justify-between">
-            <button onClick={() => setStep(4)} className="flex items-center gap-2 px-4 py-2 bg-card text-foreground text-[12px] font-semibold rounded-lg hover:bg-muted font-sans"><ChevronLeft size={13} /> Back</button>
-            <button onClick={() => setSubmitted(true)}
-              className="flex items-center gap-2 px-6 py-2.5 bg-[#4ADE80] text-[#070C16] text-[13px] font-bold rounded-lg hover:bg-[#4ADE80]/90 transition-all font-sans">
-              <Zap size={14} /> Generate Job Card
+
+          <div className="flex justify-between mt-1">
+            <button onClick={() => setStep(4)} className="flex items-center gap-1.5 px-4 py-2 bg-card text-foreground text-[11px] font-bold rounded-xl border border-border hover:bg-muted font-sans cursor-pointer"><ChevronLeft size={13} /> Back</button>
+            <button
+              onClick={() => {
+                setGenerating(true);
+                setTimeout(() => {
+                  setGenerating(false);
+                  setSubmitted(true);
+                }, 1800);
+              }}
+              className="flex items-center gap-2 px-6 py-2.5 bg-[#4ADE80] text-[#070C16] text-[13px] font-extrabold rounded-xl hover:bg-[#4ADE80]/90 transition-all font-sans cursor-pointer shadow-lg shadow-emerald-500/10"
+            >
+              <Zap size={14} /> Complete Job Card
             </button>
           </div>
         </motion.div>
       )}
+
+      {/* Camera Simulator Overlay */}
+      {showCameraOverlay && (
+        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur flex flex-col items-center justify-center p-4">
+          <div className="w-full max-w-md bg-card/95 border border-border rounded-2xl overflow-hidden shadow-2xl relative">
+            <div className="bg-black/40 p-4 border-b border-border flex justify-between items-center">
+              <span className="text-xs font-bold text-foreground font-sans flex items-center gap-1.5"><Camera size={14} className="text-primary" /> Camera View Analyzer</span>
+              <button onClick={() => { setShowCameraOverlay(false); setActivePhotoZone(null); }} className="text-muted-foreground hover:text-white"><X size={16} /></button>
+            </div>
+
+            <div className="relative aspect-video bg-black flex items-center justify-center overflow-hidden font-mono text-[9px] text-primary select-none">
+              {/* Overlay targeting frame */}
+              <div className="absolute inset-4 border-2 border-dashed border-primary/45 rounded flex flex-col justify-between items-center p-3">
+                <span>[ZONED OUTLINE AREA]</span>
+                <span className="text-center font-bold uppercase text-[10px] tracking-widest text-[#FACC15] bg-black/80 p-1 rounded">ALIGN VEHICLE {activePhotoZone?.toUpperCase()} HERE</span>
+                <span>[DMS MULTI-ZONE LENS ACTIVE]</span>
+              </div>
+              <div className="w-full h-full bg-cover bg-center opacity-70" style={{ backgroundImage: `url('/dummy_car.jpg')` }} />
+            </div>
+
+            <div className="p-4 bg-card/85 flex justify-between items-center gap-2">
+              <button
+                onClick={() => { setShowCameraOverlay(false); setActivePhotoZone(null); }}
+                className="px-4 py-2 bg-muted hover:bg-muted/80 text-[11px] font-bold text-foreground rounded-lg cursor-pointer"
+              >
+                Cancel Source
+              </button>
+              <button
+                onClick={saveCapturedPhoto}
+                className="px-6 py-2 bg-primary hover:bg-primary/95 text-[11px] font-bold text-primary-foreground rounded-lg cursor-pointer flex items-center gap-1.5"
+              >
+                Capture Single Shot <Camera size={13} />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Vehicle History Popup Dialog Modal */}
+      <AnimatePresence>
+        {showHistoryModal && (
+          <div className="fixed inset-0 bg-[#070C16]/85 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 z-50 overflow-y-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 15, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 15, scale: 0.98 }}
+              className="bg-[#0B1220] border border-slate-800 rounded-2xl w-full max-w-4xl max-h-[85vh] overflow-hidden shadow-2xl flex flex-col font-sans text-slate-100"
+            >
+              {/* Modal Header */}
+              <div className="p-4 sm:p-5 border-b border-slate-800 bg-[#0F172A] flex items-center justify-between shrink-0">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
+                    <History size={16} className="text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-100">
+                      Vehicle History Database
+                    </h3>
+                    <p className="text-[10px] text-muted-foreground uppercase font-mono tracking-widest mt-0.5">
+                      Intel Records for: {regNo || "DL6CR1517"}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowHistoryModal(false)}
+                  className="p-1.5 hover:bg-slate-800 text-slate-400 hover:text-slate-200 rounded-lg cursor-pointer transition-colors"
+                >
+                  <X size={15} />
+                </button>
+              </div>
+
+              {/* Modal Body Container with customized background */}
+              <div className="p-5 overflow-y-auto flex-1 bg-[#090F1C]">
+                <VehicleHistoryPanel initialReg={regNo || "DL6CR1517"} />
+              </div>
+
+              {/* Modal Footer */}
+              <div className="p-4 border-t border-slate-800 bg-[#0F172A] flex justify-end gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setShowHistoryModal(false)}
+                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-[11px] font-bold text-slate-200 rounded-lg cursor-pointer transition-all uppercase tracking-wider font-sans"
+                >
+                  Close Records
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
-  )
+  );
 }
 
 export function generateJcPdf(jc: any, action: 'download' | 'print') {
@@ -4750,6 +5694,7 @@ function AllJobCardsPanel({ onAction }: { onAction?: (a: PanelType, d?: Record<s
   const [filter, setFilter] = useState("All")
   const [selectedJC, setSelectedJC] = useState<string | null>(null)
   const [tab1JcNo, setTab1JcNo] = useState<string | null>(null)
+  const [localHistoryRegNo, setLocalHistoryRegNo] = useState<string | null>(null)
   const [jobs, setJobs] = useState<JobCard[]>(() => {
     try {
       const cached = localStorage.getItem("nexa_job_cards")
@@ -4784,26 +5729,12 @@ function AllJobCardsPanel({ onAction }: { onAction?: (a: PanelType, d?: Record<s
             <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search JC No, Reg, Model…"
               className="w-full pl-8 pr-3 py-2 text-[12px] bg-card border border-border rounded-lg text-foreground placeholder:text-muted-foreground outline-none focus:border-primary/50 font-sans" />
           </div>
-          <button
-            onClick={() => onAction?.("jc-opening")}
-            className="px-3.5 py-2 bg-primary hover:bg-primary/95 text-primary-foreground text-[11px] font-extrabold uppercase tracking-wide rounded-lg transition-all flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95 whitespace-nowrap"
-            title="Create / Open New Job Card"
-          >
-             <Plus size={12} className="stroke-[3px]" />
-             <span>New Job Card</span>
-          </button>
-        </div>
-        <div className="flex gap-1.5 flex-wrap">
-          {filters.map(f => (
-            <button key={f} onClick={() => setFilter(f)}
-              className={`px-3 py-1 text-[11px] font-semibold rounded-full transition-all font-sans ${filter === f ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground hover:text-foreground"}`}>{f}</button>
-          ))}
         </div>
         <div className="overflow-x-auto rounded-xl border border-border">
           <table className="w-full text-[11.5px]">
             <thead>
               <tr className="border-b border-border bg-card/60">
-                {["JC Number", "Model", "Reg No", "Service Type", "Status", "Date", "Amount"].map(h => (
+                {["JC Number", "Model", "Reg No", "Service Type", "Status", "Date", "Amount", "Vehicle History"].map(h => (
                   <th key={h} className="px-3 py-2.5 text-left font-semibold text-muted-foreground font-sans text-[10px] tracking-wide uppercase whitespace-nowrap">{h}</th>
                 ))}
               </tr>
@@ -4812,10 +5743,10 @@ function AllJobCardsPanel({ onAction }: { onAction?: (a: PanelType, d?: Record<s
               {filtered.map(jc => (
                 <tr key={jc.jcNo} className="border-b border-border hover:bg-card/30 cursor-pointer transition-colors group" onClick={() => setTab1JcNo(jc.jcNo)}>
                   <td className="px-3 py-2.5">
-                    <button onClick={(e) => { e.stopPropagation(); setTab1JcNo(jc.jcNo); }}
-                      className="text-primary font-mono font-medium hover:text-accent hover:underline underline-offset-2 transition-colors">
-                      {jc.jcNo}
-                    </button>
+                     <button onClick={(e) => { e.stopPropagation(); setTab1JcNo(jc.jcNo); }}
+                       className="text-primary font-mono font-medium hover:text-accent hover:underline underline-offset-2 transition-colors">
+                       {jc.jcNo}
+                     </button>
                   </td>
                   <td className="px-3 py-2.5 text-foreground max-w-[140px] truncate">{jc.model}</td>
                   <td className="px-3 py-2.5 text-foreground font-mono">{jc.regNo}</td>
@@ -4828,13 +5759,23 @@ function AllJobCardsPanel({ onAction }: { onAction?: (a: PanelType, d?: Record<s
                       style={{ backgroundColor: "#ffffff", color: "#000000", borderColor: "#000000" }}
                     >
                       {filters.filter(f => f !== "All").map(f => (
-                        <option key={f} value={f} className="bg-card text-foreground">{f}</option>
+                         <option key={f} value={f} className="bg-card text-foreground">{f}</option>
                       ))}
                     </select>
                     <ChevronRight size={10} className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none opacity-50 rotate-90" />
                   </td>
                   <td className="px-3 py-2.5 text-muted-foreground font-mono">{jc.date}</td>
                   <td className="px-3 py-2.5 text-foreground font-mono">{jc.amount > 0 ? `₹${jc.amount.toLocaleString()}` : "—"}</td>
+                  <td className="px-3 py-2.5" onClick={e => e.stopPropagation()}>
+                    <button
+                      type="button"
+                      onClick={() => setLocalHistoryRegNo(jc.regNo)}
+                      className="flex items-center gap-1 px-2.5 py-1 bg-primary text-primary-foreground hover:bg-primary/90 rounded text-[10px] font-bold font-sans cursor-pointer transition-all shadow-sm"
+                    >
+                      <History size={11} />
+                      <span>View</span>
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -4871,6 +5812,59 @@ function AllJobCardsPanel({ onAction }: { onAction?: (a: PanelType, d?: Record<s
           >
             <JCDetailModal jcNo={selectedJC} onClose={() => setSelectedJC(null)} />
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {localHistoryRegNo && (
+          <div className="fixed inset-0 bg-[#070C16]/85 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 z-[9999] overflow-y-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 15, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 15, scale: 0.98 }}
+              className="bg-[#0B1220] border border-slate-800 rounded-2xl w-full max-w-4xl max-h-[85vh] overflow-hidden shadow-2xl flex flex-col font-sans text-slate-100"
+            >
+              {/* Modal Header */}
+              <div className="p-4 sm:p-5 border-b border-slate-800 bg-[#0F172A] flex items-center justify-between shrink-0">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
+                    <History size={16} className="text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-100">
+                      Vehicle History Database
+                    </h3>
+                    <p className="text-[10px] text-muted-foreground uppercase font-mono tracking-widest mt-0.5">
+                      Intel Records for: {localHistoryRegNo}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setLocalHistoryRegNo(null)}
+                  className="p-1.5 hover:bg-slate-800 text-slate-400 hover:text-slate-200 rounded-lg cursor-pointer transition-colors"
+                >
+                  <X size={15} />
+                </button>
+              </div>
+
+              {/* Modal Body Container */}
+              <div className="p-5 overflow-y-auto flex-1 bg-[#090F1C]">
+                <VehicleHistoryPanel initialReg={localHistoryRegNo} />
+              </div>
+
+              {/* Modal Footer */}
+              <div className="p-4 border-t border-slate-800 bg-[#0F172A] flex justify-end gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setLocalHistoryRegNo(null)}
+                  className="px-4 py-2 bg-[#1A2333] hover:bg-[#253248] text-[11px] font-bold text-slate-200 rounded-lg cursor-pointer transition-all uppercase tracking-wider font-sans border border-slate-800"
+                >
+                  Close Records
+                </button>
+              </div>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </>
@@ -5574,12 +6568,24 @@ function SuzukiConnectAdvicePanel({ onAction }: { onAction: (a: PanelType, d?: R
 import FlowViewerPanel from "../components/FlowViewerPanel"
 
 // ── Panel Renderer ─────────────────────────────────────────────────────────────
-function PanelRenderer({ panel, onAction, initialData }: { panel: PanelType; onAction: (a: PanelType, d?: Record<string, unknown>) => void; initialData?: Record<string, unknown> }) {
+function PanelRenderer({ 
+  panel, 
+  onAction, 
+  initialData,
+  jcSession,
+  setJcSession
+}: { 
+  panel: PanelType; 
+  onAction: (a: PanelType, d?: Record<string, unknown>) => void; 
+  initialData?: Record<string, unknown>;
+  jcSession?: any;
+  setJcSession?: any;
+}) {
   if (panel === "flow-viewer") return <FlowViewerPanel />
   if (panel === "welcome") return <WelcomePanel onAction={onAction} />
   if (panel === "appointments") return <AppointmentsPanel onAction={onAction} />
   if (panel === "vehicle-history") return <VehicleHistoryPanel initialReg={initialData?.regNo as string} />
-  if (panel === "jc-opening") return <JCOpeningPanel initialReg={initialData?.regNo as string} />
+  if (panel === "jc-opening") return <JCOpeningPanel initialReg={initialData?.regNo as string} jcSession={jcSession} setJcSession={setJcSession} />
   if (panel === "all-jobcards") return <AllJobCardsPanel onAction={onAction} />
   if (panel === "tasks") return <TasksPanel />
   if (panel === "notifications") return <NotificationsPanel />
@@ -5603,13 +6609,15 @@ function JCChatStepRenderer({
   jcSession,
   setJcSession,
   advanceJcChat,
-  isActive
+  isActive,
+  onShowHistory
 }: {
   stepCode: string;
   jcSession: any;
   setJcSession: (s: any) => void;
   advanceJcChat: (label: string, fields: any, nextStep: string) => void;
   isActive: boolean;
+  onShowHistory?: () => void;
 }) {
   if (!jcSession) return null;
 
@@ -5766,13 +6774,22 @@ function JCChatStepRenderer({
               <span className="font-mono text-primary font-semibold">{jcSession.regNo}</span>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap sm:flex-nowrap">
             <button
               onClick={() => advanceJcChat("Correct, continue", {}, "CUSTOMER_DETAILS")}
               className="flex-1 py-2 bg-primary text-primary-foreground text-[12px] font-semibold rounded-lg font-sans text-center cursor-pointer hover:brightness-105"
             >
               ✓ Yes, Correct
             </button>
+            {onShowHistory && (
+              <button
+                type="button"
+                onClick={onShowHistory}
+                className="flex items-center gap-1 px-2.5 py-1 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 hover:border-primary/30 rounded-lg text-[10px] font-bold font-sans cursor-pointer transition-all shrink-0 whitespace-nowrap"
+              >
+                <History size={11} className="text-primary animate-pulse" /> View Vehicle History
+              </button>
+            )}
             <button
               onClick={() => advanceJcChat("Go back to search", {}, "VIN_SCAN")}
               className="px-4 py-2 bg-card hover:bg-muted border border-border text-[12px] font-semibold rounded-lg text-foreground font-sans cursor-pointer transition-colors"
@@ -6842,6 +7859,7 @@ function BotBubble({
   setJcSession?: any;
   advanceJcChat?: any;
 }) {
+  const [showVehicleHistoryPopup, setShowVehicleHistoryPopup] = useState(false);
   const triggerSpeak = () => {
     if (window.speechSynthesis) {
       window.speechSynthesis.cancel();
@@ -6950,15 +7968,24 @@ function BotBubble({
               })}
             </div>
             
-            <div className="flex justify-between items-center mt-2.5 text-[11px] font-sans">
+            <div className="flex justify-between items-center mt-2.5 text-[11px] font-sans gap-2 flex-wrap sm:flex-nowrap">
               <span className="text-foreground font-semibold">
                 Active Area: <span className="text-primary">{FRIENDLY_STEP_LABELS[jcStepCode] || jcStepCode}</span>
               </span>
-              {jcStepCode !== "COMPLETED" && (
-                <span className="text-muted-foreground font-mono text-[9px] uppercase">
-                  Single Interactive Output
-                </span>
-              )}
+              <div className="flex items-center gap-2 px-1">
+                <button
+                  type="button"
+                  onClick={() => setShowVehicleHistoryPopup(true)}
+                  className="flex items-center gap-1 px-2.5 py-1 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 hover:border-primary/30 rounded-lg text-[10px] font-bold font-sans cursor-pointer transition-all shrink-0 whitespace-nowrap"
+                >
+                  <History size={11} className="text-primary animate-pulse" /> View Vehicle History
+                </button>
+                {jcStepCode !== "COMPLETED" && (
+                  <span className="text-muted-foreground font-mono text-[9px] uppercase hidden sm:inline">
+                    Single Interactive Output
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         )}
@@ -6993,7 +8020,7 @@ function BotBubble({
 
             {/* Panel Area wrapper with controlled padding */}
             <div className="p-4 md:p-5">
-              <PanelRenderer panel={panel} onAction={onAction} initialData={initialData} />
+              <PanelRenderer panel={panel} onAction={onAction} initialData={initialData} jcSession={jcSession} setJcSession={setJcSession} />
             </div>
           </motion.div>
         )}
@@ -7006,6 +8033,7 @@ function BotBubble({
               setJcSession={setJcSession} 
               advanceJcChat={advanceJcChat} 
               isActive={jcSession?.step === jcStepCode} 
+              onShowHistory={() => setShowVehicleHistoryPopup(true)}
             />
             {jcSession?.step === jcStepCode && jcStepCode !== "VIN_SCAN" && jcStepCode !== "COMPLETED" && (
               <div className="flex justify-start px-0.5 mt-1.5 animate-fade-in">
@@ -7032,6 +8060,60 @@ function BotBubble({
 
         <p className="text-[10px] text-muted-foreground mt-1 font-mono">{timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
       </div>
+
+      {/* Local Vehicle History Popup Dialog Modal */}
+      <AnimatePresence>
+        {showVehicleHistoryPopup && (
+          <div className="fixed inset-0 bg-[#070C16]/85 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 z-[9999] overflow-y-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 15, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 15, scale: 0.98 }}
+              className="bg-[#0B1220] border border-slate-800 rounded-2xl w-full max-w-4xl max-h-[85vh] overflow-hidden shadow-2xl flex flex-col font-sans text-slate-100"
+            >
+              {/* Modal Header */}
+              <div className="p-4 sm:p-5 border-b border-slate-800 bg-[#0F172A] flex items-center justify-between shrink-0">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
+                    <History size={16} className="text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-100">
+                      Vehicle History Database
+                    </h3>
+                    <p className="text-[10px] text-muted-foreground uppercase font-mono tracking-widest mt-0.5">
+                      Intel Records for: {jcSession?.regNo || (initialData?.regNo as string) || "DL6CR1517"}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowVehicleHistoryPopup(false)}
+                  className="p-1.5 hover:bg-slate-800 text-slate-400 hover:text-slate-200 rounded-lg cursor-pointer transition-colors"
+                >
+                  <X size={15} />
+                </button>
+              </div>
+
+              {/* Modal Body Container */}
+              <div className="p-5 overflow-y-auto flex-1 bg-[#090F1C]">
+                <VehicleHistoryPanel initialReg={jcSession?.regNo || (initialData?.regNo as string) || "DL6CR1517"} />
+              </div>
+
+              {/* Modal Footer */}
+              <div className="p-4 border-t border-slate-800 bg-[#0F172A] flex justify-end gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setShowVehicleHistoryPopup(false)}
+                  className="px-4 py-2 bg-[#1A2333] hover:bg-[#253248] text-[11px] font-bold text-slate-200 rounded-lg cursor-pointer transition-all uppercase tracking-wider font-sans border border-slate-800"
+                >
+                  Close Records
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </motion.div>
   )
 }
@@ -7145,282 +8227,358 @@ function DashboardView({
   };
 
   return (
-    <div className="p-5 w-full h-full overflow-y-auto font-sans text-foreground relative z-10 flex flex-col items-center">
-      <div className="max-w-[1200px] w-full">
+    <div className="p-4 sm:p-6 w-full h-full overflow-y-auto font-sans text-foreground relative z-10 flex flex-col items-center bg-slate-50/50 dark:bg-transparent transition-colors duration-300">
+      <div className="max-w-[1200px] w-full flex flex-col gap-5 sm:gap-6">
+        
         {/* Header */}
-        <div className="bg-card border border-border p-4 lg:p-5 flex sm:flex-row flex-col justify-between items-start sm:items-center mb-4 gap-3">
-          <div>
-            <h1 className="text-[15px] font-semibold flex items-center gap-2 flex-wrap">
-              ⚙️ NEXA Management Cockpit
-              <span className="text-[10px] font-semibold bg-primary/10 text-primary border border-primary/20 flex items-center px-2 py-0.5 rounded-full tracking-wider uppercase">Prem Motors Pvt. Ltd.</span>
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-card border border-border p-5 md:p-6 rounded-2xl flex sm:flex-row flex-col justify-between items-start sm:items-center gap-4 shadow-sm"
+        >
+          <div className="space-y-1">
+            <h1 className="text-[17px] font-extrabold flex items-center gap-2.5 flex-wrap tracking-tight">
+              <LayoutDashboard className="text-primary" size={18} />
+              <span className="uppercase tracking-wide font-sans">NEXA Workshop Cockpit</span>
+              <span className="text-[9px] font-bold bg-primary/10 text-primary border border-primary/20 flex items-center px-2.5 py-0.5 rounded-full tracking-widest uppercase font-mono">Prem Motors Pvt. Ltd.</span>
             </h1>
-            <p className="text-[11px] text-muted-foreground mt-1">Real-time dealership dashboard. Oversee technician work bays, service backlogs, and customer workflows.</p>
+            <p className="text-[11px] text-muted-foreground leading-relaxed">Real-time workshop intelligence and logistics dashboard. Monitor bay activity, check-in schedules, advisor backlogs, and telemetry.</p>
           </div>
-        </div>
+        </motion.div>
 
-        {/* KPIs */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
-          {/* Card 1: My Appointments */}
-          <div 
+        {/* KPIs Grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          
+          {/* Card 1: Appointments */}
+          <motion.div 
             id="dashboard-kpi-appointments"
             onClick={() => onSelectPanel?.("appointments")}
-            className="group bg-card border border-border p-4 hover:scale-[1.02] hover:shadow-lg hover:border-primary/50 transition-all duration-300 cursor-pointer select-none"
+            whileHover={{ y: -3, transition: { duration: 0.2 } }}
+            className="group bg-card border border-border p-4.5 rounded-2xl shadow-sm hover:border-primary/55 hover:shadow-md hover:shadow-primary/5 transition-all duration-300 cursor-pointer select-none space-y-2.5"
           >
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground group-hover:text-primary transition-colors">My Appointments</span>
-              <div className="w-8 h-8 flex items-center justify-center bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-all rounded-md">
-                <Calendar size={16} strokeWidth={1.5} />
+            <div className="flex justify-between items-center">
+              <span className="text-[10px] font-bold tracking-widest uppercase text-muted-foreground group-hover:text-primary transition-colors">My Appointments</span>
+              <div className="w-8 h-8 flex items-center justify-center bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-all rounded-xl border border-primary/10">
+                <Calendar size={15} strokeWidth={2} />
               </div>
             </div>
-            <div className="font-mono text-[26px] font-semibold leading-none text-foreground">7 Today</div>
-            <div className="text-[10px] text-emerald-600 font-semibold mt-1.5 flex items-center gap-1">
-              <span>🟢</span> 4 In-Service | 3 Confirmed
+            <div>
+              <div className="font-mono text-2xl sm:text-3xl font-extrabold leading-none text-foreground">7 Today</div>
+              <div className="text-[9.5px] text-emerald-600 dark:text-emerald-500 font-bold mt-2 flex items-center gap-1 font-mono uppercase tracking-wider">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>4 In-Service | 3 Confirmed</span>
+              </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Card 2: Job Cards */}
-          <div 
+          <motion.div 
             id="dashboard-kpi-jobcards"
             onClick={() => onSelectPanel?.("all-jobcards")}
-            className="group bg-card border border-border p-4 hover:scale-[1.02] hover:shadow-lg hover:border-amber-500/50 transition-all duration-300 cursor-pointer select-none"
+            whileHover={{ y: -3, transition: { duration: 0.2 } }}
+            className="group bg-card border border-border p-4.5 rounded-2xl shadow-sm hover:border-amber-500/55 hover:shadow-md hover:shadow-amber-500/5 transition-all duration-300 cursor-pointer select-none space-y-2.5"
           >
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground group-hover:text-amber-500 transition-colors">Job Cards</span>
-              <div className="w-8 h-8 flex items-center justify-center bg-amber-500/10 text-amber-500 group-hover:bg-amber-500 group-hover:text-black transition-all rounded-md">
-                <ClipboardList size={16} strokeWidth={1.5} />
+            <div className="flex justify-between items-center">
+              <span className="text-[10px] font-bold tracking-widest uppercase text-muted-foreground group-hover:text-amber-500 transition-colors">Active Jobcards</span>
+              <div className="w-8 h-8 flex items-center justify-center bg-amber-500/10 text-amber-500 group-hover:bg-amber-500 group-hover:text-black transition-all rounded-xl border border-amber-500/10">
+                <ClipboardList size={15} strokeWidth={2} />
               </div>
             </div>
-            <div className="font-mono text-[26px] font-semibold leading-none text-foreground">144</div>
-            <div className="text-[10px] text-emerald-600 font-semibold mt-1.5 flex items-center gap-1">
-              <span>🟢</span> 98 In-Progress active bays
+            <div>
+              <div className="font-mono text-2xl sm:text-3xl font-extrabold leading-none text-foreground">144 Active</div>
+              <div className="text-[9.5px] text-emerald-600 dark:text-emerald-500 font-bold mt-2 flex items-center gap-1 font-mono uppercase tracking-wider">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>98 In repair active bays</span>
+              </div>
             </div>
-          </div>
+          </motion.div>
 
-          {/* Card 3: My Task */}
-          <div 
+          {/* Card 3: My Tasks */}
+          <motion.div 
             id="dashboard-kpi-tasks"
             onClick={() => onSelectPanel?.("tasks")}
-            className="group bg-card border border-border p-4 hover:scale-[1.02] hover:shadow-lg hover:border-violet-500/50 transition-all duration-300 cursor-pointer select-none"
+            whileHover={{ y: -3, transition: { duration: 0.2 } }}
+            className="group bg-card border border-border p-4.5 rounded-2xl shadow-sm hover:border-violet-500/55 hover:shadow-md hover:shadow-violet-500/5 transition-all duration-300 cursor-pointer select-none space-y-2.5"
           >
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground group-hover:text-violet-500 transition-colors">My Task</span>
-              <div className="w-8 h-8 flex items-center justify-center bg-violet-500/10 text-violet-400 group-hover:bg-violet-500 group-hover:text-white transition-all rounded-md">
-                <CheckSquare size={16} strokeWidth={1.5} />
+            <div className="flex justify-between items-center">
+              <span className="text-[10px] font-bold tracking-widest uppercase text-muted-foreground group-hover:text-violet-500 transition-colors">My Tasks</span>
+              <div className="w-8 h-8 flex items-center justify-center bg-violet-500/10 text-violet-400 group-hover:bg-violet-500 group-hover:text-white transition-all rounded-xl border border-violet-500/5">
+                <CheckSquare size={15} strokeWidth={2} />
               </div>
             </div>
-            <div className="font-mono text-[26px] font-semibold leading-none text-foreground">{doneTasks} / {tasks.length}</div>
-            <div className="text-[10px] text-muted-foreground mt-1.5 font-semibold">
-              Advisor daily checklist targets
+            <div>
+              <div className="font-mono text-2xl sm:text-3xl font-extrabold leading-none text-foreground">{doneTasks} / {tasks.length}</div>
+              <div className="text-[9.5px] text-muted-foreground font-semibold mt-2 block uppercase tracking-wider font-mono">
+                Daily Advisor targets completed
+              </div>
             </div>
-          </div>
+          </motion.div>
 
-          {/* Card 4: Active Services Today */}
-          <div 
+          {/* Card 4: Services */}
+          <motion.div 
             id="dashboard-kpi-active-services"
             onClick={() => onSelectPanel?.("all-jobcards")}
-            className="group bg-card border border-border p-4 hover:scale-[1.02] hover:shadow-lg hover:border-emerald-500/50 transition-all duration-300 cursor-pointer select-none"
+            whileHover={{ y: -3, transition: { duration: 0.2 } }}
+            className="group bg-card border border-border p-4.5 rounded-2xl shadow-sm hover:border-emerald-500/55 hover:shadow-md hover:shadow-emerald-500/5 transition-all duration-300 cursor-pointer select-none space-y-2.5"
           >
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-[10px] font-semibold tracking-wider uppercase text-muted-foreground group-hover:text-emerald-500 transition-colors">Active Services Today</span>
-              <div className="w-8 h-8 flex items-center justify-center bg-emerald-500/10 text-emerald-500 group-hover:bg-emerald-500 group-hover:text-white transition-all rounded-md">
-                <Wrench size={16} strokeWidth={1.5} />
+            <div className="flex justify-between items-center">
+              <span className="text-[10px] font-bold tracking-widest uppercase text-muted-foreground group-hover:text-emerald-500 transition-colors">Intakes Today</span>
+              <div className="w-8 h-8 flex items-center justify-center bg-emerald-500/10 text-emerald-500 group-hover:bg-emerald-500 group-hover:text-white transition-all rounded-xl border border-emerald-500/10">
+                <Wrench size={15} strokeWidth={2} />
               </div>
             </div>
-            <div className="font-mono text-[26px] font-semibold leading-none text-foreground">24</div>
-            <div className="text-[10px] text-muted-foreground mt-1.5 font-semibold">
-              16 pre-scheduled | 8 walk-ins
-            </div>
-          </div>
-        </div>
-
-        {/* Journey Banner */}
-        <div className="bg-primary/95 border border-primary p-4 lg:p-5 mb-4 flex sm:flex-row flex-col justify-between items-start sm:items-center gap-4 relative overflow-hidden">
-          <div className="absolute -top-10 -right-10 w-44 h-44 rounded-full bg-white/5 pointer-events-none"></div>
-          <div className="flex gap-3 items-start flex-1 min-w-0 z-10">
-            <div className="bg-white/10 border border-white/10 p-2.5 text-[18px] shrink-0">🔧</div>
             <div>
-              <div className="text-[10px] font-bold font-mono tracking-widest text-white/70 mb-0.5">JOURNEY IN PROGRESS (ACTIVE STATE SAVED)</div>
-              <div className="text-[13px] font-semibold text-white">Open Job Card — Step 3:</div>
-              <div className="text-[11px] text-white/80">Check Vehicle Damage Status</div>
-              <div className="flex gap-1.5 mt-2.5 items-center">
-                <div className="h-1 rounded-full bg-white/70 w-3.5 transition-all"></div>
-                <div className="h-1 rounded-full bg-white/70 w-3.5 transition-all"></div>
-                <div className="h-1 rounded-full bg-[#fcd34d] w-[22px] transition-all"></div>
-                <div className="h-1 rounded-full bg-white/30 w-1.5 transition-all"></div>
-                <div className="h-1 rounded-full bg-white/30 w-1.5 transition-all"></div>
-                <div className="h-1 rounded-full bg-white/30 w-1.5 transition-all"></div>
-                <div className="h-1 rounded-full bg-white/30 w-1.5 transition-all"></div>
-                <div className="h-1 rounded-full bg-white/30 w-1.5 transition-all"></div>
+              <div className="font-mono text-2xl sm:text-3xl font-extrabold leading-none text-foreground">24 Intake</div>
+              <div className="text-[9.5px] text-muted-foreground font-semibold mt-2 block uppercase tracking-wider font-mono">
+                16 pre-scheduled | 8 walk-ins
+              </div>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Journey Control Banner */}
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.99 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg relative overflow-hidden flex sm:flex-row flex-col justify-between items-start sm:items-center gap-5 text-white"
+        >
+          {/* Subtle decoration sphere */}
+          <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-indigo-500/10 blur-2xl pointer-events-none" />
+          
+          <div className="flex gap-4 items-start flex-1 min-w-0 z-10">
+            <div className="w-10 h-10 rounded-xl bg-indigo-500/15 border border-indigo-500/35 flex items-center justify-center shrink-0">
+              <Wrench size={18} className="text-indigo-400 animate-pulse" />
+            </div>
+            <div className="space-y-1">
+              <div className="text-[9px] font-bold font-mono tracking-widest text-[#818cf8] uppercase">Advisor Journey In Progress &middot; Engine Restored</div>
+              <div className="text-[13px] font-bold text-slate-100 flex items-center gap-1.5">
+                <span>Active Job Card Opening Flow</span>
+                <span className="text-xs font-semibold px-2 py-0.5 rounded bg-amber-500/10 text-amber-500 border border-amber-500/15">Step 3 of 8</span>
+              </div>
+              <div className="text-[11px] text-slate-300">Evaluating Exterior Body Damage and digital inspection audit report.</div>
+              
+              {/* Dynamic Step Progress Indicator */}
+              <div className="flex gap-1.5 pt-2 items-center">
+                {[1, 2, 3, 4, 5, 6, 7, 8].map((stepNum) => {
+                  const isActive = stepNum === 3;
+                  const isCompleted = stepNum < 3;
+                  return (
+                    <div 
+                      key={stepNum} 
+                      className={`h-1.5 rounded-full transition-all duration-300 ${
+                        isActive ? "w-6 bg-amber-400" : isCompleted ? "w-3.5 bg-[#818cf8]" : "w-1.5 bg-slate-800"
+                      }`} 
+                    />
+                  );
+                })}
               </div>
             </div>
           </div>
-          <div className="flex gap-2 shrink-0 z-10">
-            <button className="bg-black/20 border border-white/20 text-white px-3.5 py-2 text-[11px] font-semibold hover:bg-black/30 transition-colors cursor-pointer" onClick={() => showToast('Flow state reset.')}>↺ Abort / Reset State</button>
-            <button className="bg-amber-300 text-amber-950 px-4 py-2 text-[11px] font-bold hover:bg-amber-200 transition-colors cursor-pointer" onClick={() => onReturnToChat()}>▶ Resume in AI Chat</button>
+          
+          <div className="flex gap-2.5 shrink-0 z-10 w-full sm:w-auto">
+            <button 
+              className="flex-1 sm:flex-none bg-slate-800 hover:bg-slate-700/80 text-slate-200 hover:text-white px-4 py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-wider font-sans border border-slate-705/10 cursor-pointer transition-all hover:scale-[1.01] active:scale-95" 
+              onClick={() => showToast('Flow state reset.')}
+            >
+              ↺ Reset State
+            </button>
+            <button 
+              className="flex-1 sm:flex-none bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-5 py-2.5 rounded-xl text-[11px] uppercase tracking-wider font-sans transition-all hover:scale-[1.01] active:scale-95 shadow-md shadow-indigo-600/10 flex items-center justify-center gap-1.5 cursor-pointer" 
+              onClick={() => onReturnToChat()}
+            >
+              <span>Resume Chat</span>
+              <ArrowRight size={12} />
+            </button>
           </div>
-        </div>
+        </motion.div>
 
-        {/* Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-3.5">
-          {/* Left Col */}
-          <div className="flex flex-col gap-3.5">
-            {/* Jobcards Table */}
-            <div className="bg-card border border-border">
-              <div className="p-3.5 border-b border-border flex justify-between items-center gap-3 flex-wrap">
-                <div>
-                  <div className="text-[12px] font-semibold uppercase tracking-wider text-foreground">Active Garage Jobcards</div>
-                  <div className="text-[9px] font-mono text-muted-foreground mt-0.5">SELECT ROW TO PERFORM CRITICAL OPERATIONS</div>
+        {/* Content Columns */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-5 md:gap-6">
+          
+          {/* Left Column */}
+          <div className="flex flex-col gap-5 md:gap-6">
+            
+            {/* Active Garage Jobcards */}
+            <div className="bg-card border border-border rounded-2xl shadow-sm overflow-hidden flex flex-col">
+              <div className="p-4 sm:p-5 border-b border-border flex justify-between items-center gap-3 flex-wrap bg-slate-50/50 dark:bg-[#0F172A]/20">
+                <div className="space-y-0.5">
+                  <div className="text-[12.5px] font-bold uppercase tracking-wider text-foreground">Active Garage Jobcards</div>
+                  <div className="text-[9px] font-mono text-muted-foreground font-medium uppercase tracking-widest">Select record for critical system operations & checklists</div>
                 </div>
-                <input 
-                  type="text" 
-                  placeholder="Search Reg No, jobcard or Customer…" 
-                  className="bg-muted border border-border px-3 py-1.5 text-[11px] w-56 outline-none focus:border-primary transition-colors text-foreground placeholder-muted-foreground"
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
-                />
+                
+                {/* Refined Search input */}
+                <div className="relative w-full sm:w-60">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"><Search size={12} /></span>
+                  <input 
+                    type="text" 
+                    placeholder="Search Registration, JC or Client…" 
+                    className="bg-muted border border-border pl-8 pr-3 py-1.8 text-[11.5px] w-full rounded-xl outline-none focus:border-primary/50 text-foreground transition-all placeholder:text-muted-foreground font-sans"
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                  />
+                </div>
               </div>
+              
               <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse min-w-[600px]">
+                <table className="w-full text-left border-collapse min-w-[620px]">
                   <thead>
-                    <tr className="bg-muted border-b border-border">
-                      <th className="p-2.5 text-[9px] font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap">SR</th>
-                      <th className="p-2.5 text-[9px] font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap">Reg Num</th>
-                      <th className="p-2.5 text-[9px] font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap">Intake Date</th>
-                      <th className="p-2.5 text-[9px] font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap">Jobcard No</th>
-                      <th className="p-2.5 text-[9px] font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap">Customer Name</th>
-                      <th className="p-2.5 text-[9px] font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap">Vehicle Model</th>
-                      <th className="p-2.5 text-[9px] font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap">CCP</th>
-                      <th className="p-2.5 text-[9px] font-bold uppercase tracking-wider text-muted-foreground whitespace-nowrap">Status</th>
+                    <tr className="bg-muted/30 border-b border-border">
+                      <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-muted-foreground whitespace-nowrap">SR</th>
+                      <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-muted-foreground whitespace-nowrap">Reg Num</th>
+                      <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-muted-foreground whitespace-nowrap">Intake Date</th>
+                      <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-muted-foreground whitespace-nowrap">Jobcard No</th>
+                      <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-muted-foreground whitespace-nowrap">Customer Name</th>
+                      <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-muted-foreground whitespace-nowrap">Vehicle Model</th>
+                      <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-muted-foreground whitespace-nowrap">CCP</th>
+                      <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-muted-foreground whitespace-nowrap">Status</th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="divide-y divide-border">
                     {filteredCards.length > 0 ? filteredCards.map((jc, idx) => (
-                      <tr key={idx} className="border-b border-border hover:bg-muted/50 cursor-pointer transition-colors" onClick={() => setSelectedJC(jc)}>
-                        <td className="p-2.5 text-[11px] font-mono text-muted-foreground">{jc.serial}</td>
-                        <td className="p-2.5 text-[11px] font-mono font-semibold text-primary">{jc.regNum}</td>
-                        <td className="p-2.5 text-[11px] font-mono text-muted-foreground">{jc.openingDate.split(" ")[0]}</td>
-                        <td className="p-2.5 text-[11px] font-mono">{jc.jobCardNo}</td>
-                        <td className="p-2.5 text-[11px] font-medium text-foreground max-w-[120px] truncate">{jc.customerName}</td>
-                        <td className="p-2.5 text-[11px] text-muted-foreground max-w-[110px] truncate">{jc.model}</td>
-                        <td className="p-2.5">
-                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold border ${jc.ccp.includes("Not eligible") ? "bg-muted text-muted-foreground border-border" : jc.ccp.includes("purchased") ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" : "bg-primary/10 text-primary border-primary/20"}`}>
+                      <tr 
+                        key={idx} 
+                        className="hover:bg-muted/20 cursor-pointer transition-colors group/row" 
+                        onClick={() => setSelectedJC(jc)}
+                      >
+                        <td className="px-4 py-3.2 text-[11.5px] font-mono text-muted-foreground">{jc.serial}</td>
+                        <td className="px-4 py-3.2 text-[11.5px] font-mono font-bold text-primary group-hover/row:text-primary-foreground/90 transition-all">{jc.regNum}</td>
+                        <td className="px-4 py-3.2 text-[11.5px] font-mono text-muted-foreground">{jc.openingDate.split(" ")[0]}</td>
+                        <td className="px-4 py-3.2 text-[11.5px] font-mono text-foreground">{jc.jobCardNo}</td>
+                        <td className="px-4 py-3.2 text-[11.5px] font-semibold text-foreground max-w-[130px] truncate">{jc.customerName}</td>
+                        <td className="px-4 py-3.2 text-[11.5px] text-muted-foreground max-w-[120px] truncate">{jc.model}</td>
+                        <td className="px-4 py-3.2">
+                          <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-bold border ${jc.ccp.includes("Not eligible") ? "bg-muted text-muted-foreground/60 border-border" : jc.ccp.includes("purchased") ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" : "bg-primary/10 text-primary border-primary/20"}`}>
                             {jc.ccp.includes("Not eligible") ? "N/A" : jc.ccp.includes("purchased") ? "Purchased" : "Eligible"}
                           </span>
                         </td>
-                        <td className="p-2.5">
-                          <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-bold border ${jc.status === 'Job Card Opened' ? 'bg-amber-500/10 text-amber-600 border-amber-500/20' : 'bg-muted text-muted-foreground border-border'}`}>
-                            <span className={`w-1.5 h-1.5 rounded-full ${jc.status === 'Job Card Opened' ? 'bg-amber-500' : 'bg-muted-foreground'}`}></span>
+                        <td className="px-4 py-3.2">
+                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[9px] font-extrabold border ${jc.status === 'Job Card Opened' ? 'bg-amber-500/10 text-amber-600 border-amber-500/20' : 'bg-muted text-muted-foreground border-border'}`}>
+                            <span className={`w-1.5 h-1.5 rounded-full ${jc.status === 'Job Card Opened' ? 'bg-amber-500 animate-pulse' : 'bg-muted-foreground'}`}></span>
                             {jc.status}
                           </span>
                         </td>
                       </tr>
                     )) : (
                       <tr>
-                        <td colSpan={8} className="p-6 text-center text-muted-foreground italic text-[11px]">No active NEXA job cards match filter criteria.</td>
+                        <td colSpan={8} className="p-8 text-center text-muted-foreground italic text-[11.5px]">No active NEXA job cards match the filter criteria.</td>
                       </tr>
                     )}
                   </tbody>
                 </table>
               </div>
-              <div className="p-3 bg-muted border-t border-border flex justify-between items-center flex-wrap gap-2">
-                <span className="text-[10px] text-muted-foreground">*Select a row to launch interactive Closed / Update cards flow directly.</span>
-                <button className="bg-card border border-border text-foreground px-3.5 py-1.5 text-[11px] font-semibold hover:border-foreground flex items-center gap-1.5 transition-colors cursor-pointer" onClick={() => showToast('Opening: Allocate New Job Card')}>
-                  ＋ Allocate New Job Card
+              
+              {/* Table Footer */}
+              <div className="p-4 bg-muted/20 border-t border-border flex justify-between items-center flex-wrap gap-2.5">
+                <span className="text-[10px] text-muted-foreground font-sans">💡 Tip: Selection launches Interactive actions including Search, Update, and Tax Billing.</span>
+                <button 
+                  className="bg-card hover:bg-muted border border-border hover:border-muted-foreground text-foreground px-4 py-2 rounded-xl text-[11px] font-bold flex items-center gap-1.5 transition-colors cursor-pointer active:scale-95 shadow-sm" 
+                  onClick={() => showToast('Opening: Allocate New Job Card')}
+                >
+                  <Plus size={12} className="text-primary" />
+                  <span>Allocate New Job Card</span>
                 </button>
               </div>
             </div>
 
             {/* Bulletins */}
-            <div className="bg-card border border-border">
-              <div className="px-4 py-3 border-b border-border">
-                <div className="text-[12px] font-semibold text-foreground flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-sky-600"></div>
+            <div className="bg-card border border-border rounded-2xl shadow-sm overflow-hidden">
+              <div className="px-4.5 py-4 border-b border-border bg-slate-50/50 dark:bg-[#0F172A]/20">
+                <div className="text-[12.5px] font-bold uppercase tracking-wider text-foreground flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></div>
                   Latest Dealer Service Bulletins
                 </div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 p-3.5">
-                <div className="bg-muted border border-border p-3">
-                  <span className="text-[9px] font-bold uppercase tracking-wider bg-red-500/10 text-red-500 border border-red-500/20 px-2 py-0.5 rounded-full">HIGH Priority</span>
-                  <div className="text-[11px] font-semibold text-foreground mt-2 leading-tight">All-New Grand Vitara Smart Hybrid Campaign Guide</div>
-                  <div className="text-[10px] text-muted-foreground mt-1 leading-snug">New update on inspection protocols of Smart Hybrid components for safety audit.</div>
-                  <div className="text-[9px] font-mono text-muted-foreground mt-2">May 25, 2026</div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 p-4.5">
+                <div className="bg-muted/40 hover:bg-muted/70 border border-border border-l-4 border-l-rose-500 p-4 rounded-xl transition-all duration-300 flex flex-col justify-between">
+                  <div>
+                    <span className="text-[9px] font-extrabold uppercase tracking-widest bg-rose-500/10 text-rose-500 border border-rose-500/20 px-2 py-0.5 rounded">HIGH Priority</span>
+                    <h4 className="text-[11.5px] font-bold text-foreground mt-2.5 leading-tight">All-New Grand Vitara Smart Hybrid Campaign Guide</h4>
+                    <p className="text-[10.5px] text-muted-foreground mt-1.5 leading-snug">New update on inspection protocols of Smart Hybrid components for safety audit.</p>
+                  </div>
+                  <div className="text-[9px] font-mono text-slate-400 mt-3">Issued: May 25, 2026</div>
                 </div>
-                <div className="bg-muted border border-border p-3">
-                  <span className="text-[9px] font-bold uppercase tracking-wider bg-sky-500/10 text-sky-600 border border-sky-500/20 px-2 py-0.5 rounded-full">MEDIUM Priority</span>
-                  <div className="text-[11px] font-semibold text-foreground mt-2 leading-tight">NEXA Premium Points Rules Revision</div>
-                  <div className="text-[10px] text-muted-foreground mt-1 leading-snug">Nexon loyalty points multiplier increased to 1.5× for select accessories fitment.</div>
-                  <div className="text-[9px] font-mono text-muted-foreground mt-2">May 18, 2026</div>
+                
+                <div className="bg-muted/40 hover:bg-muted/70 border border-border border-l-4 border-l-sky-500 p-4 rounded-xl transition-all duration-300 flex flex-col justify-between">
+                  <div>
+                    <span className="text-[9px] font-extrabold uppercase tracking-widest bg-sky-500/10 text-sky-600 border border-sky-500/20 px-2 py-0.5 rounded">MEDIUM Priority</span>
+                    <h4 className="text-[11.5px] font-bold text-foreground mt-2.5 leading-tight">NEXA Premium Points Rules Revision</h4>
+                    <p className="text-[10.5px] text-muted-foreground mt-1.5 leading-snug">Nexon loyalty points multiplier increased to 1.5&times; for select accessories fitment.</p>
+                  </div>
+                  <div className="text-[9px] font-mono text-slate-400 mt-3">Issued: May 18, 2026</div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Right Col */}
-          <div className="flex flex-col gap-3.5">
+          {/* Right Column */}
+          <div className="flex flex-col gap-5 md:gap-6">
+            
             {/* Today's Schedule */}
-            <div className="bg-card border border-border">
-              <div className="px-3.5 py-3 border-b border-border">
-                <div className="text-[12px] font-semibold text-foreground flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-emerald-600"></div>
+            <div className="bg-card border border-border rounded-2xl shadow-sm overflow-hidden">
+              <div className="px-4 py-3.5 border-b border-border bg-slate-50/50 dark:bg-[#0F172A]/20">
+                <div className="text-[12.5px] font-bold uppercase tracking-wider text-foreground flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
                   Today's Service Schedule
                 </div>
               </div>
-              <div className="p-3.5 flex flex-col gap-2">
-                <div className="bg-muted border border-border p-2.5 flex justify-between items-start">
-                  <div>
-                    <div className="font-mono text-[9px] font-semibold text-primary">KL01CC4342</div>
-                    <div className="text-[11px] font-semibold text-foreground mt-0.5">SOMARAJAN C N</div>
-                    <div className="text-[10px] text-muted-foreground italic">Baleno Petrol</div>
+              <div className="p-4 flex flex-col gap-3">
+                <div className="bg-muted/45 hover:bg-muted/70 border border-border p-3.5 rounded-xl flex justify-between items-start transition-all duration-350">
+                  <div className="space-y-0.5">
+                    <div className="font-mono text-[9px] font-bold text-primary tracking-wider">KL01CC4342</div>
+                    <div className="text-[12px] font-bold text-foreground leading-tight">SOMARAJAN C N</div>
+                    <div className="text-[10.5px] text-muted-foreground italic">Baleno Petrol</div>
                   </div>
-                  <div className="text-right">
-                    <div className="font-mono text-[10px] font-semibold text-muted-foreground">09:30 AM</div>
-                    <div className="mt-1 text-[9px] font-bold px-2 py-0.5 bg-amber-500/10 text-amber-600 rounded-sm inline-block">Delayed</div>
-                  </div>
-                </div>
-                <div className="bg-muted border border-border p-2.5 flex justify-between items-start">
-                  <div>
-                    <div className="font-mono text-[9px] font-semibold text-primary">UK18P2194</div>
-                    <div className="text-[11px] font-semibold text-foreground mt-0.5">AREA MANAGER CSD</div>
-                    <div className="text-[10px] text-muted-foreground italic">New Celerio 2021</div>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-mono text-[10px] font-semibold text-muted-foreground">11:00 AM</div>
-                    <div className="mt-1 text-[9px] font-bold px-2 py-0.5 bg-emerald-500/10 text-emerald-600 rounded-sm inline-block">Checked In</div>
+                  <div className="text-right flex flex-col items-end gap-1 shrink-0">
+                    <div className="font-mono text-[9.5px] font-semibold text-muted-foreground">09:30 AM</div>
+                    <span className="text-[8px] font-bold px-1.5 py-0.5 bg-amber-500/10 text-amber-600 border border-amber-500/20 rounded uppercase">Delayed</span>
                   </div>
                 </div>
-                <div className="bg-muted border border-border p-2.5 flex justify-between items-start">
-                  <div>
-                    <div className="font-mono text-[9px] font-semibold text-primary">HR26EY6033</div>
-                    <div className="text-[11px] font-semibold text-foreground mt-0.5">SACHIN</div>
-                    <div className="text-[10px] text-muted-foreground italic">WagonR Petrol</div>
+                
+                <div className="bg-muted/45 hover:bg-muted/70 border border-border p-3.5 rounded-xl flex justify-between items-start transition-all duration-350">
+                  <div className="space-y-0.5">
+                    <div className="font-mono text-[9px] font-bold text-primary tracking-wider">UK18P2194</div>
+                    <div className="text-[12px] font-bold text-foreground leading-tight">AREA MANAGER CSD</div>
+                    <div className="text-[10.5px] text-muted-foreground italic">New Celerio 2021</div>
                   </div>
-                  <div className="text-right">
-                    <div className="font-mono text-[10px] font-semibold text-muted-foreground">01:30 PM</div>
-                    <div className="mt-1 text-[9px] font-bold px-2 py-0.5 bg-border text-muted-foreground border border-border rounded-sm inline-block">Confirmed</div>
+                  <div className="text-right flex flex-col items-end gap-1 shrink-0">
+                    <div className="font-mono text-[9.5px] font-semibold text-muted-foreground">11:00 AM</div>
+                    <span className="text-[8px] font-bold px-1.5 py-0.5 bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 rounded uppercase">Checked In</span>
+                  </div>
+                </div>
+                
+                <div className="bg-muted/45 hover:bg-muted/70 border border-border p-3.5 rounded-xl flex justify-between items-start transition-all duration-350">
+                  <div className="space-y-0.5">
+                    <div className="font-mono text-[9px] font-bold text-primary tracking-wider">HR26EY6033</div>
+                    <div className="text-[12px] font-bold text-foreground leading-tight">SACHIN</div>
+                    <div className="text-[10.5px] text-muted-foreground italic">WagonR Petrol</div>
+                  </div>
+                  <div className="text-right flex flex-col items-end gap-1 shrink-0">
+                    <div className="font-mono text-[9.5px] font-semibold text-muted-foreground">01:30 PM</div>
+                    <span className="text-[8px] font-bold px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-muted-foreground border border-border rounded uppercase">Confirmed</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Checklist */}
-            <div className="bg-card border border-border">
-              <div className="px-3.5 py-3 border-b border-border">
-                <div className="text-[12px] font-semibold text-foreground flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-sky-600"></div>
-                  Service Advisor Checklists
+            {/* Advisor Checklist */}
+            <div className="bg-card border border-border rounded-2xl shadow-sm overflow-hidden">
+              <div className="px-4 py-3.5 border-b border-border bg-slate-50/50 dark:bg-[#0F172A]/20">
+                <div className="text-[12.5px] font-bold uppercase tracking-wider text-foreground flex items-center gap-2">
+                  <CheckCircle size={14} className="text-indigo-500" />
+                  Advisor Tasklists
                 </div>
               </div>
-              <div className="p-3.5 flex flex-col gap-1.5">
+              <div className="p-4 flex flex-col gap-2">
                 {tasks.map(t => (
                   <div 
                     key={t.id} 
-                    className="flex items-start gap-2 p-2 bg-muted border border-border cursor-pointer hover:bg-muted/80 transition-colors"
+                    className="flex items-start gap-3 p-3 bg-muted/40 hover:bg-muted/70 border border-border rounded-xl cursor-pointer transition-all duration-200"
                     onClick={() => setTasks(tasks.map(x => x.id === t.id ? { ...x, done: !x.done } : x))}
                   >
-                    <div className={`mt-0.5 shrink-0 w-3.5 h-3.5 border ${t.done ? 'bg-primary border-primary text-primary-foreground' : 'bg-card border-border'} flex items-center justify-center text-[9px] transition-colors`}>
-                      {t.done && "✓"}
+                    <div className={`mt-0.5 shrink-0 w-4.5 h-4.5 border rounded-lg ${t.done ? 'bg-primary border-primary text-primary-foreground' : 'bg-card border-border'} flex items-center justify-center text-[10px] transition-colors`}>
+                      {t.done && <Check size={11} strokeWidth={3} />}
                     </div>
-                    <div className={`text-[11px] select-none ${t.done ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
+                    <div className={`text-[12.3px] font-medium leading-tight select-none ${t.done ? 'line-through text-muted-foreground/60' : 'text-foreground'}`}>
                       {t.text}
                     </div>
                   </div>
@@ -7428,30 +8586,41 @@ function DashboardView({
               </div>
             </div>
 
-            {/* Calls */}
-            <div className="bg-card border border-border">
-              <div className="px-3.5 py-3 border-b border-border">
-                <div className="text-[12px] font-semibold text-foreground flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-emerald-600"></div>
-                  Pending Customer Calls
+            {/* Pending calls */}
+            <div className="bg-card border border-border rounded-2xl shadow-sm overflow-hidden">
+              <div className="px-4 py-3.5 border-b border-border bg-slate-50/50 dark:bg-[#0F172A]/20">
+                <div className="text-[12.5px] font-bold uppercase tracking-wider text-foreground flex items-center gap-2">
+                  <Phone size={14} className="text-emerald-500" />
+                  Callbacks Queue
                 </div>
               </div>
-              <div className="px-3.5 py-2.5 flex flex-col">
-                <div className="flex justify-between items-start gap-2 py-2 border-b border-border last:border-none">
-                  <div>
-                    <div className="text-[11px] font-semibold text-foreground">Somarajan C N</div>
-                    <div className="font-mono text-[9px] text-muted-foreground mt-0.5">9847058853</div>
-                    <div className="text-[10px] text-muted-foreground mt-1">Re: Revised Estimate approval</div>
+              <div className="p-4 flex flex-col gap-3">
+                <div className="flex justify-between items-start gap-2.5 p-3.5 bg-muted/40 hover:bg-muted/70 border border-border rounded-xl transition-all duration-350">
+                  <div className="flex gap-2.5 items-start">
+                    <div className="bg-emerald-500/10 text-emerald-500 p-2 rounded-lg border border-emerald-505/15 shrink-0">
+                      <Phone size={12} />
+                    </div>
+                    <div className="mini-card-labels">
+                      <div className="text-[12px] font-bold text-foreground">Somarajan C N</div>
+                      <div className="font-mono text-[9px] text-muted-foreground">9847058853</div>
+                      <div className="text-[10.5px] text-muted-foreground leading-normal mt-1.5 bg-card/65 dark:bg-[#0F172A]/40 px-2.5 py-1.5 border border-border/80 rounded">Re: Revised Estimate approval</div>
+                    </div>
                   </div>
-                  <div className="font-mono text-[9px] text-muted-foreground shrink-0">10 mins ago</div>
+                  <div className="font-mono text-[9px] text-slate-400 shrink-0 mt-0.5">10m ago</div>
                 </div>
-                <div className="flex justify-between items-start gap-2 py-2 border-b border-border last:border-none">
-                  <div>
-                    <div className="text-[11px] font-semibold text-foreground">Meera Naik</div>
-                    <div className="font-mono text-[9px] text-muted-foreground mt-0.5">9812842974</div>
-                    <div className="text-[10px] text-muted-foreground mt-1">Re: Insurance survey followup</div>
+
+                <div className="flex justify-between items-start gap-2.5 p-3.5 bg-muted/40 hover:bg-muted/70 border border-border rounded-xl transition-all duration-350">
+                  <div className="flex gap-2.5 items-start">
+                    <div className="bg-emerald-500/10 text-emerald-500 p-2 rounded-lg border border-emerald-555/15 shrink-0">
+                      <Phone size={12} />
+                    </div>
+                    <div className="mini-card-labels">
+                      <div className="text-[12px] font-bold text-foreground">Meera Naik</div>
+                      <div className="font-mono text-[9px] text-muted-foreground">9812842974</div>
+                      <div className="text-[10.5px] text-muted-foreground leading-normal mt-1.5 bg-card/65 dark:bg-[#0F172A]/40 px-2.5 py-1.5 border border-border/80 rounded">Re: Insurance survey callback</div>
+                    </div>
                   </div>
-                  <div className="font-mono text-[9px] text-muted-foreground shrink-0">1 hr ago</div>
+                  <div className="font-mono text-[9px] text-slate-400 shrink-0 mt-0.5">1h ago</div>
                 </div>
               </div>
             </div>
@@ -7459,97 +8628,166 @@ function DashboardView({
         </div>
       </div>
 
-      {/* Modal */}
-      {selectedJC && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-5 animate-in fade-in duration-200" onClick={(e) => { if (e.target === e.currentTarget) setSelectedJC(null); }}>
-          <div className="bg-card border border-border w-full max-w-[420px] p-6 relative animate-in slide-in-from-bottom-4 duration-200">
-            <button className="absolute top-4 right-4 text-muted-foreground hover:bg-muted p-1 cursor-pointer" onClick={() => setSelectedJC(null)}>
-              <X size={16} />
-            </button>
-            <div className="text-[9px] font-mono font-bold uppercase tracking-wider bg-muted text-muted-foreground px-2 py-1 flex mb-3 w-fit border border-border">TAB1 ACTION DESK</div>
-            <div className="text-[14px] font-semibold text-foreground leading-tight">Select Required Action for Jobcard No:</div>
-            <div className="font-mono text-[15px] font-bold text-primary mt-1">{selectedJC.jobCardNo}</div>
-            
-            <div className="grid grid-cols-2 gap-2.5 bg-muted border border-border p-3 mt-4">
-              <div>
-                <div className="text-[9px] font-mono text-muted-foreground">MODEL:</div>
-                <div className="text-[11px] font-semibold text-foreground truncate" title={selectedJC.model}>{selectedJC.model}</div>
+      {/* Action desk Modal */}
+      <AnimatePresence>
+        {selectedJC && (
+          <div className="fixed inset-0 z-[9999] bg-[#070C16]/85 backdrop-blur-md flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0, y: 15, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 15, scale: 0.98 }}
+              className="bg-[#0B1220] border border-slate-800 w-full max-w-[440px] rounded-2xl shadow-2xl overflow-hidden flex flex-col text-slate-100"
+            >
+              {/* Modal Header */}
+              <div className="p-4 sm:p-5 border-b border-slate-800 bg-[#0F172A] flex items-center justify-between shrink-0">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
+                    <Activity size={16} className="text-primary animate-pulse" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-100">
+                      NEXA Action Desk
+                    </h3>
+                    <p className="text-[10px] text-muted-foreground uppercase font-mono tracking-widest mt-0.5">
+                      Intel card No: {selectedJC.jobCardNo}
+                    </p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setSelectedJC(null)}
+                  className="p-1.5 hover:bg-slate-800 text-slate-400 hover:text-slate-200 rounded-lg cursor-pointer transition-colors"
+                >
+                  <X size={15} />
+                </button>
               </div>
-              <div>
-                <div className="text-[9px] font-mono text-muted-foreground">REG NO:</div>
-                <div className="text-[11px] font-semibold text-foreground truncate" title={selectedJC.regNum}>{selectedJC.regNum}</div>
-              </div>
-              <div>
-                <div className="text-[9px] font-mono text-muted-foreground">CUSTOMER:</div>
-                <div className="text-[11px] font-semibold text-foreground truncate" title={selectedJC.customerName}>{selectedJC.customerName}</div>
-              </div>
-              <div>
-                <div className="text-[9px] font-mono text-muted-foreground">ADVISOR:</div>
-                <div className="text-[11px] font-semibold text-foreground truncate" title={selectedJC.serviceAdvisor}>{selectedJC.serviceAdvisor}</div>
-              </div>
-            </div>
 
-            <div className="flex flex-col gap-2.5 mt-5">
-              <button 
-                className="w-full bg-muted border border-border text-foreground hover:bg-accent text-[11px] font-bold py-3 transition-colors flex items-center justify-center cursor-pointer"
-                onClick={() => { 
-                  setPopupHistoryRegNo(selectedJC.regNum);
-                  setSelectedJC(null); 
-                }}
-              >
-                🔍 Find ID & History / Register Trail
-              </button>
-              <button 
-                className="w-full bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 text-[11px] font-bold py-3 transition-colors flex items-center justify-center cursor-pointer"
-                onClick={() => { 
-                  if (onJobCardAction) {
-                    onJobCardAction('modify', selectedJC);
-                  } else {
-                    showToast(`Opening: Update / Modify Active Jobcard for ${selectedJC.jobCardNo}`); 
-                  }
-                  setSelectedJC(null); 
-                }}
-              >
-                🔧 Update / Modify Active Jobcard
-              </button>
-              <button 
-                className="w-full bg-primary border border-primary text-primary-foreground hover:bg-primary/90 text-[11px] font-bold py-3 transition-colors flex items-center justify-center cursor-pointer"
-                onClick={() => { 
-                  if (onJobCardAction) {
-                    onJobCardAction('close', selectedJC);
-                  } else {
-                    showToast(`Opening: Close Jobcard & Tax Invoice for ${selectedJC.jobCardNo}`); 
-                  }
-                  setSelectedJC(null); 
-                }}
-              >
-                ✓ Close Jobcard & Tax Invoice
-              </button>
-            </div>
+              {/* Modal Body */}
+              <div className="p-5 bg-[#090F1C] flex flex-col gap-4">
+                <div className="grid grid-cols-2 gap-3.5 bg-[#0F172A] border border-slate-850 p-4 rounded-xl">
+                  <div>
+                    <span className="text-[9px] font-mono text-slate-400 uppercase tracking-wider block">Vehicle Model</span>
+                    <span className="text-[11.5px] font-bold text-slate-100 leading-tight block mt-0.5 truncate" title={selectedJC.model}>{selectedJC.model}</span>
+                  </div>
+                  <div>
+                    <span className="text-[9px] font-mono text-slate-400 uppercase tracking-wider block">Registration No</span>
+                    <span className="text-[11.5px] font-bold text-primary font-mono block mt-0.5 truncate" title={selectedJC.regNum}>{selectedJC.regNum}</span>
+                  </div>
+                  <div className="pt-2 border-t border-slate-800/40">
+                    <span className="text-[9px] font-mono text-slate-400 uppercase tracking-wider block">Customer Name</span>
+                    <span className="text-[11.5px] font-semibold text-slate-200 block mt-0.5 truncate" title={selectedJC.customerName}>{selectedJC.customerName}</span>
+                  </div>
+                  <div className="pt-2 border-t border-slate-800/40">
+                    <span className="text-[9px] font-mono text-slate-400 uppercase tracking-wider block">Service Advisor</span>
+                    <span className="text-[11.5px] font-semibold text-slate-200 block mt-0.5 truncate" title={selectedJC.serviceAdvisor}>{selectedJC.serviceAdvisor}</span>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-2.5 pt-2">
+                  <button 
+                    className="w-full bg-[#1A2333] hover:bg-[#253248] border border-slate-800 text-[11px] font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer text-slate-200 uppercase tracking-wider font-sans"
+                    onClick={() => { 
+                      setPopupHistoryRegNo(selectedJC.regNum);
+                      setSelectedJC(null); 
+                    }}
+                  >
+                    <History size={13} className="text-sky-400" />
+                    <span>Search Vehicle History</span>
+                  </button>
+                  
+                  <button 
+                    className="w-full bg-primary/10 hover:bg-primary/20 border border-primary/30 text-primary hover:text-white text-[11px] font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer uppercase tracking-wider font-sans"
+                    onClick={() => { 
+                      if (onJobCardAction) {
+                        onJobCardAction('modify', selectedJC);
+                      } else {
+                        showToast(`Opening: Update / Modify Active Jobcard for ${selectedJC.jobCardNo}`); 
+                      }
+                      setSelectedJC(null); 
+                    }}
+                  >
+                    <Pencil size={13} />
+                    <span>Update / Modify Jobcard</span>
+                  </button>
+                  
+                  <button 
+                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 text-[11px] font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer uppercase tracking-wider font-sans"
+                    onClick={() => { 
+                      if (onJobCardAction) {
+                        onJobCardAction('close', selectedJC);
+                      } else {
+                        showToast(`Opening: Close Jobcard & Tax Invoice for ${selectedJC.jobCardNo}`); 
+                      }
+                      setSelectedJC(null); 
+                    }}
+                  >
+                    <CheckCircle size={13} />
+                    <span>Close Card & Bill Invoice</span>
+                  </button>
+                </div>
+              </div>
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
 
       {/* Vehicle History Report Popup */}
-      {popupHistoryRegNo && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-5 animate-in fade-in duration-200" onClick={(e) => { if (e.target === e.currentTarget) setPopupHistoryRegNo(null); }}>
-          <div className="bg-card border border-border w-full max-w-4xl p-6 relative rounded-xl shadow-2xl animate-in slide-in-from-bottom-4 duration-200 flex flex-col max-h-[90vh] overflow-y-auto">
-            <button className="absolute top-4 right-4 text-muted-foreground hover:bg-muted p-1 rounded-lg cursor-pointer transition-colors" onClick={() => setPopupHistoryRegNo(null)}>
-              <X size={16} />
-            </button>
-            <div className="text-[9px] font-mono font-bold uppercase tracking-wider bg-muted text-muted-foreground px-2 py-1 flex mb-3 w-fit border border-border">VEHICLE SERVICE VEHICLE HISTORY POPUP</div>
-            <h3 className="text-[15px] font-bold text-foreground mb-4 font-sans border-b border-border pb-2">Vehicle Service History — {popupHistoryRegNo}</h3>
-            
-            <div className="flex-1 overflow-y-auto min-h-0">
-              <VehicleHistoryPanel initialReg={popupHistoryRegNo} />
-            </div>
+      <AnimatePresence>
+        {popupHistoryRegNo && (
+          <div className="fixed inset-0 bg-[#070C16]/85 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 z-[9999] overflow-y-auto" onClick={(e) => { if (e.target === e.currentTarget) setPopupHistoryRegNo(null); }}>
+            <motion.div
+              initial={{ opacity: 0, y: 15, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 15, scale: 0.98 }}
+              className="bg-[#0B1220] border border-slate-800 rounded-2xl w-full max-w-4xl max-h-[85vh] overflow-hidden shadow-2xl flex flex-col font-sans text-slate-100"
+              onClick={e => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <div className="p-4 sm:p-5 border-b border-slate-800 bg-[#0F172A] flex items-center justify-between shrink-0">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
+                    <History size={16} className="text-primary animate-pulse" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-100">
+                      Vehicle History Database
+                    </h3>
+                    <p className="text-[10px] text-muted-foreground uppercase font-mono tracking-widest mt-0.5">
+                      Intel Records for: {popupHistoryRegNo}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setPopupHistoryRegNo(null)}
+                  className="p-1.5 hover:bg-slate-800 text-slate-400 hover:text-slate-200 rounded-lg cursor-pointer transition-colors"
+                >
+                  <X size={15} />
+                </button>
+              </div>
+
+              {/* Modal Body Container */}
+              <div className="p-5 overflow-y-auto flex-1 bg-[#090F1C]">
+                <VehicleHistoryPanel initialReg={popupHistoryRegNo} />
+              </div>
+
+              {/* Modal Footer */}
+              <div className="p-4 border-t border-slate-800 bg-[#0F172A] flex justify-end gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setPopupHistoryRegNo(null)}
+                  className="px-4 py-2 bg-[#1A2333] hover:bg-[#253248] text-[11px] font-bold text-slate-200 rounded-lg cursor-pointer transition-all uppercase tracking-wider font-sans border border-slate-800"
+                >
+                  Close Records
+                </button>
+              </div>
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
 
       {/* Toast */}
       {toastMsg && (
-        <div className="fixed bottom-5 left-1/2 -translate-x-1/2 bg-foreground text-background px-4 py-2 text-[11px] font-medium z-[100] animate-in slide-in-from-bottom-2 fade-in duration-200">
+        <div className="fixed bottom-5 left-1/2 -translate-x-1/2 bg-foreground text-background px-4 py-2.5 rounded-xl text-[11.5px] font-bold z-[100] shadow-xl animate-in slide-in-from-bottom-2 fade-in duration-200">
           {toastMsg}
         </div>
       )}
@@ -7778,26 +9016,7 @@ function Sidebar({
       </div>
       </div>
 
-      {/* Profile/Account status at bottom of Sidebar */}
-      <div className="p-4 mt-auto border-t border-slate-100 dark:border-slate-800 shrink-0">
-        <div className="bg-slate-50 dark:bg-slate-900/40 rounded-xl p-3.5">
-          <div className="flex items-center gap-3 mb-2.5">
-            <div className="w-9 h-9 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 font-bold flex items-center justify-center border border-indigo-200/50 dark:border-indigo-800/50 shrink-0 text-sm">
-              TM
-            </div>
-            <div className="min-w-0">
-              <div className="text-[13px] font-semibold text-slate-800 dark:text-slate-200 truncate">T. Mahajan</div>
-              <div className="text-[11px] text-slate-400 dark:text-slate-500 truncate">Pro Support Agent</div>
-            </div>
-          </div>
-          <div className="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
-            <div className="w-3/4 h-full bg-indigo-500 rounded-full"></div>
-          </div>
-          <div className="text-[9px] font-semibold font-mono text-slate-500 dark:text-slate-400 mt-1.5 uppercase tracking-wider">
-            7.4k / 10k tokens used
-          </div>
-        </div>
-      </div>
+
     </div>
   )
 }
@@ -7973,12 +9192,28 @@ function LoginScreen({ onLoginSuccess, theme, setTheme }: LoginScreenProps) {
         }`}
       >
         {/* Top Header */}
-        <div className="absolute top-6 right-10 flex items-center gap-6 z-20">
+        <div className="absolute top-6 right-10 flex items-center gap-4 z-20">
           <span className={`text-[11px] font-sans select-none hidden sm:inline transition-colors duration-500 ${
             theme === "dark" ? "text-zinc-500" : "text-zinc-550"
           }`}>
             Designed & Developed by <span className="font-bold text-[#F26522]">global360</span>
           </span>
+          {/* Theme Toggle Button */}
+          <button
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
+              theme === "dark" 
+                ? "border-zinc-800 text-zinc-400 hover:bg-zinc-900" 
+                : "border-zinc-200 text-zinc-650 hover:bg-zinc-100"
+            }`}
+            title={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+          >
+            {theme === "dark" ? (
+              <Sun size={14} className="text-amber-500" />
+            ) : (
+              <Moon size={14} className="text-indigo-600" />
+            )}
+          </button>
         </div>
 
         {/* Profile Avatar */}
@@ -8277,6 +9512,18 @@ export default function App() {
     paymentMode: string;
     signature?: string;
   } | null>(null)
+
+  const prevViewRef = useRef(view);
+  useEffect(() => {
+    if (prevViewRef.current === "chat" && view === "dashboard") {
+      if (jcSession && jcSession.step !== "COMPLETED") {
+        setActiveDashPanel("jc-opening");
+        setActiveDashPanelData(undefined);
+      }
+    }
+    prevViewRef.current = view;
+  }, [view, jcSession]);
+
   const [isListening, setIsListening] = useState(false)
   const [isVoiceHUDOpen, setIsVoiceHUDOpen] = useState(false)
   const [speakResponses, setSpeakResponses] = useState(false)
@@ -9166,10 +10413,10 @@ export default function App() {
                     className="fixed inset-0 z-40" 
                     onClick={() => setNotifDropdownOpen(false)} 
                   />
-                  <div className="absolute right-0 mt-2 w-80 bg-white border border-[#c3c2c2] rounded-xl shadow-xl z-50 text-foreground overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
-                    <div className="p-3 border-b border-[#e2e8f0] flex items-center justify-between bg-slate-50">
+                  <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-slate-900 border border-[#c3c2c2] dark:border-slate-800 rounded-xl shadow-xl z-50 text-foreground overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
+                    <div className="p-3 border-b border-[#e2e8f0] dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-900/60">
                       <div className="flex items-center gap-1.5">
-                        <span className="text-[12px] font-sans font-bold text-slate-900 uppercase tracking-wide">Notifications</span>
+                        <span className="text-[12px] font-sans font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wide">Notifications</span>
                         {sharedNotifs.filter(n => !n.read).length > 0 && (
                           <span className="px-1.5 py-0.5 rounded-full bg-rose-500/10 text-rose-500 text-[9px] font-bold font-mono">
                             {sharedNotifs.filter(n => !n.read).length}
@@ -9180,13 +10427,13 @@ export default function App() {
                         onClick={() => {
                           setSharedNotifs(ns => ns.map(n => ({ ...n, read: true })));
                         }}
-                        className="text-[10px] text-blue-600 hover:text-blue-800 font-sans font-semibold transition-colors cursor-pointer"
+                        className="text-[10px] text-[#4f46e5] dark:text-indigo-400 hover:text-[#4338ca] dark:hover:text-indigo-350 font-sans font-semibold transition-colors cursor-pointer"
                       >
                         Mark all read
                       </button>
                     </div>
 
-                    <div className="max-h-[280px] overflow-y-auto divide-y divide-slate-100">
+                    <div className="max-h-[280px] overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60">
                       {sharedNotifs.length === 0 ? (
                         <div className="p-6 text-center text-muted-foreground text-[11px] font-sans">
                           No notifications found
@@ -9200,14 +10447,14 @@ export default function App() {
                               onClick={() => {
                                 setSharedNotifs(ns => ns.map(x => x.id === n.id ? { ...x, read: true } : x));
                               }}
-                              className={`p-3 text-[11.5px] cursor-pointer transition-all hover:bg-slate-50 flex gap-2.5 items-start ${!isUnread ? "bg-white opacity-60" : "bg-blue-50/20"}`}
+                              className={`p-3 text-[11.5px] cursor-pointer transition-all hover:bg-slate-50 dark:hover:bg-slate-850 flex gap-2.5 items-start ${!isUnread ? "bg-white dark:bg-slate-900 opacity-60" : "bg-blue-50/20 dark:bg-blue-950/25"}`}
                             >
                               <div className={`w-1.5 h-1.5 rounded-full shrink-0 mt-1.5 ${!isUnread ? "bg-transparent" : "bg-blue-500 animate-pulse"}`} />
                               <div className="flex-1 min-w-0">
-                                <p className={`font-sans leading-relaxed ${!isUnread ? "text-slate-500 font-medium" : "text-slate-900 font-bold"}`}>
+                                <p className={`font-sans leading-relaxed ${!isUnread ? "text-slate-500 dark:text-slate-400 font-medium" : "text-slate-900 dark:text-slate-100 font-bold"}`}>
                                   {n.text}
                                 </p>
-                                <span className="text-[9px] font-mono text-slate-400 mt-1 block">
+                                <span className="text-[9px] font-mono text-slate-400 dark:text-slate-500 mt-1 block">
                                   {n.time}
                                 </span>
                               </div>
@@ -9217,14 +10464,14 @@ export default function App() {
                       )}
                     </div>
 
-                    <div className="p-2 border-t border-slate-100 bg-slate-50 text-center">
+                    <div className="p-2 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 text-center">
                       <button 
                         onClick={() => {
                           setNotifDropdownOpen(false);
                           setView("dashboard");
                           setActiveDashPanel("notifications");
                         }}
-                        className="w-full py-1.5 text-[10.5px] text-slate-600 hover:text-slate-900 font-semibold uppercase tracking-wider font-sans bg-white hover:bg-slate-100 border border-[#e2e8f0] rounded-lg shadow-sm transition-all cursor-pointer"
+                        className="w-full py-1.5 text-[10.5px] text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 font-semibold uppercase tracking-wider font-sans bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-[#e2e8f0] dark:border-slate-700 rounded-lg shadow-sm transition-all cursor-pointer"
                       >
                         View All in Dashboard
                       </button>
@@ -9273,6 +10520,8 @@ export default function App() {
                     <PanelRenderer 
                       panel={activeDashPanel} 
                       initialData={activeDashPanelData}
+                      jcSession={jcSession}
+                      setJcSession={setJcSession}
                       onAction={(actionId, data) => {
                         if (actionId === "welcome") {
                           setActiveDashPanel(null);
@@ -9394,6 +10643,8 @@ export default function App() {
                       <PanelRenderer 
                         panel={activeWorkPanel} 
                         initialData={activeWorkPanelData}
+                        jcSession={jcSession}
+                        setJcSession={setJcSession}
                         onAction={(actionId, data) => {
                           if (actionId === "welcome") {
                             setActiveWorkPanel(null);
