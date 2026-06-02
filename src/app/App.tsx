@@ -9761,7 +9761,7 @@ function LoginScreen({ onLoginSuccess, theme, setTheme }: LoginScreenProps) {
           <span className={`text-[11px] font-sans select-none hidden sm:inline transition-colors duration-500 ${
             theme === "dark" ? "text-zinc-500" : "text-zinc-550"
           }`}>
-            Designed & Developed by <span className="font-bold text-[#F26522]">global360</span>
+            designed and developed by <span className="font-bold text-[#F26522]">Adglobal360</span>
           </span>
           {/* Theme Toggle Button */}
           <button
