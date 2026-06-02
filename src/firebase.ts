@@ -8,10 +8,12 @@ let auth: any = null;
 let hasConfiguredFirebase = false;
 
 // Safe check to verify keys exist before initializing, avoiding start-up crashes
+const safeProcessEnv = typeof process !== "undefined" && process.env ? process.env : {};
+
 const firebaseConfig = {
-  apiKey: process.env.VITE_FIREBASE_API_KEY || (typeof window !== 'undefined' ? (window as any).FIREBASE_API_KEY : undefined),
-  projectId: process.env.VITE_FIREBASE_PROJECT_ID || (typeof window !== 'undefined' ? (window as any).FIREBASE_PROJECT_ID : undefined),
-  firestoreDatabaseId: process.env.VITE_FIREBASE_DATABASE_ID || "(default)",
+  apiKey: safeProcessEnv.VITE_FIREBASE_API_KEY || (typeof window !== 'undefined' ? (window as any).FIREBASE_API_KEY : undefined),
+  projectId: safeProcessEnv.VITE_FIREBASE_PROJECT_ID || (typeof window !== 'undefined' ? (window as any).FIREBASE_PROJECT_ID : undefined),
+  firestoreDatabaseId: safeProcessEnv.VITE_FIREBASE_DATABASE_ID || "(default)",
 };
 
 if (firebaseConfig.apiKey && firebaseConfig.projectId) {

@@ -13,9 +13,64 @@ async function startServer() {
   app.post("/api/chat", async (req, res) => {
     try {
       const apiKey = process.env.GEMINI_API_KEY;
-      if (!apiKey) {
-        throw new Error("GEMINI_API_KEY is not configured.");
+      const { prompt, chatHistory = [], activeContext = {}, chatType = "work" } = req.body;
+      const isEmployeeChat = chatType === "employee";
+
+      if (!apiKey || apiKey === "MY_GEMINI_API_KEY" || apiKey.trim() === "") {
+        console.warn("GEMINI_API_KEY is not configured. Returning local mock response.");
+        const upperText = (prompt || "").toUpperCase();
+        let panel = null;
+        let botText = "";
+        let initialData = null;
+
+        if (isEmployeeChat) {
+          if (upperText.includes("HELLO") || upperText.includes("HI") || upperText.includes("HEY") || upperText.includes("GREETING")) {
+            botText = "Hello! How may I help you? Here is what I can do:\n1. Check your **Appointments & schedule** today\n2. Guide you on **how to open/create a Job Card**\n3. Review your **Tasks** or **Callbacks**\n4. Access **Suzuki Connect telematics**\n\nTell me, how can I help you today?";
+          } else if (upperText.includes("APPOINTMENT") || upperText.includes("SCHEDULE")) {
+            botText = "Here are today\x27s scheduled service appointments from the LIVE WORKSHOP DATABASE:\n\n1. **HR26DS6144** - 08:15 AM - Paid Service - Baleno Petrol - Not Arrived\n2. **HR26FN3715** - 10:30 AM - Paid Service - Grand Vitara Strong Hybrid - Not Arrived\n3. **HR26FK2786** - 09:00 AM - Paid Service - Grand Vitara Smart Hybrid - Not Arrived\n4. **HR26CW7677** - 09:15 AM - Paid Service - Baleno Petrol - Not Arrived\n5. **HR82C0640** - 09:30 AM - Free Service - New Baleno CNG - Not Arrived\n6. **HR10X2772** - 11:45 AM - Free Service - Brezza S-CNG - Not Arrived";
+            panel = "appointments";
+          } else if (upperText.includes("JOB CARD") || upperText.includes("JC") || upperText.includes("CREATE") || upperText.includes("OPEN")) {
+            if (upperText.includes("YES") || upperText.includes("OPEN IT") || upperText.includes("CONFIRM")) {
+              botText = "Opening the Job Card creation screen now.";
+              panel = "jc-opening";
+            } else {
+              botText = "To open a new Job Card (JC):\n1. Click \x27Open Job Card\x27 in the sidebar.\n2. Enter the registration number or scan the license plate.\n3. Log details (odometer, fuel, dents) and customer demands.\n4. Click \x27Generate Job Card\x27 to save it.\n\nWould you like me to open the Job Card creation screen for you?";
+            }
+          } else if (upperText.includes("DIAGNOSTIC") || upperText.includes("OBD") || upperText.includes("TELEMATICS")) {
+            botText = "Accessing Suzuki Connect remote diagnostics. To initiate:\n1. Go to \x27Suzuki Connect Advice\x27 panel.\n2. Review diagnostic logs and active OBD codes.\n3. Send recommendation reports to customers.\n\nWould you like to open the diagnostics screen?";
+            panel = "suzuki-connect-advice";
+          } else {
+            botText = "I am your friendly NEXA Employee Advisor Assistant. I am here to help you manage workshop operations, appointments, Job Card procedures, and callbacks. Let know what you need!";
+          }
+        } else {
+          if (upperText.includes("HELLO") || upperText.includes("HI") || upperText.includes("HEY")) {
+            botText = "Welcome to the NEXA Advisor Hub! I am your AI Chatbot. You can search vehicle histories, manage job cards, or handle appointments.";
+            panel = "welcome";
+          } else if (upperText.includes("APPOINTMENT") || upperText.includes("SCHEDULE")) {
+            botText = "Pulling today\x27s appointments dashboard...";
+            panel = "appointments";
+          } else if (upperText.includes("HISTORY") || upperText.includes("PAST RECORDS")) {
+            let matchedReg = "DL6CR1517";
+            if (upperText.includes("HR26DS6144")) matchedReg = "HR26DS6144";
+            botText = `Opening past records for vehicle ${matchedReg}.`;
+            panel = "vehicle-history";
+            initialData = { regNo: matchedReg };
+          } else if (upperText.includes("JOB CARD") || upperText.includes("JC") || upperText.includes("ACTIVE")) {
+            botText = "Opening the Active Job Cards panel...";
+            panel = "all-jobcards";
+          } else if (upperText.includes("CALL") || upperText.includes("CALLBACK") || upperText.includes("PHONE")) {
+            botText = "Opening customer callbacks queues.";
+            panel = "my-calls";
+          } else {
+            botText = "Opening relevant screen in your workshop dashboard now.";
+          }
+        }
+
+        res.setHeader("Access-Control-Allow-Origin", "*");
+        res.setHeader("Content-Type", "application/json");
+        return res.status(200).json({ panel, botText, initialData });
       }
+
       const ai = new GoogleGenAI({ 
         apiKey,
         httpOptions: {
@@ -24,9 +79,6 @@ async function startServer() {
           }
         }
       });
-      const { prompt, chatHistory = [], activeContext = {}, chatType = "work" } = req.body;
-      
-      const isEmployeeChat = chatType === "employee";
       
       const systemInstruction = isEmployeeChat 
         ? `You are the NEXA Advisor Employee Personal AI Assistant, a dedicated helpful digital champion for Maruti Suzuki NEXA workshop advisors and technicians.

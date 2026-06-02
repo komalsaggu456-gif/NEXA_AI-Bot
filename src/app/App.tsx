@@ -2199,8 +2199,8 @@ function JCOpeningPanel({
       return [
         { type: "L", desc: "Diagnosis Fee (Body Check)", code: "ZE75L0", qty: 1, price: 600, accepted: "YES", acceptedQty: 1, rejectionReason: "-" },
         { type: "L", desc: "Bonnet Painting & Polish - Hygiene", code: "ZZ07H", qty: 1, price: 175, accepted: "YES", acceptedQty: 1, rejectionReason: "-" },
-        { type: "P", desc: "Front Door Hinge Broken Element", code: "FDH01", qty: 1, price: 1450, accepted: "YES", acceptedQty: 1, rejectionReason: "-" },
-        { type: "L", desc: "Noise from Suspension System", code: "NS01", qty: 1, price: 1200, accepted: "NO", acceptedQty: 0, rejectionReason: "Customer Refused" },
+        { type: "L", desc: "Wheel Balancing & alignment", code: "ZA18LO", qty: 1, price: 745.88, accepted: "YES", acceptedQty: 1, rejectionReason: "-" },
+        { type: "P", desc: "Front Door Hinge Broken Element", code: "FDH01", qty: 1, price: 1312, accepted: "YES", acceptedQty: 1, rejectionReason: "-" },
       ];
     }
     return jcSession.demands.map((d: any) => ({
@@ -2220,6 +2220,15 @@ function JCOpeningPanel({
   const [newCode, setNewCode] = useState("");
   const [newQty, setNewQty] = useState(1);
   const [newPrice, setNewPrice] = useState(0);
+
+  // Step 4 (Demands & Timeline Sub-flow) States
+  const [panelSubStep, setPanelSubStep] = useState(1);
+  const [panelActivePopup, setPanelActivePopup] = useState<"LABOUR" | "PART" | "HISTORY" | null>(null);
+  const [panelLabourForm, setPanelLabourForm] = useState({ demandRepair: "Periodic Maintenance", code: "", desc: "", price: 0, hours: 1.0, billableType: "Customer" });
+  const [panelPartForm, setPanelPartForm] = useState({ demandRepair: "Periodic Maintenance", partNo: "", desc: "", price: 0, qty: 1 });
+  const [panelToast, setPanelToast] = useState("");
+  const [panelAudioActive, setPanelAudioActive] = useState(false);
+  const [panelAudioLog, setPanelAudioLog] = useState("");
 
   // Scheduling states
   const [assignedGroup, setAssignedGroup] = useState("Group A");
@@ -2774,7 +2783,7 @@ function JCOpeningPanel({
             {/* Hand-marked Scratch/Dent Panel */}
             <div className="p-4 bg-card/30 border border-border rounded-xl flex flex-col gap-3">
               <div className="flex justify-between items-center pb-2 border-b border-border">
-                <p className="text-[12px] font-bold tracking-tight text-white uppercase">Interactive Panel Layout</p>
+                <p className="text-[12px] font-bold tracking-tight text-foreground uppercase">Interactive Panel Layout</p>
                 <button
                   onClick={() => { setScratchDot([2, 5, 11]); setDentDot([4, 8]); }}
                   className="text-[9px] bg-card border border-border px-2 py-0.5 rounded font-black cursor-pointer hover:border-white transition-colors"
@@ -2851,7 +2860,7 @@ function JCOpeningPanel({
             {/* 14 Exterior Photo Slots Panel */}
             <div className="p-4 bg-card/30 border border-border rounded-xl flex flex-col gap-3">
               <div className="flex justify-between items-center pb-2 border-b border-border">
-                <p className="text-[12px] font-bold tracking-tight text-white uppercase">Vehicle Damage Zone Snapshots (14 Panels)</p>
+                <p className="text-[12px] font-bold tracking-tight text-foreground uppercase">Vehicle Damage Zone Snapshots (14 Panels)</p>
                 <span className="text-[10px] px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-amber-400 font-mono font-bold">14 REQUIRED CLS</span>
               </div>
 
@@ -2938,7 +2947,7 @@ function JCOpeningPanel({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Tyre tread element */}
             <div className="p-4 bg-card/30 border border-border rounded-xl flex flex-col gap-4">
-              <h4 className="text-[12px] font-bold tracking-tight text-white uppercase pb-1 border-b border-border">Tread Depth Tyre Health (mm check)</h4>
+              <h4 className="text-[12px] font-bold tracking-tight text-foreground uppercase pb-1 border-b border-border">Tread Depth Tyre Health (mm check)</h4>
               <p className="text-[11px] text-muted-foreground leading-relaxed">
                 Log residual tread depth thicknesses in millimeters. Values below <strong className="text-rose-400">3mm</strong> are flagged critical, initiating recommendations in customer quotation.
               </p>
@@ -2976,7 +2985,7 @@ function JCOpeningPanel({
 
             {/* Battery condition health */}
             <div className="p-4 bg-card/30 border border-border rounded-xl flex flex-col gap-4">
-              <h4 className="text-[12px] font-bold tracking-tight text-white uppercase pb-1 border-b border-border">Lead-Acid Battery Health (Performance metrics)</h4>
+              <h4 className="text-[12px] font-bold tracking-tight text-foreground uppercase pb-1 border-b border-border">Lead-Acid Battery Health (Performance metrics)</h4>
               <p className="text-[11px] text-muted-foreground leading-relaxed">
                 Audit starting voltages and plate contamination health rating. If rated poor, starter labour elements get injected into summary.
               </p>
@@ -3033,282 +3042,654 @@ function JCOpeningPanel({
 
       {/* Step 4: Demands, Parts checklist details & Scheduling */}
       {step === 4 && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-4">
-          <div className="flex justify-between items-center">
-            <p className="text-[11px] uppercase font-black text-secondary tracking-wider">Demanded Repair & Labor Parts Estimation list</p>
-            <button
-              onClick={() => { setShowAddDemandRow(!showAddDemandRow); setNewDesc(""); setNewCode(""); setNewPrice(0); setNewQty(1); }}
-              className="flex items-center gap-1 bg-primary/15 border border-primary/20 text-primary text-[10px] font-black uppercase px-2.5 py-1 rounded-lg hover:bg-primary/25 cursor-pointer"
-            >
-              <Plus size={12} /> Add Demand Item
-            </button>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-4 font-sans text-foreground">
+          
+          {/* Panel Toast */}
+          <AnimatePresence>
+            {panelToast && (
+              <motion.div
+                initial={{ opacity: 0, y: -15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                className="bg-emerald-500 text-white font-bold text-[11px] px-4 py-2 rounded-lg text-center flex items-center justify-center gap-1.5 self-center shadow-lg border border-emerald-400/20 z-50 absolute top-4 left-1/2 -translate-x-1/2"
+              >
+                <Check size={13} /> {panelToast}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Header Specifications bar */}
+          <div className="flex justify-between items-center pb-2 border-b border-border shrink-0 select-none">
+            <span className="text-[12px] font-black uppercase text-secondary tracking-widest block">
+              Step 4: Demanded Repair & Labor Parts Estimation (Stage {panelSubStep} of 3)
+            </span>
+            <div className="flex gap-1.5">
+              {[1, 2, 3].map((s) => (
+                <button
+                  key={s}
+                  onClick={() => setPanelSubStep(s)}
+                  className={`w-5 h-5 rounded-full border text-[10px] font-mono font-bold flex items-center justify-center transition-all ${
+                    panelSubStep === s
+                      ? "bg-primary border-primary text-primary-foreground scale-110"
+                      : "bg-card border-border text-muted-foreground hover:border-foreground"
+                  }`}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
           </div>
 
-          {showAddDemandRow && (
-            <div className="p-4 rounded-xl border border-primary/25 bg-card flex flex-wrap gap-3 items-end transition-all">
-              <div className="flex-1 min-w-[80px]">
-                <label className="text-[9px] uppercase font-extrabold text-muted-foreground block mb-1">TYPE</label>
-                <select value={newType} onChange={e => setNewType(e.target.value as "L" | "P")} className="w-full text-xs px-2.5 py-1.5 bg-card border border-border rounded-lg outline-none cursor-pointer">
-                  <option value="L">Labour (L)</option>
-                  <option value="P">Part (P)</option>
-                </select>
+          {/* Stage 1: Specifications & History Triggers */}
+          {panelSubStep === 1 && (
+            <div className="flex flex-col gap-4 animate-fade-in select-none">
+              <div className="bg-[#0F172A] border border-border/40 p-5 rounded-2xl text-slate-100 flex flex-col gap-2 shadow-lg max-w-xl mx-auto w-full">
+                <span className="text-[10px] font-mono text-slate-400 uppercase tracking-widest block font-bold">Open Job Card Active Specs Card</span>
+                <h3 className="text-[16px] font-black tracking-wide leading-tight">
+                  VITARA BREZZA K15B BS-VI
+                </h3>
+                <div className="grid grid-cols-2 gap-4 mt-2.5 pt-2.5 border-t border-slate-800/80 text-[11.5px] font-mono text-slate-300">
+                  <div className="bg-slate-900/40 p-2 rounded border border-slate-800/50">
+                    <span className="text-slate-400 block text-[9px] uppercase font-bold">PLATE REG NUMBER</span>
+                    <strong className="text-white text-[12.5px]">{regNo}</strong>
+                  </div>
+                  <div className="bg-slate-900/40 p-2 rounded border border-slate-800/50">
+                    <span className="text-slate-400 block text-[9px] uppercase font-bold">ODOMETER READING</span>
+                    <strong className="text-white text-[12.5px]">{parseInt(odometer).toLocaleString()} KMS</strong>
+                  </div>
+                </div>
               </div>
-              <div className="flex-[3] min-w-[180px]">
-                <label className="text-[9px] uppercase font-extrabold text-muted-foreground block mb-1">DESCRIPTION</label>
-                <input value={newDesc} onChange={e => setNewDesc(e.target.value)} placeholder="E.g. Front Right Side Bumper paint" className="w-full text-xs px-2.5 py-1.5 bg-card border border-border rounded-lg outline-none font-sans" />
+
+              {/* SA Microphone Audio Emulator */}
+              <div className="p-4 rounded-xl border border-border bg-card/45 max-w-xl mx-auto w-full flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex flex-col gap-0.5 text-left">
+                    <div className="flex items-center gap-1.5 text-foreground font-black text-[12.5px] uppercase">
+                      <Mic size={15} className={panelAudioActive ? "text-red-500 animate-pulse" : "text-muted-foreground"} />
+                      <span>SA Voice Recording Capture</span>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground leading-relaxed">
+                      Toggle standard SA voice capture simulator to append direct customer guidelines to specifications.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      if (!panelAudioActive) {
+                        setPanelAudioActive(true);
+                        setPanelAudioLog("Listening for SA guidelines...");
+                        setTimeout(() => {
+                          setPanelAudioActive(false);
+                          setPanelAudioLog('Captured Voice: "Customer reported slight squeaking noise on high speeds"');
+                          const newD = {
+                            type: "L",
+                            desc: "Squeaking Noise Diagnosis & Overhaul",
+                            code: "SQ01",
+                            qty: 1,
+                            price: 542,
+                            accepted: "YES",
+                            acceptedQty: 1,
+                            rejectionReason: "-"
+                          };
+                          setDemands(prev => [...prev, newD]);
+                          setPanelToast("Voice guidelines added!");
+                          setTimeout(() => setPanelToast(""), 3000);
+                        }, 2500);
+                      }
+                    }}
+                    className={`px-4 py-2 text-[11px] rounded-lg font-bold border transition-all cursor-pointer uppercase tracking-wider font-sans shadow-sm ${
+                      panelAudioActive 
+                        ? "bg-red-500 border-red-500 text-white animate-pulse" 
+                        : "bg-primary/15 border-primary/20 text-primary hover:bg-primary/25"
+                    }`}
+                  >
+                    {panelAudioActive ? "RECORDING..." : "REC VOICE"}
+                  </button>
+                </div>
+                {panelAudioLog && (
+                  <p className="text-[11px] font-mono text-muted-foreground italic bg-background p-2.5 rounded border border-border/80 text-left">
+                    {panelAudioLog}
+                  </p>
+                )}
               </div>
-              <div className="flex-1 min-w-[100px]">
-                <label className="text-[9px] uppercase font-extrabold text-muted-foreground block mb-1">DMS CODE</label>
-                <input value={newCode} onChange={e => setNewCode(e.target.value.toUpperCase())} placeholder="E.g. ZE75L0" className="w-full text-xs px-2.5 py-1.5 bg-card border border-border rounded-lg outline-none font-mono" />
-              </div>
-              <div className="w-[60px]">
-                <label className="text-[9px] uppercase font-extrabold text-muted-foreground block mb-1">QTY</label>
-                <input type="number" value={newQty} onChange={e => setNewQty(parseInt(e.target.value) || 1)} className="w-full text-xs px-2.5 py-1.5 bg-card border border-border rounded-lg text-center font-mono" />
-              </div>
-              <div className="w-[85px]">
-                <label className="text-[9px] uppercase font-extrabold text-muted-foreground block mb-1">PRICE (₹)</label>
-                <input type="number" value={newPrice} onChange={e => setNewPrice(parseInt(e.target.value) || 0)} className="w-full text-xs px-2.5 py-1.5 bg-card border border-border rounded-lg font-mono text-right" />
-              </div>
-              <div className="flex gap-1.5 shrink-0">
+
+              {/* History & Share triggers */}
+              <div className="flex gap-4 justify-center mt-2 max-w-xl mx-auto w-full">
+                <button
+                  onClick={() => setPanelActivePopup("HISTORY")}
+                  className="flex-1 flex items-center justify-center gap-2 py-3 px-4 bg-card border border-border hover:bg-muted text-foreground rounded-xl transition-all font-bold text-[12px] font-sans cursor-pointer shadow-md"
+                >
+                  <History size={14} className="text-secondary" /> VEHICLE HISTORY LOGS
+                </button>
+
                 <button
                   onClick={() => {
-                    if (!newDesc.trim()) return;
-                    setDemands(prev => [...prev, {
-                      type: newType,
-                      desc: newDesc,
-                      code: newCode || (newType === "L" ? "LBR" : "PRT") + Math.trunc(Math.random() * 900 + 100),
-                      qty: newQty,
-                      price: newPrice * newQty,
-                      accepted: "YES",
-                      acceptedQty: newQty,
-                      rejectionReason: "-"
-                    }]);
-                    setShowAddDemandRow(false);
+                    setPanelToast("Emailed demands checklist copy!");
+                    setTimeout(() => setPanelToast(""), 3000);
                   }}
-                  className="px-3.5 py-1.5 bg-primary text-primary-foreground font-black text-[10px] rounded-lg tracking-wider uppercase cursor-pointer hover:bg-primary/90"
+                  className="flex-1 flex items-center justify-center gap-2 py-3 px-4 bg-card border border-border hover:bg-muted text-foreground rounded-xl transition-all font-bold text-[12px] font-sans cursor-pointer shadow-md"
                 >
-                  ADD
+                  <Mail size={14} className="text-secondary" /> SHARE DEMANDS COPY
                 </button>
+              </div>
+
+              <div className="flex justify-end mt-4 max-w-xl mx-auto w-full pt-3 border-t border-border">
                 <button
-                  onClick={() => setShowAddDemandRow(false)}
-                  className="px-3 py-1.5 bg-card border border-border text-foreground text-[10px] font-bold rounded-lg cursor-pointer"
+                  onClick={() => setPanelSubStep(2)}
+                  className="flex items-center gap-1 px-6 py-2.5 bg-primary hover:bg-primary-hover text-primary-foreground text-[12px] font-black rounded-xl uppercase tracking-wider cursor-pointer shadow-md font-sans"
                 >
-                  CANCEL
+                  PROCEED TO DEMANDS TABLE <ArrowRight size={13} />
                 </button>
               </div>
             </div>
           )}
 
-          {/* Demands Table Grid */}
-          <div className="overflow-x-auto rounded-xl border border-border bg-card/15 shadow-inner">
-            <table className="w-full text-left border-collapse text-[11px] font-sans">
-              <thead>
-                <tr className="border-b border-border bg-card/60 font-bold text-muted-foreground uppercase text-[9px] tracking-wider">
-                  <th className="px-3 py-2.5 text-center w-[45px]">S.No.</th>
-                  <th className="px-3 py-2.5 text-center w-[45px]">Type</th>
-                  <th className="px-3 py-2.5">Description</th>
-                  <th className="px-3 py-2.5">Part No. / Labour Code</th>
-                  <th className="px-3 py-2.5 text-right w-[55px]">Qty</th>
-                  <th className="px-3 py-2.5 text-right w-[85px]">Price</th>
-                  <th className="px-3 py-2.5 text-center w-[85px]">Accepted</th>
-                  <th className="px-3 py-2.5 text-center w-[75px]">Acc Qty</th>
-                  <th className="px-3 py-2.5">Rejection Reason</th>
-                </tr>
-              </thead>
-              <tbody>
-                {demands.map((d, sNo) => {
-                  const isAccepted = d.accepted === "YES" || d.accepted === true;
-                  return (
-                    <tr key={sNo} className="border-b border-border hover:bg-card/25 transition-colors align-middle">
-                      <td className="px-3 py-2 text-center font-mono text-muted-foreground">{sNo + 1}</td>
-                      <td className="px-3 py-2 text-center">
-                        <span className={`px-1.5 py-0.2 select-none text-[8.5px] font-black rounded font-mono ${d.type === "L" ? "bg-amber-400/10 border border-amber-500/20 text-amber-400" : "bg-emerald-400/10 border border-emerald-500/20 text-emerald-400"}`}>
-                          {d.type}
-                        </span>
-                      </td>
-                      <td className="px-3 py-2 font-medium text-foreground max-w-[150px] truncate">{d.desc}</td>
-                      <td className="px-3 py-2 font-mono text-xs text-muted-foreground select-all">{d.code}</td>
-                      <td className="px-3 py-2 text-right font-mono">{d.qty}</td>
-                      <td className="px-3 py-2 text-right font-mono text-foreground font-semibold">₹{d.price}</td>
-                      <td className="px-3 py-2 text-center">
-                        <select
-                          value={d.accepted}
-                          onChange={e => {
-                            const val = e.target.value;
-                            setDemands(prev => {
-                              const copy = [...prev];
-                              copy[sNo] = {
-                                ...copy[sNo],
-                                accepted: val,
-                                acceptedQty: val === "YES" ? d.qty : 0,
-                                rejectionReason: val === "YES" ? "-" : "Customer Refused"
-                              };
-                              return copy;
-                            });
-                          }}
-                          className={`px-1.5 py-0.5 rounded text-[10px] font-bold border outline-none bg-background cursor-pointer ${isAccepted ? "border-emerald-500/30 text-emerald-400" : "border-rose-500/20 text-rose-400"}`}
-                        >
-                          <option value="YES">YES</option>
-                          <option value="NO">NO</option>
-                        </select>
-                      </td>
-                      <td className="px-3 py-2 text-center">
-                        <input
-                          type="number"
-                          disabled={!isAccepted}
-                          value={isAccepted ? (d.acceptedQty ?? d.qty) : 0}
-                          onChange={e => {
-                            const val = parseFloat(e.target.value) || 0;
-                            setDemands(prev => {
-                              const copy = [...prev];
-                              copy[sNo].acceptedQty = val;
-                              return copy;
-                            });
-                          }}
-                          className="w-12 text-center bg-background/30 border border-border rounded py-0.5 text-[10px] font-mono outline-none"
-                        />
-                      </td>
-                      <td className="px-3 py-2 truncate max-w-[110px]">
-                        {isAccepted ? (
-                          <span className="text-muted-foreground/45 font-mono">-</span>
-                        ) : (
-                          <input
-                            value={d.rejectionReason}
-                            onChange={e => {
-                              const text = e.target.value;
-                              setDemands(prev => {
-                                const copy = [...prev];
-                                copy[sNo].rejectionReason = text;
-                                return copy;
-                              });
-                            }}
-                            className="bg-transparent border-0 border-b border-rose-500/10 text-rose-300 text-[10px]"
-                          />
-                        )}
-                      </td>
+          {/* Stage 2: Active Demands table */}
+          {panelSubStep === 2 && (
+            <div className="flex flex-col gap-4 animate-fade-in">
+              <div className="overflow-x-auto rounded-2xl border border-border bg-card/20 shadow-md max-w-full">
+                <table className="w-full text-left border-collapse text-[11.5px] font-sans">
+                  <thead>
+                    <tr className="border-b border-border bg-card/75 font-bold text-muted-foreground uppercase text-[9.5px] tracking-wider select-none">
+                      <th className="px-4 py-3.5 text-center w-[50px]">S.NO.</th>
+                      <th className="px-4 py-3.5 text-center w-[60px]">TYPE</th>
+                      <th className="px-4 py-3.5">DESCRIPTION DETAILS</th>
+                      <th className="px-4 py-3.5 min-w-[120px]">DMS / PART CODE</th>
+                      <th className="px-4 py-3.5 text-right w-[80px]">QTY</th>
+                      <th className="px-4 py-3.5 text-right w-[100px]">PRICE</th>
+                      <th className="px-4 py-3.5 text-center w-[80px]">ACTION</th>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                  </thead>
+                  <tbody>
+                    {demands.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="p-6 text-center text-muted-foreground italic font-sans">
+                          No active demands logged. Use buttons below to add parts or labor items.
+                        </td>
+                      </tr>
+                    ) : (
+                      demands.map((d: any, idx: number) => (
+                        <tr key={d.code || idx} className="border-b border-border hover:bg-card/40 transition-colors align-middle font-sans">
+                          <td className="px-4 py-3 text-center font-mono text-muted-foreground">{idx + 1}</td>
+                          <td className="px-4 py-3 text-center select-none">
+                            <span className={`px-2 py-0.5 rounded text-[9.5px] font-bold font-mono tracking-wide ${d.type === "L" ? "bg-primary/10 border border-primary/20 text-primary" : "bg-emerald-500/10 border border-emerald-500/20 text-emerald-400"}`}>
+                              {d.type === "L" ? "L" : "P"}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 font-semibold text-foreground truncate max-w-[200px]">{d.desc}</td>
+                          <td className="px-4 py-3 font-mono text-muted-foreground">{d.code}</td>
+                          <td className="px-4 py-3 text-right font-mono text-foreground font-semibold">{d.qty || 1}</td>
+                          <td className="px-4 py-3 text-right font-mono text-foreground font-semibold">₹{d.price.toLocaleString("en-IN")}</td>
+                          <td className="px-4 py-3 text-center">
+                            <button
+                              onClick={() => {
+                                const newD = demands.filter((_: any, i: number) => i !== idx);
+                                setDemands(newD);
+                              }}
+                              className="text-red-400 hover:text-red-500 font-bold px-2 select-none text-[13.5px] cursor-pointer"
+                            >
+                              Delete
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
 
-          {/* Pricing calculations exactly as shown in the image */}
-          <div className="border-t border-border/80 pt-3 flex flex-col gap-2 bg-card/10 p-3 rounded-xl border border-border">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex justify-between items-baseline border-b border-border pb-1 text-xs">
-                <span className="text-[9px] font-black text-muted-foreground tracking-wider uppercase">Scheduled Labour Amt</span>
-                <span className="font-mono font-bold text-white">₹{labourTotal.toLocaleString("en-IN")}</span>
-              </div>
-              <div className="flex justify-between items-baseline border-b border-border pb-1 text-xs">
-                <span className="text-[9px] font-black text-muted-foreground tracking-wider uppercase">Scheduled Parts Amt</span>
-                <span className="font-mono font-bold text-white">₹{partsTotal.toLocaleString("en-IN")}</span>
-              </div>
-            </div>
-            <div className="flex justify-between items-center text-xs font-bold font-mono mt-1 pt-1">
-              <span className="text-muted-foreground font-sans text-[10px]">Dynamic Live Estimate Gross</span>
-              <span className="text-primary text-[14px]">Grand Estimate: ₹{grandTotal.toLocaleString("en-IN")} <span className="text-[9px] text-muted-foreground">(Excl. Taxes)</span></span>
-            </div>
-          </div>
-
-          {/* Scheduling controls */}
-          <div className="p-3.5 bg-card/30 border border-border rounded-xl flex flex-col gap-3 font-sans">
-            <p className="text-[10px] font-black uppercase text-secondary tracking-wider">Bay Scheduling & Promised metrics</p>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-              <div className="flex flex-col gap-1">
-                <label className="text-[9px] uppercase font-extrabold text-muted-foreground">Assigned Group</label>
-                <select value={assignedGroup} onChange={e => setAssignedGroup(e.target.value)} className="px-2 py-1.5 bg-card border border-border rounded-lg text-[11px] outline-none">
-                  <option value="Group A">Team Alpha (Group A)</option>
-                  <option value="Group B">Team Bravo (Group B)</option>
-                  <option value="Group C">Team Specialists (Group C)</option>
-                </select>
-              </div>
-              <div className="flex flex-col gap-1">
-                <label className="text-[9px] uppercase font-extrabold text-muted-foreground">Technician *</label>
-                <select value={technician} onChange={e => setTechnician(e.target.value)} className="px-2 py-1.5 bg-card border border-border rounded-lg text-[11px] outline-none">
-                  {["VISHAL ADITYA", "MADAN KUMAR", "AMIT SINGH", "SUDHIR CHARAN"].map(s => <option key={s}>{s}</option>)}
-                </select>
-              </div>
-              <div className="flex flex-col gap-1">
-                <label className="text-[9px] uppercase font-extrabold text-muted-foreground">Service Bay *</label>
-                <select value={allocatedBay} onChange={e => setAllocatedBay(e.target.value)} className="px-2 py-1.5 bg-card border border-border rounded-lg text-[11px] outline-none">
-                  {["BAY-04", "BAY-02", "BAY-08", "BAY-10"].map(s => <option key={s}>{s}</option>)}
-                </select>
-              </div>
-              <div className="flex flex-col gap-1 relative">
-                <label className="text-[9px] uppercase font-extrabold text-[#FACC15]">Promised DateTime *</label>
+              {/* Add Labour & Parts Trigger buttons */}
+              <div className="flex gap-4 justify-center select-none max-w-xl mx-auto w-full">
                 <button
-                  type="button"
-                  onClick={() => setShowDateTimePicker(true)}
-                  className="px-2.5 py-1.5 bg-card border border-[#FACC15]/40 text-left font-mono text-[11.5px] rounded-lg text-[#FACC15] flex justify-between items-center"
+                  onClick={() => setPanelActivePopup("LABOUR")}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-3 px-4 bg-primary/15 border border-primary/20 hover:bg-primary/25 text-primary rounded-xl font-black uppercase text-[12px] transition-colors cursor-pointer shadow-sm"
                 >
-                  <span>{promisedDateTime}</span>
-                  <Calendar size={13} />
+                  + Add Labour Item
                 </button>
+                <button
+                  onClick={() => setPanelActivePopup("PART")}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-3 px-4 bg-emerald-500/15 border border-emerald-500/20 hover:bg-emerald-500/25 text-emerald-400 rounded-xl font-black uppercase text-[12px] transition-colors cursor-pointer shadow-sm"
+                >
+                  + Add Parts Item
+                </button>
+              </div>
 
-                {/* Simulated Scroll wheel Date-picker dialog exactly like phone apps */}
-                {showDateTimePicker && (
-                  <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="absolute bottom-[105%] right-0 z-50 bg-card border border-border p-3 rounded-xl shadow-2xl w-[220px] flex flex-col gap-2.5">
-                    <p className="text-[10px] uppercase font-bold text-muted-foreground text-center tracking-wider pb-1.5 border-b border-border">Service Promising Wheels</p>
-                    <div className="flex gap-1 justify-center">
-                      <div className="flex flex-col items-center gap-1">
-                        <span className="text-[8px] text-muted-foreground">MONTH-DAY</span>
-                        <select className="bg-background border border-border py-0.5 px-1 font-mono text-[11px] outline-none" onChange={e => {
-                          const datePart = e.target.value;
-                          setPromisedDateTime(prev => datePart + " " + prev.split(" ")[1]);
-                        }}>
-                          <option value="30-May-2026">30-May</option>
-                          <option value="31-May-2026">31-May</option>
-                          <option value="01-Jun-2026">01-Jun</option>
-                        </select>
-                      </div>
-                      <div className="flex flex-col items-center gap-1">
-                        <span className="text-[8px] text-muted-foreground">HOUR-MIN</span>
-                        <select className="bg-background border border-border py-0.5 px-1 font-mono text-[11px] outline-none" onChange={e => {
-                          const timePart = e.target.value;
-                          setPromisedDateTime(prev => prev.split(" ")[0] + " " + timePart);
-                        }}>
-                          <option value="15:14">15:14</option>
-                          <option value="16:00">16:00</option>
-                          <option value="18:30">18:30</option>
-                        </select>
-                      </div>
+              <div className="flex justify-between border-t border-border pt-4 mt-2 select-none">
+                <button
+                  onClick={() => setPanelSubStep(1)}
+                  className="flex items-center gap-1.5 px-4 py-2 bg-card text-foreground text-[11px] font-bold rounded-xl border border-border hover:bg-muted font-sans cursor-pointer"
+                >
+                  <ChevronLeft size={13} /> Back
+                </button>
+                <button
+                  onClick={() => setPanelSubStep(3)}
+                  className="flex items-center gap-1.5 px-5 py-2.5 bg-primary text-primary-foreground text-[12px] font-bold rounded-xl hover:brightness-110 font-sans cursor-pointer"
+                >
+                  PROCEED TO SCHEDULING <ChevronRight size={13} />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Stage 3: Estimator Summary & Resource Allocation */}
+          {panelSubStep === 3 && (
+            <div className="flex flex-col gap-4 animate-fade-in">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                
+                {/* Aggregate Totals card */}
+                <div className="border border-border p-5 rounded-2xl bg-card/25 shadow-sm flex flex-col gap-3">
+                  <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest border-b border-border pb-1 select-none">Estimator Totals Summary</span>
+                  <div className="flex justify-between items-baseline border-b border-border pb-1.5 text-xs">
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">Aggregate Labour sum</span>
+                    <span className="text-[17px] font-black text-foreground font-mono">₹{labourTotal.toLocaleString("en-IN")}</span>
+                  </div>
+                  <div className="flex justify-between items-baseline border-b border-border pb-1.5 text-xs">
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">Aggregate Parts sum</span>
+                    <span className="text-[17px] font-black text-foreground font-mono">₹{partsTotal.toLocaleString("en-IN")}</span>
+                  </div>
+                  <div className="flex justify-between items-center pt-2 font-bold font-sans">
+                    <span className="text-secondary text-[11px]">Dynamic Estimate Gross</span>
+                    <span className="text-primary font-mono text-[19px]">Grand Estimate: ₹{grandTotal.toLocaleString("en-IN")}</span>
+                  </div>
+                </div>
+
+                {/* Resource Allocation Dropdowns */}
+                <div className="p-4 bg-card/35 border border-border rounded-2xl flex flex-col gap-3 font-sans select-none text-left">
+                  <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest border-b border-border pb-1">Resource allocation</span>
+                  <div className="grid grid-cols-2 gap-3.5 text-[11px]">
+                    <div>
+                      <label className="text-[9px] text-muted-foreground block mb-0.5 font-bold uppercase">Work Group *</label>
+                      <select value={assignedGroup} onChange={e => setAssignedGroup(e.target.value)} className="w-full bg-card border border-border p-2 rounded-lg text-foreground outline-none cursor-pointer">
+                        <option value="Group A">Group A (Periodic Maintenance)</option>
+                        <option value="Group B">Group B (Express Repairs)</option>
+                      </select>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => setShowDateTimePicker(false)}
-                      className="w-full py-1 bg-primary text-primary-foreground text-[10px] font-bold rounded cursor-pointer"
+                    <div>
+                      <label className="text-[9px] text-muted-foreground block mb-0.5 font-bold uppercase">Technician *</label>
+                      <select value={technician} onChange={e => setTechnician(e.target.value)} className="w-full bg-card border border-border p-2 rounded-lg text-foreground outline-none cursor-pointer">
+                        <option value="VISHAL ADITYA">VISHAL ADITYA</option>
+                        <option value="MANOJ KUMAR">MANOJ KUMAR</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3.5 text-[11px]">
+                    <div>
+                      <label className="text-[9px] text-muted-foreground block mb-0.5 font-bold uppercase">Allocated Bay *</label>
+                      <select value={allocatedBay} onChange={e => setAllocatedBay(e.target.value)} className="w-full bg-card border border-border p-2 rounded-lg text-foreground outline-none cursor-pointer">
+                        <option value="BAY-04">BAY-04 (Mechanical)</option>
+                        <option value="BAY-01">BAY-01 (Body Paint)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-[9px] text-muted-foreground block mb-0.5 font-bold uppercase">Payment Mode *</label>
+                      <select value={paymentMode} onChange={e => setPaymentMode(e.target.value)} className="w-full bg-card border border-border p-2 rounded-lg text-foreground outline-none cursor-pointer">
+                        <option value="ONLINE">ONLINE / DIGITAL UPI</option>
+                        <option value="CASH">CASH PAYMENT</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              <div className="flex justify-between border-t border-border pt-4 mt-2 select-none">
+                <button
+                  onClick={() => setPanelSubStep(2)}
+                  className="flex items-center gap-1.5 px-4 py-2 bg-card text-foreground text-[11px] font-bold rounded-xl border border-border hover:bg-muted font-sans cursor-pointer"
+                >
+                  <ChevronLeft size={13} /> BACK
+                </button>
+                <button
+                  onClick={() => setStep(5)}
+                  className="flex items-center gap-1.5 px-6 py-2.5 bg-primary text-primary-foreground text-[12px] font-black rounded-xl hover:brightness-110 font-sans cursor-pointer shadow-md uppercase tracking-wider"
+                >
+                  Next (Summary & Sign) <ArrowRight size={13} /></button>
+              </div>
+            </div>
+          )}
+
+          {/* Interactive Modal Pop-ups (Image 2821 Modal Dialog Layout) */}
+          {panelActivePopup === "LABOUR" && (
+            <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs font-sans">
+              <div className="bg-card border border-border p-6 rounded-2xl w-full max-w-sm flex flex-col gap-4 text-foreground shadow-2xl relative text-left">
+                <div className="flex justify-between items-center border-b border-border pb-2 shrink-0 select-none">
+                  <p className="text-[13px] font-black text-primary uppercase tracking-wide">Image 2821: Add Labour Item</p>
+                  <button onClick={() => setPanelActivePopup(null)} className="text-muted-foreground hover:text-foreground cursor-pointer">
+                    <X size={16} />
+                  </button>
+                </div>
+
+                <div className="flex flex-col gap-3 text-[11px]">
+                  <div>
+                    <label className="text-[9px] text-muted-foreground uppercase block mb-0.5 font-bold">Demand Repair Section</label>
+                    <select
+                      value={panelLabourForm.demandRepair}
+                      onChange={(e) => setPanelLabourForm({ ...panelLabourForm, demandRepair: e.target.value })}
+                      className="w-full bg-background border border-border p-2 rounded-lg outline-none cursor-pointer text-[12px]"
                     >
-                      ✓ Select Done
-                    </button>
-                  </motion.div>
-                )}
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4 mt-1 border-t border-border/40 pt-2.5">
-              <div className="flex flex-col gap-1">
-                <label className="text-[9px] uppercase font-extrabold text-muted-foreground">Technical Expert Analyst</label>
-                <input readOnly value="MADAN KUMAR (PRO-TESTER)" className="px-2 py-1.5 bg-muted/30 border border-border rounded-lg text-muted-foreground cursor-not-allowed" />
-              </div>
-              <div className="flex flex-col gap-1">
-                <label className="text-[9px] uppercase font-extrabold text-muted-foreground">Estimate Payment Mode *</label>
-                <select value={paymentMode} onChange={e => setPaymentMode(e.target.value)} className="px-2 py-1.5 bg-card border border-border rounded-lg text-[11px] outline-none">
-                  {["ONLINE", "CARD PAYMENTS", "CASH ON DELIVERY", "NEXA REWARDS POINTS"].map(s => <option key={s}>{s}</option>)}
-                </select>
-              </div>
-            </div>
-          </div>
+                      <option value="Periodic Maintenance">Periodic Maintenance</option>
+                      <option value="Suspension Noise">Suspension Noise</option>
+                      <option value="Body Wash / Paint">Body Wash / Paint</option>
+                    </select>
+                  </div>
 
-          <div className="flex justify-between">
-            <button onClick={() => setStep(3)} className="flex items-center gap-1.5 px-4 py-2 bg-card text-foreground text-[11px] font-bold rounded-xl border border-border hover:bg-muted font-sans cursor-pointer"><ChevronLeft size={13} /> Back</button>
-            <button onClick={() => setStep(5)} className="flex items-center gap-1.5 px-5 py-2.5 bg-primary text-primary-foreground text-[12px] font-bold rounded-xl hover:bg-primary/95 font-sans cursor-pointer">Next (Summary & Sign) <ArrowRight size={13} /></button>
-          </div>
+                  <div>
+                    <label className="text-[9px] text-muted-foreground uppercase block mb-0.5 font-bold">Labour Code / Voice search</label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="E.g. ZE75L0"
+                        value={panelLabourForm.code}
+                        onChange={(e) => setPanelLabourForm({ ...panelLabourForm, code: e.target.value })}
+                        className="w-full bg-background border border-border p-2 pr-8 rounded-lg outline-none font-mono text-[12px]"
+                      />
+                      <Mic size={15} className="absolute right-2.5 top-2.5 text-muted-foreground hover:text-primary cursor-pointer" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-[9px] text-muted-foreground uppercase block mb-0.5 font-bold">Description details</label>
+                    <input
+                      type="text"
+                      placeholder="Labour details..."
+                      value={panelLabourForm.desc}
+                      onChange={(e) => setPanelLabourForm({ ...panelLabourForm, desc: e.target.value })}
+                      className="w-full bg-background border border-border p-2 rounded-lg outline-none text-[12px]"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-[9px] text-muted-foreground uppercase block mb-0.5 font-bold">Price (₹)</label>
+                      <input
+                        type="number"
+                        value={panelLabourForm.price}
+                        onChange={(e) => setPanelLabourForm({ ...panelLabourForm, price: parseFloat(e.target.value) || 0 })}
+                        className="w-full bg-background border border-border p-2 rounded-lg outline-none font-mono text-[12px]"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[9px] text-muted-foreground uppercase block mb-0.5 font-bold">Frame Hours</label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        value={panelLabourForm.hours}
+                        onChange={(e) => setPanelLabourForm({ ...panelLabourForm, hours: parseFloat(e.target.value) || 0 })}
+                        className="w-full bg-background border border-border p-2 rounded-lg outline-none font-mono text-[12px]"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-[9px] text-muted-foreground uppercase block mb-0.5 font-bold">Billable Type</label>
+                    <select
+                      value={panelLabourForm.billableType}
+                      onChange={(e) => setPanelLabourForm({ ...panelLabourForm, billableType: e.target.value })}
+                      className="w-full bg-background border border-border p-2 rounded-lg outline-none cursor-pointer text-[12px]"
+                    >
+                      <option value="Customer">Customer Billed (Standard)</option>
+                      <option value="Warranty">Warranty covered</option>
+                      <option value="FOC">FOC Free of Cost</option>
+                    </select>
+                  </div>
+
+                  {/* Frequently Used Checklist */}
+                  <div className="border border-border p-3 rounded-xl bg-[#0F172A]/5 flex flex-col gap-2 shrink-0">
+                    <span className="text-[9.5px] font-bold text-secondary uppercase tracking-wider block border-b border-border/60 pb-0.5">Frequently Used Labour Codes</span>
+                    <div className="flex flex-col gap-1.5 max-h-[90px] overflow-y-auto pr-1">
+                      {FREQ_LABOUR_CODES.map((item) => (
+                        <label key={item.code} className="flex items-center gap-2 cursor-pointer py-0.5 hover:bg-muted/10 rounded">
+                          <input
+                            type="checkbox"
+                            checked={panelLabourForm.code === item.code}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setPanelLabourForm({
+                                  ...panelLabourForm,
+                                  code: item.code,
+                                  desc: item.desc,
+                                  price: item.price,
+                                  hours: item.hours
+                                });
+                              }
+                            }}
+                            className="accent-primary cursor-pointer w-3.5 h-3.5"
+                          />
+                          <span className="text-[10.5px] font-mono text-foreground font-semibold shrink-0">{item.code}</span>
+                          <span className="text-[11px] text-muted-foreground truncate">{item.desc}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2 border-t border-border pt-4 select-none">
+                  <button
+                    onClick={() => {
+                      if (!panelLabourForm.code || !panelLabourForm.desc) return;
+                      const newD = {
+                        type: "L",
+                        desc: panelLabourForm.desc,
+                        code: panelLabourForm.code,
+                        qty: 1,
+                        price: panelLabourForm.price,
+                        accepted: "YES",
+                        acceptedQty: 1,
+                        rejectionReason: "-"
+                      };
+                      setDemands(prev => [...prev, newD]);
+                      setPanelToast("Labour item added!");
+                      setTimeout(() => setPanelToast(""), 2000);
+                    }}
+                    className="py-2.5 bg-secondary text-foreground text-[10.5px] font-bold rounded-xl hover:bg-muted transition-colors cursor-pointer uppercase font-sans border border-border"
+                  >
+                    ADD
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (!panelLabourForm.code || !panelLabourForm.desc) return;
+                      const newD = {
+                        type: "L",
+                        desc: panelLabourForm.desc,
+                        code: panelLabourForm.code,
+                        qty: 1,
+                        price: panelLabourForm.price,
+                        accepted: "YES",
+                        acceptedQty: 1,
+                        rejectionReason: "-"
+                      };
+                      setDemands(prev => [...prev, newD]);
+                      setPanelActivePopup(null);
+                      setPanelToast("Labour item added successfully!");
+                      setTimeout(() => setPanelToast(""), 3000);
+                    }}
+                    className="py-2.5 bg-primary text-primary-foreground text-[10.5px] font-black rounded-xl hover:brightness-110 transition-all cursor-pointer uppercase font-sans"
+                  >
+                    ADD & CLOSE
+                  </button>
+                  <button
+                    onClick={() => setPanelActivePopup(null)}
+                    className="py-2.5 bg-background border border-border text-muted-foreground hover:text-foreground text-[10.5px] font-bold rounded-xl transition-colors cursor-pointer uppercase font-sans"
+                  >
+                    CANCEL
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {panelActivePopup === "PART" && (
+            <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs font-sans">
+              <div className="bg-card border border-border p-6 rounded-2xl w-full max-w-sm flex flex-col gap-4 text-foreground shadow-2xl relative text-left">
+                <div className="flex justify-between items-center border-b border-border pb-2 shrink-0 select-none">
+                  <p className="text-[13px] font-black text-emerald-400 uppercase tracking-wide">Image 2821: Add Parts Item</p>
+                  <button onClick={() => setPanelActivePopup(null)} className="text-muted-foreground hover:text-foreground cursor-pointer">
+                    <X size={16} />
+                  </button>
+                </div>
+
+                <div className="flex flex-col gap-3 text-[11px]">
+                  <div>
+                    <label className="text-[9px] text-muted-foreground uppercase block mb-0.5 font-bold">Demand Repair Section</label>
+                    <select
+                      value={panelPartForm.demandRepair}
+                      onChange={(e) => setPanelPartForm({ ...panelPartForm, demandRepair: e.target.value })}
+                      className="w-full bg-background border border-border p-2 rounded-lg outline-none cursor-pointer text-[12px]"
+                    >
+                      <option value="Periodic Maintenance">Periodic Maintenance</option>
+                      <option value="Suspension Noise">Suspension Noise</option>
+                      <option value="Body Wash / Paint">Body Wash / Paint</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-[9px] text-muted-foreground uppercase block mb-0.5 font-bold">Part Number / Voice mic</label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="E.g. FDH01"
+                        value={panelPartForm.partNo}
+                        onChange={(e) => setPanelPartForm({ ...panelPartForm, partNo: e.target.value })}
+                        className="w-full bg-background border border-border p-2 pr-8 rounded-lg outline-none font-mono text-[12px]"
+                      />
+                      <Mic size={15} className="absolute right-2.5 top-2.5 text-muted-foreground hover:text-primary cursor-pointer" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-[9px] text-muted-foreground uppercase block mb-0.5 font-bold">Part Description</label>
+                    <input
+                      type="text"
+                      placeholder="Part description..."
+                      value={panelPartForm.desc}
+                      onChange={(e) => setPanelPartForm({ ...panelPartForm, desc: e.target.value })}
+                      className="w-full bg-background border border-border p-2 rounded-lg outline-none text-[12px]"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-[9px] text-muted-foreground uppercase block mb-0.5 font-bold">Price (₹)</label>
+                      <input
+                        type="number"
+                        value={panelPartForm.price}
+                        onChange={(e) => setPanelPartForm({ ...panelPartForm, price: parseFloat(e.target.value) || 0 })}
+                        className="w-full bg-background border border-border p-2 rounded-lg outline-none font-mono text-[12px]"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[9px] text-muted-foreground uppercase block mb-0.5 font-bold">Unit Quantity</label>
+                      <input
+                        type="number"
+                        value={panelPartForm.qty}
+                        onChange={(e) => setPanelPartForm({ ...panelPartForm, qty: parseInt(e.target.value) || 1 })}
+                        className="w-full bg-background border border-border p-2 rounded-lg outline-none font-mono text-[12px] text-center"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2 border-t border-border pt-4 select-none">
+                  <button
+                    onClick={() => {
+                      if (!panelPartForm.partNo || !panelPartForm.desc) return;
+                      const newD = {
+                        type: "P",
+                        desc: panelPartForm.desc,
+                        code: panelPartForm.partNo,
+                        qty: panelPartForm.qty,
+                        price: panelPartForm.price * panelPartForm.qty,
+                        accepted: "YES",
+                        acceptedQty: panelPartForm.qty,
+                        rejectionReason: "-"
+                      };
+                      setDemands(prev => [...prev, newD]);
+                      setPanelToast("Part item added!");
+                      setTimeout(() => setPanelToast(""), 2000);
+                    }}
+                    className="py-2.5 bg-secondary text-foreground text-[10.5px] font-bold rounded-xl hover:bg-muted transition-colors cursor-pointer uppercase font-sans border border-border"
+                  >
+                    ADD
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (!panelPartForm.partNo || !panelPartForm.desc) return;
+                      const newD = {
+                        type: "P",
+                        desc: panelPartForm.desc,
+                        code: panelPartForm.partNo,
+                        qty: panelPartForm.qty,
+                        price: panelPartForm.price * panelPartForm.qty,
+                        accepted: "YES",
+                        acceptedQty: panelPartForm.qty,
+                        rejectionReason: "-"
+                      };
+                      setDemands(prev => [...prev, newD]);
+                      setPanelActivePopup(null);
+                      setPanelToast("Part item added successfully!");
+                      setTimeout(() => setPanelToast(""), 3000);
+                    }}
+                    className="py-2.5 bg-primary text-primary-foreground text-[10.5px] font-black rounded-xl hover:brightness-110 transition-all cursor-pointer uppercase font-sans"
+                  >
+                    ADD & CLOSE
+                  </button>
+                  <button
+                    onClick={() => setPanelActivePopup(null)}
+                    className="py-2.5 bg-background border border-border text-muted-foreground hover:text-foreground text-[10.5px] font-bold rounded-xl transition-colors cursor-pointer uppercase font-sans"
+                  >
+                    CANCEL
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {panelActivePopup === "HISTORY" && (
+            <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-xs font-sans">
+              <div className="bg-card border border-border p-6 rounded-2xl w-full max-w-sm flex flex-col gap-4 text-foreground shadow-2xl relative select-none text-left">
+                <div className="flex justify-between items-center border-b border-border pb-2 shrink-0 select-none">
+                  <p className="text-[13px] font-black text-secondary uppercase tracking-wide">Vehicle History Logs</p>
+                  <button onClick={() => setPanelActivePopup(null)} className="text-muted-foreground hover:text-foreground cursor-pointer">
+                    <X size={16} />
+                  </button>
+                </div>
+
+                <div className="flex flex-col gap-3 text-[11px] font-sans leading-relaxed">
+                  <div className="bg-background border border-border p-3.5 rounded-xl">
+                    <span className="text-[10px] font-bold text-primary uppercase font-mono">29-Jan-2026 At Prem Motors</span>
+                    <p className="font-bold text-[12px] mt-1">Periodic Maintenance Service (PMS-Standard)</p>
+                    <p className="text-muted-foreground mt-0.5">Odometer: 29,800 KMS</p>
+                    <ul className="list-disc pl-4 text-muted-foreground mt-1.5 flex flex-col gap-1">
+                      <li>Engine oil & oil filter replaced</li>
+                      <li>Front brake pads overhauled & cleaned</li>
+                      <li>AC Cabin filter vacuum sanitized</li>
+                    </ul>
+                  </div>
+
+                  <div className="bg-background border border-border p-3.5 rounded-xl opacity-85">
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase font-mono">14-Sep-2025 At Prem Motors</span>
+                    <p className="font-bold text-[12px] mt-1">Running Repairs & Balancing Check</p>
+                    <p className="text-muted-foreground mt-0.5">Odometer: 21,500 KMS</p>
+                    <ul className="list-disc pl-4 text-muted-foreground mt-1.5 flex flex-col gap-1">
+                      <li>Wheel Balancing & weight rotation</li>
+                      <li>Wiper blade wash fluid refilled</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="flex justify-end mt-2">
+                  <button
+                    onClick={() => setPanelActivePopup(null)}
+                    className="px-5 py-2.5 bg-primary text-primary-foreground text-[11px] font-black rounded-xl hover:brightness-110 cursor-pointer uppercase shadow-md font-sans"
+                  >
+                    CLOSE LOGS
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </motion.div>
-      )}
-
-      {/* Step 5: Summary Drawing & Jobcard Generation */}
-      {step === 5 && (
+      )}      {step === 5 && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="p-4 rounded-xl bg-card/30 border border-border flex flex-col gap-3">
@@ -3331,7 +3712,7 @@ function JCOpeningPanel({
                   className="w-4 h-4 accent-primary cursor-pointer"
                 />
                 <label htmlFor="send-approval-tick" className="text-xs text-muted-foreground selection:bg-transparent cursor-pointer font-medium leading-snug">
-                  Transmit jobcard demands copy to mobile <strong className="text-white">{mobile}</strong> for customer instant approval (OCAS) via SMS & Whatsapp?
+                  Transmit jobcard demands copy to mobile <strong className="text-foreground">{mobile}</strong> for customer instant approval (OCAS) via SMS & Whatsapp?
                 </label>
               </div>
             </div>
@@ -3367,7 +3748,7 @@ function JCOpeningPanel({
           <div className="w-full max-w-md bg-card/95 border border-border rounded-2xl overflow-hidden shadow-2xl relative">
             <div className="bg-black/40 p-4 border-b border-border flex justify-between items-center">
               <span className="text-xs font-bold text-foreground font-sans flex items-center gap-1.5"><Camera size={14} className="text-primary" /> Camera View Analyzer</span>
-              <button onClick={() => { setShowCameraOverlay(false); setActivePhotoZone(null); }} className="text-muted-foreground hover:text-white"><X size={16} /></button>
+              <button onClick={() => { setShowCameraOverlay(false); setActivePhotoZone(null); }} className="text-muted-foreground hover:text-foreground"><X size={16} /></button>
             </div>
 
             <div className="relative aspect-video bg-black flex items-center justify-center overflow-hidden font-mono text-[9px] text-primary select-none">
@@ -4831,7 +5212,7 @@ function CloseJobCardPanel({
                             setScratchDot([1, 4, 8]);
                             setDentDot([2, 5]);
                           }}
-                          className="text-[9px] text-muted-foreground hover:text-white transition-colors text-right underline cursor-pointer self-end"
+                          className="text-[9px] text-muted-foreground hover:text-foreground transition-colors text-right underline cursor-pointer self-end"
                         >
                           Reset AI spots
                         </button>
@@ -4848,7 +5229,7 @@ function CloseJobCardPanel({
                   <div className="flex flex-col gap-2 bg-card/30 p-3 rounded-lg border border-border">
                     <div className="flex justify-between items-center">
                       <div>
-                        <p className="text-[11px] font-bold uppercase text-white">Interior Snaps Count: {interiorImagesCount}</p>
+                        <p className="text-[11px] font-bold uppercase text-foreground">Interior Snaps Count: {interiorImagesCount}</p>
                         <p className="text-[9.5px] text-muted-foreground">Requires minimum 3 mandatory interior photos</p>
                       </div>
                       <div className="flex gap-1.5">
@@ -4880,7 +5261,7 @@ function CloseJobCardPanel({
                       <select 
                         value={fuelLevel} 
                         onChange={(e) => setFuelLevel(e.target.value)}
-                        className="bg-card text-white border border-border rounded px-2.5 py-1.5 text-[12px] font-bold outline-none cursor-pointer"
+                        className="bg-card text-foreground border border-border rounded px-2.5 py-1.5 text-[12px] font-bold outline-none cursor-pointer"
                       >
                         <option value="E">E (0%)</option>
                         <option value="1/4">1/4 (25%)</option>
@@ -4917,7 +5298,7 @@ function CloseJobCardPanel({
                       onChange={(e) => setUnderbodyCheck(e.target.checked)}
                       className="w-4 h-4 rounded text-primary accent-primary outline-none cursor-pointer"
                     />
-                    <label htmlFor="underbodyCheck" className="text-[12.5px] cursor-pointer select-none font-semibold text-white">FORMAL CAR UNDERBODY INSPECTION COMPLETED?</label>
+                    <label htmlFor="underbodyCheck" className="text-[12.5px] cursor-pointer select-none font-semibold text-foreground">FORMAL CAR UNDERBODY INSPECTION COMPLETED?</label>
                   </div>
 
                 </div>
@@ -4939,22 +5320,22 @@ function CloseJobCardPanel({
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                   <div>
                     <label className="text-[10px] text-muted-foreground block mb-1 uppercase font-bold">Group Segment</label>
-                    <p className="text-[12px] text-white font-bold bg-card/30 p-2.5 rounded border border-border font-mono">{group}</p>
+                    <p className="text-[12px] text-foreground font-bold bg-card/30 p-2.5 rounded border border-border font-mono">{group}</p>
                   </div>
                   <div>
                     <label className="text-[10px] text-muted-foreground block mb-1 uppercase font-bold">Closed By Expert</label>
-                    <p className="text-[12px] text-white font-bold bg-card/30 p-2.5 rounded border border-border font-mono">{techExpert}</p>
+                    <p className="text-[12px] text-foreground font-bold bg-card/30 p-2.5 rounded border border-border font-mono">{techExpert}</p>
                   </div>
                   <div>
                     <label className="text-[10px] text-muted-foreground block mb-1 uppercase font-bold">Primary Technician Assigned</label>
-                    <p className="text-[12px] text-white font-bold bg-card/30 p-2.5 rounded border border-border font-mono">{technician}</p>
+                    <p className="text-[12px] text-foreground font-bold bg-card/30 p-2.5 rounded border border-border font-mono">{technician}</p>
                   </div>
                   <div>
                     <label className="text-[10px] text-muted-foreground block mb-1 uppercase font-bold text-primary">Payment Mode *</label>
                     <select 
                       value={paymentMode} 
                       onChange={(e) => setPaymentMode(e.target.value)}
-                      className="w-full bg-card text-white text-[12px] p-2 rounded border border-border outline-none font-bold cursor-pointer"
+                      className="w-full bg-card text-foreground text-[12px] p-2 rounded border border-border outline-none font-bold cursor-pointer"
                     >
                       <option value="UPI">UPI / Digital Gateway</option>
                       <option value="Cash">Cash payment</option>
@@ -5047,7 +5428,7 @@ function CloseJobCardPanel({
                               className="accent-primary cursor-pointer w-3.5 h-3.5"
                             />
                           </td>
-                          <td className="p-3 font-mono text-center text-white font-bold">{dem.problemCode}</td>
+                          <td className="p-3 font-mono text-center text-foreground font-bold">{dem.problemCode}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -5061,11 +5442,11 @@ function CloseJobCardPanel({
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
                     <label className="text-[9.5px] text-muted-foreground block mb-0.5 uppercase">Problem classification code *</label>
-                    <input value={problemCode} onChange={(e) => setProblemCode(e.target.value)} className="w-full bg-card text-white text-[12px] p-2 rounded border border-border font-mono outline-none" />
+                    <input value={problemCode} onChange={(e) => setProblemCode(e.target.value)} className="w-full bg-card text-foreground text-[12px] p-2 rounded border border-border font-mono outline-none" />
                   </div>
                   <div>
                     <label className="text-[9.5px] text-muted-foreground block mb-0.5 uppercase">Fault code classification *</label>
-                    <select value={faultCode} onChange={(e) => setFaultCode(e.target.value)} className="w-full bg-card text-white text-[12px] p-2 rounded border border-border outline-none">
+                    <select value={faultCode} onChange={(e) => setFaultCode(e.target.value)} className="w-full bg-card text-foreground text-[12px] p-2 rounded border border-border outline-none">
                       <option value="FA09">FA09 (ELECTRICAL NOISE)</option>
                       <option value="FA12">FA12 (WHEEL ALIGNMENT OUT)</option>
                       <option value="FA15">FA15 (OIL DISCOLORATION)</option>
@@ -5073,7 +5454,7 @@ function CloseJobCardPanel({
                   </div>
                   <div>
                     <label className="text-[9.5px] text-muted-foreground block mb-0.5">ACTION CLASSIFICATION *</label>
-                    <select value={actionCode} onChange={(e) => setActionCode(e.target.value)} className="w-full bg-card text-white text-[12px] p-2 rounded border border-border outline-none">
+                    <select value={actionCode} onChange={(e) => setActionCode(e.target.value)} className="w-full bg-card text-foreground text-[12px] p-2 rounded border border-border outline-none">
                       <option value="AC45">AC45 (REPLACE FILTER AND FLUID)</option>
                       <option value="AC12">AC12 (ADJUST AND RE-ALIGN)</option>
                       <option value="AC01">AC01 (WASH CLEANING)</option>
@@ -5088,7 +5469,7 @@ function CloseJobCardPanel({
                       placeholder="Enter closing diagnostic remarks…" 
                       value={commentText} 
                       onChange={(e) => setCommentText(e.target.value)}
-                      className="w-full bg-card text-white text-[11.5px] p-2 rounded border border-border outline-none h-14 resize-none"
+                      className="w-full bg-card text-foreground text-[11.5px] p-2 rounded border border-border outline-none h-14 resize-none"
                     />
                   </div>
                   
@@ -5123,13 +5504,13 @@ function CloseJobCardPanel({
               <div className="grid grid-cols-2 gap-2 bg-background p-1.5 rounded-xl border border-border text-center text-[12.5px] font-bold select-none font-sans uppercase tracking-wider">
                 <button 
                   onClick={() => setShowAddLabour(false)} 
-                  className={`py-2 rounded-lg transition-all ${!showAddLabour ? "bg-[#155DFC] text-white shadow-md shadow-[#155DFC]/20" : "text-muted-foreground hover:text-white"}`}
+                  className={`py-2 rounded-lg transition-all ${!showAddLabour ? "bg-[#155DFC] text-white shadow-md shadow-[#155DFC]/20" : "text-muted-foreground hover:text-foreground"}`}
                 >
                   Tab A — Labour Details
                 </button>
                 <button 
                   onClick={() => setShowAddLabour(true)} 
-                  className={`py-2 rounded-lg transition-all ${showAddLabour ? "bg-[#155DFC] text-white shadow-md shadow-[#155DFC]/20" : "text-muted-foreground hover:text-white"}`}
+                  className={`py-2 rounded-lg transition-all ${showAddLabour ? "bg-[#155DFC] text-white shadow-md shadow-[#155DFC]/20" : "text-muted-foreground hover:text-foreground"}`}
                 >
                   Tab B — Part Details
                 </button>
@@ -5155,7 +5536,7 @@ function CloseJobCardPanel({
                           <tr key={idx} className="hover:bg-white/5 transition-all">
                             <td className="p-3 text-center text-muted-foreground font-mono">{idx + 1}</td>
                             <td className="p-3 font-mono text-primary font-bold">{item.code}</td>
-                            <td className="p-3 text-white font-semibold uppercase">{item.desc}</td>
+                            <td className="p-3 text-foreground font-semibold uppercase">{item.desc}</td>
                             <td className="p-3 text-right font-mono text-[#4ADE80] font-semibold">₹ {item.price.toLocaleString()}</td>
                             <td className="p-3 font-mono text-muted-foreground">{item.billableType}</td>
                             <td className="p-3 text-center">
@@ -5194,7 +5575,7 @@ function CloseJobCardPanel({
                         <select 
                           value={labourDiscPercent} 
                           onChange={(e) => setLabourDiscPercent(e.target.value)} 
-                          className="bg-card text-white border border-border px-2 py-0.5 rounded outline-none font-mono font-bold font-semibold text-[11px]"
+                          className="bg-card text-foreground border border-border px-2 py-0.5 rounded outline-none font-mono font-bold font-semibold text-[11px]"
                         >
                           <option value="0">0% Discount</option>
                           <option value="5">5% Discount</option>
@@ -5207,7 +5588,7 @@ function CloseJobCardPanel({
                         <select 
                           value={authBy} 
                           onChange={(e) => setAuthBy(e.target.value)} 
-                          className="bg-card text-white border border-border px-2 py-0.5 rounded outline-none font-bold text-[11px]"
+                          className="bg-card text-foreground border border-border px-2 py-0.5 rounded outline-none font-bold text-[11px]"
                         >
                           <option value="ASHWANI CHAUHAN">ASHWANI CHAUHAN (CRM)</option>
                           <option value="MANISH TIWARI">MANISH TIWARI (SA)</option>
@@ -5240,7 +5621,7 @@ function CloseJobCardPanel({
                           <tr key={idx} className="hover:bg-white/5">
                             <td className="p-3 text-center text-muted-foreground font-mono">{idx + 1}</td>
                             <td className="p-3">
-                              <p className="text-white font-semibold uppercase">{item.name}</p>
+                              <p className="text-foreground font-semibold uppercase">{item.name}</p>
                               <p className="text-[9.5px] text-muted-foreground font-mono">{item.code}</p>
                             </td>
                             <td className="p-3 text-right font-mono">₹ {item.price.toLocaleString()}</td>
@@ -5252,7 +5633,7 @@ function CloseJobCardPanel({
                                   newP[idx].qty = Number(e.target.value);
                                   setPartsItems(newP);
                                 }}
-                                className="bg-card text-white border border-border rounded px-1 text-center text-[10.5px] font-bold outline-none"
+                                className="bg-card text-foreground border border-border rounded px-1 text-center text-[10.5px] font-bold outline-none"
                               >
                                 {Array.from({ length: 5 }).map((_, i) => (
                                   <option key={i + 1} value={i + 1}>{i + 1}</option>
@@ -5302,7 +5683,7 @@ function CloseJobCardPanel({
               <div className="p-4 rounded-xl border border-primary/20 bg-primary/5 grid grid-cols-1 sm:grid-cols-3 gap-3.5 mt-2 text-[12px] font-sans">
                 <div>
                   <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Initial Estimations (Open Jc)</span>
-                  <p className="text-white font-mono mt-0.5">₹ {jc.amount ? jc.amount.toLocaleString() : "4,200"}.00</p>
+                  <p className="text-foreground font-mono mt-0.5">₹ {jc.amount ? jc.amount.toLocaleString() : "4,200"}.00</p>
                 </div>
                 <div>
                   <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Revised Estimations (Closed Jc)</span>
@@ -5331,15 +5712,15 @@ function CloseJobCardPanel({
                 <div className="grid grid-cols-2 gap-3.5 text-[11.5px]">
                   <div>
                     <label className="text-[9px] text-muted-foreground uppercase font-bold">CCP Tier Style</label>
-                    <p className="text-white font-bold font-sans text-[13px] uppercase">👑 Nexa Gold Tier</p>
+                    <p className="text-foreground font-bold font-sans text-[13px] uppercase">👑 Nexa Gold Tier</p>
                   </div>
                   <div>
                     <label className="text-[9px] text-muted-foreground uppercase font-bold">Loyalty Card Register</label>
-                    <p className="text-white font-mono font-bold">{ccpCard}</p>
+                    <p className="text-foreground font-mono font-bold">{ccpCard}</p>
                   </div>
                   <div>
                     <label className="text-[9px] text-muted-foreground uppercase font-bold">Registered Mobile</label>
-                    <p className="text-white font-mono">{ccpMobile}</p>
+                    <p className="text-foreground font-mono">{ccpMobile}</p>
                   </div>
                   <div>
                     <label className="text-[9px] text-muted-foreground uppercase font-bold col-span-1">Valid Loyalty Points</label>
@@ -5349,14 +5730,14 @@ function CloseJobCardPanel({
 
                 {!otpConfirmed ? (
                   <div className="bg-background p-4 rounded-xl border border-border flex flex-col gap-3.5 shrink-0 select-none">
-                    <p className="text-[11.5px] font-bold text-white uppercase tracking-tight">Verify Secure CCP Redemption Code</p>
+                    <p className="text-[11.5px] font-bold text-foreground uppercase tracking-tight">Verify Secure CCP Redemption Code</p>
                     <div className="flex gap-2">
                       <input 
                         type="number" 
                         value={ccpRedeemVal} 
                         onChange={(e) => setCcpRedeemVal(e.target.value)}
                         placeholder="Points count (max 542)"
-                        className="bg-card text-white border border-border rounded px-2 text-[12px] w-2/3 outline-none"
+                        className="bg-card text-foreground border border-border rounded px-2 text-[12px] w-2/3 outline-none"
                       />
                       <button 
                         onClick={() => {
@@ -5377,7 +5758,7 @@ function CloseJobCardPanel({
                           placeholder="Enter 4-digit code" 
                           value={otpCode}
                           onChange={(e) => setOtpCode(e.target.value)}
-                          className="bg-card text-white text-[12px] p-1.5 rounded border border-border text-center font-mono w-1/2 outline-none font-bold"
+                          className="bg-card text-foreground text-[12px] p-1.5 rounded border border-border text-center font-mono w-1/2 outline-none font-bold"
                         />
                         <button 
                           onClick={() => {
@@ -5398,7 +5779,7 @@ function CloseJobCardPanel({
                 ) : (
                   <div className="bg-[#10B981]/10 border border-[#10B981]/35 p-4 rounded-xl text-center select-none font-sans font-bold">
                     <p className="text-[#10B981] text-[13px] uppercase">✓ OTP verified Successfully!</p>
-                    <p className="text-[11.5px] mt-1 text-white">Applied Loyalty Discount: <span className="text-[#10B981] font-mono">₹ {ccpRedeemVal || 0}</span></p>
+                    <p className="text-[11.5px] mt-1 text-foreground">Applied Loyalty Discount: <span className="text-[#10B981] font-mono">₹ {ccpRedeemVal || 0}</span></p>
                   </div>
                 )}
 
@@ -5410,7 +5791,7 @@ function CloseJobCardPanel({
                       setCcpRedeemVal("");
                       setStep(7); // Skip loyalty
                     }} 
-                    className="text-[11.5px] font-bold text-muted-foreground hover:text-white uppercase transition-colors"
+                    className="text-[11.5px] font-bold text-muted-foreground hover:text-foreground uppercase transition-colors"
                   >
                     Skip loyalty / Skip CCP verify ↩
                   </button>
@@ -5429,11 +5810,11 @@ function CloseJobCardPanel({
                 <div className="bg-card border border-border p-4 rounded-xl flex flex-col gap-3 font-sans">
                   <div className="flex justify-between items-center border-b border-border pb-1">
                     <p className="text-[12px] font-bold font-sans text-secondary uppercase">Pick Up Metrics</p>
-                    <span className="text-[9.5px] text-muted-foreground uppercase cursor-pointer hover:text-white" onClick={() => setPickupRemarks("N/A")}>Reset</span>
+                    <span className="text-[9.5px] text-muted-foreground uppercase cursor-pointer hover:text-foreground" onClick={() => setPickupRemarks("N/A")}>Reset</span>
                   </div>
                   <div>
                     <label className="text-[9.5px] text-muted-foreground block mb-0.5">PICK UP TYPE *</label>
-                    <select value={pickupType} onChange={(e) => setPickupType(e.target.value)} className="w-full bg-card text-white text-[12px] p-2 rounded border border-border outline-none font-semibold">
+                    <select value={pickupType} onChange={(e) => setPickupType(e.target.value)} className="w-full bg-card text-foreground text-[12px] p-2 rounded border border-border outline-none font-semibold">
                       <option value="2. Drop Only">2. Drop Only (Standard)</option>
                       <option value="1. Full PnD">1. Pick and Drop both</option>
                       <option value="MMS">MMS (Mobility Service)</option>
@@ -5441,18 +5822,18 @@ function CloseJobCardPanel({
                   </div>
                   <div>
                     <label className="text-[9.5px] text-muted-foreground block mb-0.5">PICK UP LOCATION</label>
-                    <select value={pickupLoc} onChange={(e) => setPickupLoc(e.target.value)} className="w-full bg-card text-white text-[12px] p-2 rounded border border-border outline-none">
+                    <select value={pickupLoc} onChange={(e) => setPickupLoc(e.target.value)} className="w-full bg-card text-foreground text-[12px] p-2 rounded border border-border outline-none">
                       <option value="Location 2">Gurgaon Sector 2</option>
                       <option value="Location 1">Gurgaon Sector 14</option>
                     </select>
                   </div>
                   <div>
                     <label className="text-[9.5px] text-muted-foreground block mb-0.5">PICK UP ADDRESS</label>
-                    <input value={pickupAddr} onChange={(e) => setPickupAddr(e.target.value)} className="w-full bg-card text-white text-[12px] p-2 rounded border border-border outline-none" />
+                    <input value={pickupAddr} onChange={(e) => setPickupAddr(e.target.value)} className="w-full bg-card text-foreground text-[12px] p-2 rounded border border-border outline-none" />
                   </div>
                   <div>
                     <label className="text-[9.5px] text-muted-foreground block mb-0.5">ASSOCIATED DRIVER</label>
-                    <select value={pndAssociate} onChange={(e) => setPndAssociate(e.target.value)} className="w-full bg-card text-white text-[12px] p-2 rounded border border-border outline-none">
+                    <select value={pndAssociate} onChange={(e) => setPndAssociate(e.target.value)} className="w-full bg-card text-foreground text-[12px] p-2 rounded border border-border outline-none">
                       <option value="Associate 2">Associate Driver 2</option>
                       <option value="Associate 1">Associate Driver 1 (Ramesh)</option>
                     </select>
@@ -5477,7 +5858,7 @@ function CloseJobCardPanel({
                         }}
                         className="accent-primary cursor-pointer w-3 h-3"
                       />
-                      <label htmlFor="sameAsPickup" className="text-[10px] text-white cursor-pointer font-bold">Same as Pick Up?</label>
+                      <label htmlFor="sameAsPickup" className="text-[10px] text-foreground cursor-pointer font-bold">Same as Pick Up?</label>
                     </div>
                   </div>
                   <div>
@@ -5486,18 +5867,18 @@ function CloseJobCardPanel({
                   </div>
                   <div>
                     <label className="text-[9.5px] text-muted-foreground block mb-0.5">DROP LOCATION</label>
-                    <select value={dropLoc} onChange={(e) => setDropLoc(e.target.value)} className="w-full bg-card text-white text-[12px] p-2 rounded border border-border outline-none">
+                    <select value={dropLoc} onChange={(e) => setDropLoc(e.target.value)} className="w-full bg-card text-foreground text-[12px] p-2 rounded border border-border outline-none">
                       <option value="Location 2">Gurgaon Sector 2</option>
                       <option value="Location 1">Gurgaon Sector 14</option>
                     </select>
                   </div>
                   <div>
                     <label className="text-[9.5px] text-muted-foreground block mb-0.5">DROP ARRIVAL ADDRESS</label>
-                    <input value={dropAddr} onChange={(e) => setDropAddr(e.target.value)} className="w-full bg-card text-white text-[12px] p-2 rounded border border-border outline-none" />
+                    <input value={dropAddr} onChange={(e) => setDropAddr(e.target.value)} className="w-full bg-card text-foreground text-[12px] p-2 rounded border border-border outline-none" />
                   </div>
                   <div>
                     <label className="text-[9.5px] text-muted-foreground block mb-0.5">DROP ASSOCIATED DRIVER</label>
-                    <select value={dropAssociate} onChange={(e) => setDropAssociate(e.target.value)} className="w-full bg-card text-white text-[12px] p-2 rounded border border-border outline-none">
+                    <select value={dropAssociate} onChange={(e) => setDropAssociate(e.target.value)} className="w-full bg-card text-foreground text-[12px] p-2 rounded border border-border outline-none">
                       <option value="Associate 2">Associate Driver 2</option>
                       <option value="Associate 1">Associate Driver 1</option>
                     </select>
@@ -5567,7 +5948,7 @@ function CloseJobCardPanel({
                       {labourItems.map((item, idx) => (
                         <div key={idx} className="flex justify-between items-center pt-1.5 text-[11px]">
                           <span className="text-muted-foreground truncate uppercase pr-2 max-w-[190px]">{item.desc}</span>
-                          <span className="font-mono text-white">₹ {item.price.toLocaleString()}</span>
+                          <span className="font-mono text-foreground">₹ {item.price.toLocaleString()}</span>
                         </div>
                       ))}
                     </div>
@@ -5580,7 +5961,7 @@ function CloseJobCardPanel({
                       {partsItems.map((item, idx) => (
                         <div key={idx} className="flex justify-between items-center pt-1.5 text-[11px]">
                           <span className="text-muted-foreground truncate uppercase pr-2 max-w-[180px]">{item.name} (x{item.qty})</span>
-                          <span className="font-mono text-white">₹ {(item.price * item.qty).toLocaleString()}</span>
+                          <span className="font-mono text-foreground">₹ {(item.price * item.qty).toLocaleString()}</span>
                         </div>
                       ))}
                     </div>
@@ -5591,11 +5972,11 @@ function CloseJobCardPanel({
                 <div className="bg-background border border-border p-4 rounded-xl flex flex-col gap-1.5 font-sans mt-1">
                   <div className="flex justify-between items-center">
                     <span className="text-muted-foreground">Total Parts Cost Spares portion:</span>
-                    <span className="font-mono text-white">₹ {partsTotal.toLocaleString()}</span>
+                    <span className="font-mono text-foreground">₹ {partsTotal.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-muted-foreground">Total Labour Operations portion:</span>
-                    <span className="font-mono text-white">₹ {labourTotal.toLocaleString()}</span>
+                    <span className="font-mono text-foreground">₹ {labourTotal.toLocaleString()}</span>
                   </div>
                   {otpConfirmed && (
                     <div className="flex justify-between items-center text-amber-400">
@@ -5616,7 +5997,7 @@ function CloseJobCardPanel({
                       setIsPreinvoicePdfSimulated(true);
                       triggerToast("PDF generated and downloaded successfully inside browser sandbox!");
                     }} 
-                    className="py-1.5 px-4 bg-card/70 hover:bg-card text-white rounded border border-border text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5 transition-colors font-sans"
+                    className="py-1.5 px-4 bg-card/70 hover:bg-card text-foreground rounded border border-border text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5 transition-colors font-sans"
                   >
                     <Eye size={12} /> {isPreinvoicePdfSimulated ? "Re-preview PDF" : "Preview Invoice"}
                   </button>
@@ -5624,7 +6005,7 @@ function CloseJobCardPanel({
                     onClick={() => {
                       triggerToast("Sent PDF print job successfully to workshop floor printer #4.");
                     }} 
-                    className="py-1.5 px-4 bg-card/70 hover:bg-card text-white rounded border border-border text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5 transition-colors font-sans"
+                    className="py-1.5 px-4 bg-card/70 hover:bg-card text-foreground rounded border border-border text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5 transition-colors font-sans"
                   >
                     <Printer size={12} /> Print Draft
                   </button>
@@ -5649,7 +6030,7 @@ function CloseJobCardPanel({
       <div className="bg-background border-t border-border px-6 py-4 flex items-center justify-between shrink-0 select-none text-[12px] font-bold">
         <button 
           onClick={handlePrevStep}
-          className="flex items-center gap-1 px-4 py-2 bg-card hover:bg-white/5 border border-border rounded-lg text-muted-foreground hover:text-white transition-all font-sans uppercase tracking-wider font-bold"
+          className="flex items-center gap-1 px-4 py-2 bg-card hover:bg-white/5 border border-border rounded-lg text-muted-foreground hover:text-foreground transition-all font-sans uppercase tracking-wider font-bold"
         >
           {step === 0 ? "✖ Cancel and exit" : "↩ Previous step"}
         </button>
@@ -6377,7 +6758,7 @@ function SuzukiConnectFormPanel({ onAction }: { onAction: (a: PanelType, d?: Rec
               <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 py-1">
                 <div className="p-3 bg-card/60 rounded-xl border border-border text-left">
                   <p className="text-[10px] text-muted-foreground uppercase font-sans tracking-wide">Fuel Remaining</p>
-                  <p className="text-[18px] font-bold font-mono text-white mt-1">68%</p>
+                  <p className="text-[18px] font-bold font-mono text-foreground mt-1">68%</p>
                   <div className="w-full h-1 bg-card rounded-full overflow-hidden mt-2.5">
                     <div className="h-full bg-primary rounded-full transition-all duration-500" style={{ width: "68%" }} />
                   </div>
@@ -6409,12 +6790,12 @@ function SuzukiConnectFormPanel({ onAction }: { onAction: (a: PanelType, d?: Rec
                 </div>
                 <div className="p-3 bg-card/60 rounded-xl border border-border text-left">
                   <p className="text-[10px] text-muted-foreground uppercase font-sans tracking-wide">Tire Pressures</p>
-                  <p className="text-[18px] font-bold font-mono text-white mt-1">32 PSI</p>
+                  <p className="text-[18px] font-bold font-mono text-foreground mt-1">32 PSI</p>
                   <p className="text-[10px] font-medium font-sans text-muted-foreground mt-1">FL 32 · FR 32 · RL 31</p>
                 </div>
                 <div className="p-3 bg-card/60 rounded-xl border border-border text-left">
                   <p className="text-[10px] text-muted-foreground uppercase font-sans tracking-wide">OBD Diagnostics</p>
-                  <p className="text-[18px] font-bold font-mono text-white mt-1">0 Codes</p>
+                  <p className="text-[18px] font-bold font-mono text-foreground mt-1">0 Codes</p>
                   <span className="inline-block mt-1 px-1.5 py-0.2 px-1 text-[9px] font-bold font-sans rounded bg-[#4ADE80]/15 text-[#4ADE80] uppercase">HEALTHY</span>
                 </div>
               </div>
@@ -6633,6 +7014,30 @@ function JCChatStepRenderer({
   const [videoPlayProgress, setVideoPlayProgress] = useState(0);
   const [isSignCaptured, setIsSignCaptured] = useState(false);
   const [showLiveScanner, setShowLiveScanner] = useState(false);
+
+  // Step 8 Estimator / Demands Flow Local States
+  const [chatSubStep, setChatSubStep] = useState(1);
+  const [chatActivePopup, setChatActivePopup] = useState<"LABOUR" | "PART" | "HISTORY" | null>(null);
+  const [chatLabourForm, setChatLabourForm] = useState({ demandRepair: "Periodic Maintenance", code: "", desc: "", price: 0, hours: 1.0, billableType: "Customer" });
+  const [chatPartForm, setChatPartForm] = useState({ demandRepair: "Periodic Maintenance", partNo: "", desc: "", price: 0, qty: 1 });
+  const [chatToast, setChatToast] = useState("");
+  const [chatAudioActive, setChatAudioActive] = useState(false);
+  const [chatAudioLog, setChatAudioLog] = useState("");
+
+  // Pre-load default demands in Step 8 to match the exact design targets (₹1,520.88 Labour, ₹1,312.00 Parts)
+  useEffect(() => {
+    if (stepCode === "DEMANDS_LIST" && (!jcSession.demands || jcSession.demands.length === 0)) {
+      setJcSession({
+        ...jcSession,
+        demands: [
+          { type: "L", desc: "Diagnosis Fee (Body Check)", code: "ZE75L0", qty: 1, price: 600, accepted: "YES", acceptedQty: 1, rejectionReason: "-" },
+          { type: "L", desc: "Bonnet Painting & Polish - Hygiene", code: "ZZ07H", qty: 1, price: 175, accepted: "YES", acceptedQty: 1, rejectionReason: "-" },
+          { type: "L", desc: "Wheel Balancing & alignment", code: "ZA18LO", price: 745.88, qty: 1, accepted: "YES", acceptedQty: 1, rejectionReason: "-" },
+          { type: "P", desc: "Front Door Hinge Broken Element", code: "FDH01", qty: 1, price: 1312, accepted: "YES", acceptedQty: 1, rejectionReason: "-" },
+        ]
+      });
+    }
+  }, [stepCode]);
   const [newInvName, setNewInvName] = useState("");
   const [newFitmentName, setNewFitmentName] = useState("");
 
@@ -7406,214 +7811,658 @@ function JCChatStepRenderer({
       const isItemAccepted = (d: any) => d.accepted === "YES" || d.accepted === true || d.accepted === undefined;
       const labourTotal = demands.filter(d => d.type === "L" && isItemAccepted(d)).reduce((s, d) => s + d.price, 0);
       const partsTotal = demands.filter(d => d.type === "P" && isItemAccepted(d)).reduce((s, d) => s + d.price, 0);
+      const grandTotal = labourTotal + partsTotal;
+
+      const FREQ_LABOUR_CODES = [
+        { code: "ZE75L0", desc: "Wheel Alignment & Calibration", price: 600, hours: 0.8 },
+        { code: "ZA18LO", desc: "Wheel Balancing & weight adjust", price: 490, hours: 0.6 },
+        { code: "ZZ07H", desc: "Foam Washing & Exterior Vacuum", price: 175, hours: 0.4 },
+        { code: "DN02", desc: "Panel Dent Pulling & Primer", price: 850, hours: 1.2 },
+        { code: "PT04", desc: "Bumper Spot Paint Spray", price: 1200, hours: 1.5 },
+      ];
 
       return (
-        <div className="mt-3 p-4 bg-card/90 rounded-xl border border-border shadow-xl flex flex-col gap-3 font-sans w-full max-w-full overflow-hidden">
-          <span className="text-[12px] font-bold text-primary uppercase tracking-wide">Demanded Repairs Table Details</span>
+        <div className="mt-3 p-4 bg-card/90 rounded-xl border border-border shadow-xl flex flex-col gap-3 font-sans w-full max-w-full overflow-hidden text-foreground">
+          
+          {/* Toast Notification */}
+          <AnimatePresence>
+            {chatToast && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="bg-emerald-500 text-white font-bold text-[10.5px] px-3 py-1.5 rounded-lg text-center flex items-center justify-center gap-1.5 self-center shadow-lg border border-emerald-400/20"
+              >
+                <Check size={12} /> {chatToast}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-          <div className="overflow-x-auto rounded-xl border border-border bg-card/20 shadow-inner max-w-full">
-            <table className="w-full text-left border-collapse text-[11px] font-sans">
-              <thead>
-                <tr className="border-b border-border bg-card/75 font-bold text-muted-foreground uppercase text-[9.5px] tracking-wider">
-                  <th className="px-3 py-3 text-center w-[50px]">S.NO.</th>
-                  <th className="px-3 py-3 text-center w-[50px]">TYPE</th>
-                  <th className="px-3 py-3">DESCRIPTION</th>
-                  <th className="px-3 py-3 min-w-[130px]">PART NO./LABOUR CODE</th>
-                  <th className="px-3 py-3 text-right w-[60px]">QTY</th>
-                  <th className="px-3 py-3 text-right w-[95px]">PRICE</th>
-                  <th className="px-3 py-3 text-center w-[100px]">ACCEPTED</th>
-                  <th className="px-3 py-3 text-center w-[90px]">ACCEPTED QTY.</th>
-                  <th className="px-3 py-3">REJECTION REASON</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(() => {
-                  let lCount = 0;
-                  let pCount = 0;
-                  
-                  // Sort L items aggregate first, then P items
-                  const sortedDemands = [...demands].sort((a, b) => {
-                    if (a.type === "L" && b.type !== "L") return -1;
-                    if (a.type !== "L" && b.type === "L") return 1;
-                    return 0;
-                  });
+          {/* Sub-Step Stages Navigation Indicator */}
+          <div className="flex items-center justify-between border-b border-border pb-2 shrink-0 select-none">
+            <span className="text-[11px] font-extrabold text-primary uppercase tracking-wide">
+              Step 8: Demands Flow (Stage {chatSubStep} of 3)
+            </span>
+            <div className="flex gap-1">
+              {[1, 2, 3].map((s) => (
+                <span
+                  key={s}
+                  className={`w-2.5 h-2.5 rounded-full border transition-all duration-300 ${
+                    chatSubStep === s
+                      ? "bg-primary border-primary scale-110"
+                      : "bg-muted border-border"
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
 
-                  return sortedDemands.map((d) => {
-                    const originalIdx = demands.findIndex(orig => orig.code === d.code);
-                    const sNo = d.type === "L" ? ++lCount : ++pCount;
-                    const isAccepted = isItemAccepted(d);
+          {/* Stage 1: Vehicle Specs & Quick Triggers */}
+          {chatSubStep === 1 && (
+            <div className="flex flex-col gap-3 animate-fade-in select-none">
+              {/* Premium Specs Card (Vitara Brezza specs exactly as requested) */}
+              <div className="bg-[#0F172A] border border-border/40 p-4 rounded-xl text-slate-100 flex flex-col gap-1.5 shadow-md">
+                <span className="text-[9px] font-mono text-slate-400 uppercase tracking-widest block font-bold">Vehicle Specifications Specs</span>
+                <p className="text-[13px] font-black tracking-wide leading-snug">
+                  VITARA BREZZA K15B BS-VI
+                </p>
+                <div className="flex items-center justify-between text-[11px] text-slate-300 font-mono mt-1 pt-1 border-t border-slate-800/60">
+                  <span>PLATE: <strong className="text-white">AR01Q0463</strong></span>
+                  <span>ODOMETER: <strong className="text-white">35000 KMS</strong></span>
+                </div>
+              </div>
 
-                    return (
-                      <tr key={d.code} className="border-b border-border hover:bg-card/35 transition-colors align-middle">
-                        {/* S.NO. */}
-                        <td className="px-3 py-2.5 text-center font-mono text-muted-foreground">{sNo}</td>
-                        
-                        {/* TYPE */}
-                        <td className="px-3 py-2.5 text-center">
-                          <span className={`px-2 py-0.5 rounded text-[9.5px] font-bold font-mono tracking-wide ${d.type === "L" ? "bg-primary/10 border border-primary/20 text-primary" : "bg-emerald-500/10 border border-emerald-500/20 text-emerald-400"}`}>
-                            {d.type}
-                          </span>
-                        </td>
-                        
-                        {/* DESCRIPTION */}
-                        <td className="px-3 py-2.5 font-medium text-foreground max-w-[160px] truncate">{d.desc}</td>
-                        
-                        {/* PART NO./LABOUR CODE */}
-                        <td className="px-3 py-2.5 font-mono text-xs text-muted-foreground">
-                          <div className="flex items-center gap-1">
-                            <span>{d.code}</span>
-                            {d.type === "P" && (
-                              <span className="text-[9px] text-muted-foreground/60 select-none">▼</span>
-                            )}
-                          </div>
-                        </td>
-                        
-                        {/* QTY */}
-                        <td className="px-3 py-2.5 text-right font-mono text-foreground">
-                          {d.qty % 1 === 0 ? d.qty : d.qty.toFixed(2)}
-                        </td>
-                        
-                        {/* PRICE */}
-                        <td className="px-3 py-2.5 text-right font-mono font-medium text-foreground">
-                          ₹{d.price.toLocaleString('en-IN', { minimumFractionDigits: d.price % 1 === 0 ? 0 : 2, maximumFractionDigits: 2 })}
-                        </td>
-                        
-                        {/* ACCEPTED */}
-                        <td className="px-3 py-2.5 text-center">
-                          <select
-                            value={(d.accepted === "YES" || d.accepted === true || d.accepted === undefined) ? "YES" : "NO"}
-                            onChange={(e) => {
-                              const targetVal = e.target.value;
-                              const updatedDemands = [...demands];
-                              if (originalIdx !== -1) {
-                                updatedDemands[originalIdx] = {
-                                  ...updatedDemands[originalIdx],
-                                  accepted: targetVal,
-                                  acceptedQty: targetVal === "YES" ? d.qty : 0,
-                                  rejectionReason: targetVal === "YES" ? "-" : "Customer Refused"
-                                };
-                                setJcSession({ ...jcSession, demands: updatedDemands });
-                              }
-                            }}
-                            className={`px-2 py-1 text-[11px] font-bold rounded border cursor-pointer outline-none bg-background transition-all ${isAccepted ? "border-emerald-500/30 text-emerald-400" : "border-destructive/30 text-destructive/80"}`}
-                          >
-                            <option value="YES" className="text-emerald-400 font-sans font-semibold bg-background">YES</option>
-                            <option value="NO" className="text-destructive font-sans font-semibold bg-background">NO</option>
-                          </select>
-                        </td>
-                        
-                        {/* ACCEPTED QTY. */}
-                        <td className="px-3 py-2.5 text-center">
-                          <input
-                            type="number"
-                            step="0.01"
-                            disabled={!isAccepted}
-                            value={isAccepted ? (d.acceptedQty ?? d.qty) : 0}
-                            onChange={(e) => {
-                              const val = parseFloat(e.target.value) || 0;
-                              const updatedDemands = [...demands];
-                              if (originalIdx !== -1) {
-                                updatedDemands[originalIdx] = {
-                                  ...updatedDemands[originalIdx],
-                                  acceptedQty: val
-                                };
-                                setJcSession({ ...jcSession, demands: updatedDemands });
-                              }
-                            }}
-                            className={`w-[65px] text-center bg-background/50 border rounded py-1 px-1 text-[11px] font-mono outline-none focus:border-primary/50 transition-all ${isAccepted ? "border-border text-foreground" : "border-border/30 text-muted-foreground/30"}`}
-                          />
-                        </td>
-                        
-                        {/* REJECTION REASON */}
-                        <td className="px-3 py-2.5">
-                          {isAccepted ? (
-                            <span className="text-muted-foreground/60 font-mono text-[11px]">-</span>
-                          ) : (
-                            <input
-                              type="text"
-                              value={d.rejectionReason === "-" ? "Customer Refused" : d.rejectionReason}
-                              onChange={(e) => {
-                                const rText = e.target.value;
-                                const updatedDemands = [...demands];
-                                if (originalIdx !== -1) {
-                                  updatedDemands[originalIdx] = {
-                                    ...updatedDemands[originalIdx],
-                                    rejectionReason: rText
-                                  };
-                                  setJcSession({ ...jcSession, demands: updatedDemands });
-                                }
-                              }}
-                              className="w-full max-w-[130px] bg-background border border-destructive/20 text-foreground text-[11px] px-2 py-1 rounded outline-none focus:border-primary/40"
-                              placeholder="Reason..."
-                            />
-                          )}
+              {/* SA Audio recording capture simulator */}
+              <div className="p-3 rounded-lg border border-border bg-card/45 flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 text-foreground font-bold text-[11.5px]">
+                    <Mic size={14} className={chatAudioActive ? "text-red-500 animate-pulse" : "text-muted-foreground"} />
+                    <span>SA Voice Memo Capture</span>
+                  </div>
+                  <button
+                    onClick={() => {
+                      if (!chatAudioActive) {
+                        setChatAudioActive(true);
+                        setChatAudioLog("Listening to SA voice commands...");
+                        setTimeout(() => {
+                          setChatAudioActive(false);
+                          setChatAudioLog('Voice Memo: "Customer reported slight squeaking noise on high speeds"');
+                          const newD = {
+                            type: "L",
+                            desc: "Squeaking Noise Diagnosis & Overhaul",
+                            code: "SQ01",
+                            qty: 1,
+                            price: 542,
+                            accepted: "YES",
+                            acceptedQty: 1,
+                            rejectionReason: "-"
+                          };
+                          setJcSession({ ...jcSession, demands: [...demands, newD] });
+                          setChatToast("Voice command registered successfully!");
+                          setTimeout(() => setChatToast(""), 3000);
+                        }, 2500);
+                      }
+                    }}
+                    className={`px-3 py-1 text-[10.5px] rounded-lg font-bold border transition-all cursor-pointer uppercase tracking-wider ${
+                      chatAudioActive 
+                        ? "bg-red-500 border-red-500 text-white animate-pulse" 
+                        : "bg-primary/10 border-primary/20 text-primary hover:bg-primary/20"
+                    }`}
+                  >
+                    {chatAudioActive ? "RECORDING..." : "REC VOICE"}
+                  </button>
+                </div>
+                {chatAudioLog && (
+                  <p className="text-[10px] font-mono text-muted-foreground italic bg-background p-1.5 rounded border border-border/60">
+                    {chatAudioLog}
+                  </p>
+                )}
+              </div>
+
+              {/* Vehicle History Check Trigger */}
+              <div className="grid grid-cols-2 gap-2 text-[11px]">
+                <button
+                  onClick={() => setChatActivePopup("HISTORY")}
+                  className="flex items-center justify-center gap-1.5 py-2.5 px-3 bg-card border border-border hover:bg-muted text-foreground rounded-lg transition-all font-bold font-sans cursor-pointer shadow-sm"
+                >
+                  <History size={13} className="text-secondary" /> VEHICLE HISTORY
+                </button>
+
+                <button
+                  onClick={() => {
+                    setChatToast("Emailed demands checklist successfully!");
+                    setTimeout(() => setChatToast(""), 3000);
+                  }}
+                  className="flex items-center justify-center gap-1.5 py-2.5 px-3 bg-card border border-border hover:bg-muted text-foreground rounded-lg transition-all font-bold font-sans cursor-pointer shadow-sm"
+                >
+                  <Mail size={13} className="text-secondary" /> SHARE DEMANDS
+                </button>
+              </div>
+
+              <button
+                onClick={() => setChatSubStep(2)}
+                className="w-full mt-1.5 py-2.5 bg-primary hover:bg-primary-hover text-primary-foreground text-[12.5px] font-black rounded-lg uppercase tracking-wider cursor-pointer shadow-md flex items-center justify-center gap-1"
+              >
+                PROCEED TO DEMANDS TABLE <ArrowRight size={13} />
+              </button>
+            </div>
+          )}
+
+          {/* Stage 2: Active Demands table */}
+          {chatSubStep === 2 && (
+            <div className="flex flex-col gap-3 animate-fade-in">
+              <div className="overflow-x-auto rounded-xl border border-border bg-card/25 shadow-inner max-w-full">
+                <table className="w-full text-left border-collapse text-[10.5px] font-sans">
+                  <thead>
+                    <tr className="border-b border-border bg-card/75 font-bold text-muted-foreground uppercase text-[9px] tracking-wider select-none">
+                      <th className="px-2 py-2 text-center w-[35px]">S#</th>
+                      <th className="px-2 py-2 text-center w-[40px]">TYP</th>
+                      <th className="px-2.5 py-2">DESCRIPTION</th>
+                      <th className="px-2.5 py-2 text-right w-[70px]">PRICE</th>
+                      <th className="px-2 py-2 text-center w-[40px]">DEL</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {demands.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="p-4 text-center text-muted-foreground italic font-sans">
+                          No active demands loaded. Click buttons below to add items.
                         </td>
                       </tr>
-                    );
-                  });
-                })()}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Premium calculations styling exactly as shown in the image */}
-          <div className="mt-2 border-t border-border pt-4 flex flex-col gap-3 font-sans">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="flex justify-between items-baseline pb-1.5 border-b border-border">
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">SCHEDULED LABOUR AMT.</span>
-                <span className="text-[18px] font-bold text-foreground font-mono">
-                  ₹{labourTotal.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
-                </span>
+                    ) : (
+                      demands.map((d: any, idx: number) => (
+                        <tr key={d.code || idx} className="border-b border-border hover:bg-card/40 transition-colors align-middle font-sans">
+                          <td className="px-2 py-2 text-center font-mono text-muted-foreground">{idx + 1}</td>
+                          <td className="px-2 py-2 text-center select-none">
+                            <span className={`px-1.5 py-0.2 rounded text-[8.5px] font-bold font-mono tracking-wide ${d.type === "L" ? "bg-primary/10 border border-primary/20 text-primary" : "bg-emerald-500/10 border border-emerald-500/20 text-emerald-400"}`}>
+                              {d.type}
+                            </span>
+                          </td>
+                          <td className="px-2.5 py-2 font-semibold text-foreground truncate max-w-[130px]">{d.desc}</td>
+                          <td className="px-2.5 py-2 text-right font-mono text-foreground font-semibold">₹{d.price.toLocaleString("en-IN")}</td>
+                          <td className="px-2 py-2 text-center">
+                            <button
+                              onClick={() => {
+                                const newD = demands.filter((_: any, i: number) => i !== idx);
+                                setJcSession({ ...jcSession, demands: newD });
+                              }}
+                              className="text-red-400 hover:text-red-500 font-bold px-1 select-none text-[12.5px] cursor-pointer"
+                            >
+                              ×
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
               </div>
-              <div className="flex justify-between items-baseline pb-1.5 border-b border-border">
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">SCHEDULED PART AMT.</span>
-                <span className="text-[18px] font-bold text-foreground font-mono">
-                  ₹{partsTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </span>
+
+              {/* Add Labour & Parts Trigger buttons */}
+              <div className="grid grid-cols-2 gap-2 text-[11px] shrink-0 select-none">
+                <button
+                  onClick={() => setChatActivePopup("LABOUR")}
+                  className="flex items-center justify-center gap-1 py-2 px-3 bg-primary/15 border border-primary/20 hover:bg-primary/25 text-primary rounded-lg font-black uppercase transition-colors cursor-pointer"
+                >
+                  + Add Labour
+                </button>
+                <button
+                  onClick={() => setChatActivePopup("PART")}
+                  className="flex items-center justify-center gap-1 py-2 px-3 bg-emerald-500/15 border border-emerald-500/20 hover:bg-emerald-500/25 text-emerald-400 rounded-lg font-black uppercase transition-colors cursor-pointer"
+                >
+                  + Add Part
+                </button>
+              </div>
+
+              <div className="flex justify-between mt-1 select-none">
+                <button
+                  onClick={() => setChatSubStep(1)}
+                  className="flex items-center gap-1 px-3 py-2 bg-card text-foreground text-[11px] font-bold rounded-lg border border-border hover:bg-muted font-sans cursor-pointer"
+                >
+                  <ChevronLeft size={12} /> BACK
+                </button>
+                <button
+                  onClick={() => setChatSubStep(3)}
+                  className="flex items-center gap-1 px-4 py-2 bg-primary text-primary-foreground text-[11.5px] font-bold rounded-lg hover:brightness-110 font-sans cursor-pointer"
+                >
+                  PROCEED <ChevronRight size={12} />
+                </button>
               </div>
             </div>
-          </div>
+          )}
 
-          {/* Delivery dates */}
-          <div className="grid grid-cols-2 gap-2 text-[11.5px]">
-            <div>
-              <span className="text-muted-foreground block mb-1">Promised Date & Time</span>
-              <select
-                value={jcSession.promisedDateTime}
-                onChange={(e) => setJcSession({ ...jcSession, promisedDateTime: e.target.value })}
-                className="w-full bg-card border border-border p-2 rounded-lg text-foreground outline-none text-[12px]"
-              >
-                <option value="Today 6 PM">Today (6:00 PM)</option>
-                <option value="Tomorrow 5 PM">Tomorrow (5:00 PM)</option>
-                <option value="Day after 12 PM">Day after tomorrow (12:00 PM)</option>
-              </select>
-            </div>
-            <div>
-              <span className="text-muted-foreground block mb-1">Preferred Settlement</span>
-              <select
-                value={jcSession.paymentMode}
-                onChange={(e) => setJcSession({ ...jcSession, paymentMode: e.target.value })}
-                className="w-full bg-card border border-border p-2 rounded-lg text-foreground outline-none text-[12px]"
-              >
-                <option value="Cash">Cash settlement</option>
-                <option value="Card">Card settlement</option>
-                <option value="Insurance">Insurance coverage Claim</option>
-                <option value="UPI">UPI Digital Payment</option>
-              </select>
-            </div>
-          </div>
+          {/* Stage 3: Dynamic Estimator Summary */}
+          {chatSubStep === 3 && (
+            <div className="flex flex-col gap-3.5 animate-fade-in text-[11.5px]">
+              {/* Aggregate Totals Panel */}
+              <div className="border border-border/80 p-3.5 rounded-xl bg-card/20 shadow-sm flex flex-col gap-2">
+                <div className="flex justify-between items-baseline border-b border-border pb-1">
+                  <span className="text-[9.5px] font-bold text-muted-foreground uppercase tracking-wide">Labour Estimate</span>
+                  <span className="text-[15.5px] font-extrabold text-foreground font-mono">₹{labourTotal.toLocaleString("en-IN")}</span>
+                </div>
+                <div className="flex justify-between items-baseline border-b border-border pb-1">
+                  <span className="text-[9.5px] font-bold text-muted-foreground uppercase tracking-wide">Part Estimate</span>
+                  <span className="text-[15.5px] font-extrabold text-foreground font-mono">₹{partsTotal.toLocaleString("en-IN")}</span>
+                </div>
+                <div className="flex justify-between items-center pt-1 font-bold">
+                  <span className="text-secondary text-[10.5px]">Grand Live Total</span>
+                  <span className="text-primary font-mono text-[17px]">₹{grandTotal.toLocaleString("en-IN")}</span>
+                </div>
+              </div>
 
-          <button
-            onClick={() => advanceJcChat(`Promised delivery: ${jcSession.promisedDateTime} | settlement: ${jcSession.paymentMode}`, {}, "LABOUR_PARTS")}
-            className="w-full py-2 bg-primary text-primary-foreground text-[12px] font-extrabold rounded-lg cursor-pointer hover:brightness-110"
-          >
-            Save Demands & Continue
-          </button>
+              {/* Resource Allocation Dropdowns */}
+              <div className="bg-card/45 p-3 rounded-lg border border-border flex flex-col gap-2 font-sans select-none">
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[8.5px] text-muted-foreground block mb-0.5 font-bold uppercase">WORK GROUP</label>
+                    <select
+                      value={jcSession.assignedGroup || "Group A"}
+                      onChange={(e) => setJcSession({ ...jcSession, assignedGroup: e.target.value })}
+                      className="w-full bg-card border border-border p-1.5 rounded text-[11px] text-foreground outline-none cursor-pointer"
+                    >
+                      <option value="Group A">Group A (DMS)</option>
+                      <option value="Group B">Group B (Express)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[8.5px] text-muted-foreground block mb-0.5 font-bold uppercase">TECHNICIAN</label>
+                    <select
+                      value={jcSession.technician || "VISHAL ADITYA"}
+                      onChange={(e) => setJcSession({ ...jcSession, technician: e.target.value })}
+                      className="w-full bg-card border border-border p-1.5 rounded text-[11px] text-foreground outline-none cursor-pointer"
+                    >
+                      <option value="VISHAL ADITYA">VISHAL ADITYA</option>
+                      <option value="MANOJ KUMAR">MANOJ KUMAR</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[8.5px] text-muted-foreground block mb-0.5 font-bold uppercase">ALLOCATED BAY</label>
+                    <select
+                      value={jcSession.allocatedBay || "BAY-04"}
+                      onChange={(e) => setJcSession({ ...jcSession, allocatedBay: e.target.value })}
+                      className="w-full bg-card border border-border p-1.5 rounded text-[11px] text-foreground outline-none cursor-pointer"
+                    >
+                      <option value="BAY-04">BAY-04 (Mechanical)</option>
+                      <option value="BAY-01">BAY-01 (Denting)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[8.5px] text-muted-foreground block mb-0.5 font-bold uppercase">SETTLEMENT MODE</label>
+                    <select
+                      value={jcSession.paymentMode || "ONLINE"}
+                      onChange={(e) => setJcSession({ ...jcSession, paymentMode: e.target.value })}
+                      className="w-full bg-card border border-border p-1.5 rounded text-[11px] text-foreground outline-none cursor-pointer"
+                    >
+                      <option value="ONLINE">ONLINE / DIGITAL UPI</option>
+                      <option value="CASH">CASH SETTLEMENT</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-between select-none">
+                <button
+                  onClick={() => setChatSubStep(2)}
+                  className="flex items-center gap-1 px-3 py-2 bg-card text-foreground text-[11px] font-bold rounded-lg border border-border hover:bg-muted font-sans cursor-pointer"
+                >
+                  <ChevronLeft size={12} /> BACK
+                </button>
+                <button
+                  onClick={() => advanceJcChat(`Estimator Approved: ₹${grandTotal.toLocaleString("en-IN")}`, {}, "LABOUR_PARTS")}
+                  className="flex items-center gap-1 px-4 py-2 bg-primary text-primary-foreground text-[11.5px] font-black rounded-lg hover:brightness-110 font-sans cursor-pointer uppercase tracking-wider shadow-md"
+                >
+                  SUBMIT ESTIMATE <Check size={12} />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Interactive Modal Pop-ups (Image 2821 Modal Dialog Layout) */}
+          {chatActivePopup === "LABOUR" && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs font-sans">
+              <div className="bg-card border border-border p-5 rounded-2xl w-full max-w-sm flex flex-col gap-4 text-foreground shadow-2xl relative">
+                <div className="flex justify-between items-center border-b border-border pb-1.5">
+                  <p className="text-[12px] font-black text-primary uppercase tracking-wide">Image 2821: Add Labour Item</p>
+                  <button onClick={() => setChatActivePopup(null)} className="text-muted-foreground hover:text-foreground cursor-pointer">
+                    <X size={15} />
+                  </button>
+                </div>
+
+                <div className="flex flex-col gap-2.5 text-[11px]">
+                  <div>
+                    <label className="text-[8.5px] text-muted-foreground uppercase block mb-0.5 font-bold">Demand Repair Section</label>
+                    <select
+                      value={chatLabourForm.demandRepair}
+                      onChange={(e) => setChatLabourForm({ ...chatLabourForm, demandRepair: e.target.value })}
+                      className="w-full bg-background border border-border p-2 rounded outline-none cursor-pointer"
+                    >
+                      <option value="Periodic Maintenance">Periodic Maintenance</option>
+                      <option value="Suspension Noise">Suspension Noise</option>
+                      <option value="Body Wash / Paint">Body Wash / Paint</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-[8.5px] text-muted-foreground uppercase block mb-0.5 font-bold">Labour Code / Voice search</label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="E.g. ZE75L0"
+                        value={chatLabourForm.code}
+                        onChange={(e) => setChatLabourForm({ ...chatLabourForm, code: e.target.value })}
+                        className="w-full bg-background border border-border p-2 pr-8 rounded outline-none font-mono text-[11.5px]"
+                      />
+                      <Mic size={14} className="absolute right-2.5 top-2.5 text-muted-foreground hover:text-primary cursor-pointer" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-[8.5px] text-muted-foreground uppercase block mb-0.5 font-bold">Description details</label>
+                    <input
+                      type="text"
+                      placeholder="Labour details..."
+                      value={chatLabourForm.desc}
+                      onChange={(e) => setChatLabourForm({ ...chatLabourForm, desc: e.target.value })}
+                      className="w-full bg-background border border-border p-2 rounded outline-none"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-[8.5px] text-muted-foreground uppercase block mb-0.5 font-bold">Price (₹)</label>
+                      <input
+                        type="number"
+                        value={chatLabourForm.price}
+                        onChange={(e) => setChatLabourForm({ ...chatLabourForm, price: parseFloat(e.target.value) || 0 })}
+                        className="w-full bg-background border border-border p-2 rounded outline-none font-mono"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[8.5px] text-muted-foreground uppercase block mb-0.5 font-bold">Frame Hours</label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        value={chatLabourForm.hours}
+                        onChange={(e) => setChatLabourForm({ ...chatLabourForm, hours: parseFloat(e.target.value) || 0 })}
+                        className="w-full bg-background border border-border p-2 rounded outline-none font-mono"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-[8.5px] text-muted-foreground uppercase block mb-0.5 font-bold">Billable Type</label>
+                    <select
+                      value={chatLabourForm.billableType}
+                      onChange={(e) => setChatLabourForm({ ...chatLabourForm, billableType: e.target.value })}
+                      className="w-full bg-background border border-border p-2 rounded outline-none cursor-pointer"
+                    >
+                      <option value="Customer">Customer Billed (Standard)</option>
+                      <option value="Warranty">Warranty covered</option>
+                      <option value="FOC">FOC Free of Cost</option>
+                    </select>
+                  </div>
+
+                  {/* Frequently Used Checklist */}
+                  <div className="border border-border/80 p-2.5 rounded-lg bg-[#0F172A]/5 mt-1 flex flex-col gap-1.5">
+                    <span className="text-[9px] font-bold text-secondary uppercase tracking-wide">Frequently Used Labour Codes</span>
+                    <div className="flex flex-col gap-1 max-h-[85px] overflow-y-auto pr-1">
+                      {FREQ_LABOUR_CODES.map((item) => (
+                        <label key={item.code} className="flex items-center gap-2 cursor-pointer py-0.5 hover:bg-muted/10 rounded">
+                          <input
+                            type="checkbox"
+                            checked={chatLabourForm.code === item.code}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setChatLabourForm({
+                                  ...chatLabourForm,
+                                  code: item.code,
+                                  desc: item.desc,
+                                  price: item.price,
+                                  hours: item.hours
+                                });
+                              }
+                            }}
+                            className="accent-primary cursor-pointer w-3 h-3"
+                          />
+                          <span className="text-[10px] font-mono text-foreground font-semibold shrink-0">{item.code}</span>
+                          <span className="text-[10.5px] text-muted-foreground truncate">{item.desc}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2 border-t border-border pt-3 mt-1 select-none">
+                  <button
+                    onClick={() => {
+                      if (!chatLabourForm.code || !chatLabourForm.desc) return;
+                      const newD = {
+                        type: "L",
+                        desc: chatLabourForm.desc,
+                        code: chatLabourForm.code,
+                        qty: 1,
+                        price: chatLabourForm.price,
+                        accepted: "YES",
+                        acceptedQty: 1,
+                        rejectionReason: "-"
+                      };
+                      setJcSession({ ...jcSession, demands: [...demands, newD] });
+                      setChatToast("Labour item added!");
+                      setTimeout(() => setChatToast(""), 2000);
+                    }}
+                    className="py-2 bg-secondary text-foreground text-[10px] font-bold rounded-lg hover:bg-muted transition-colors cursor-pointer uppercase font-sans border border-border"
+                  >
+                    ADD
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (!chatLabourForm.code || !chatLabourForm.desc) return;
+                      const newD = {
+                        type: "L",
+                        desc: chatLabourForm.desc,
+                        code: chatLabourForm.code,
+                        qty: 1,
+                        price: chatLabourForm.price,
+                        accepted: "YES",
+                        acceptedQty: 1,
+                        rejectionReason: "-"
+                      };
+                      setJcSession({ ...jcSession, demands: [...demands, newD] });
+                      setChatActivePopup(null);
+                      setChatToast("Labour item added successfully!");
+                      setTimeout(() => setChatToast(""), 3000);
+                    }}
+                    className="py-2 bg-primary text-primary-foreground text-[10px] font-extrabold rounded-lg hover:brightness-110 transition-all cursor-pointer uppercase font-sans"
+                  >
+                    ADD & CLOSE
+                  </button>
+                  <button
+                    onClick={() => setChatActivePopup(null)}
+                    className="py-2 bg-background border border-border text-muted-foreground hover:text-foreground text-[10px] font-bold rounded-lg transition-colors cursor-pointer uppercase font-sans"
+                  >
+                    CANCEL
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {chatActivePopup === "PART" && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs font-sans">
+              <div className="bg-card border border-border p-5 rounded-2xl w-full max-w-sm flex flex-col gap-4 text-foreground shadow-2xl relative">
+                <div className="flex justify-between items-center border-b border-border pb-1.5">
+                  <p className="text-[12px] font-black text-emerald-400 uppercase tracking-wide">Image 2821: Add Parts Item</p>
+                  <button onClick={() => setChatActivePopup(null)} className="text-muted-foreground hover:text-foreground cursor-pointer">
+                    <X size={15} />
+                  </button>
+                </div>
+
+                <div className="flex flex-col gap-3 text-[11px]">
+                  <div>
+                    <label className="text-[8.5px] text-muted-foreground uppercase block mb-0.5 font-bold">Demand Repair Section</label>
+                    <select
+                      value={chatPartForm.demandRepair}
+                      onChange={(e) => setChatPartForm({ ...chatPartForm, demandRepair: e.target.value })}
+                      className="w-full bg-background border border-border p-2 rounded outline-none cursor-pointer"
+                    >
+                      <option value="Periodic Maintenance">Periodic Maintenance</option>
+                      <option value="Suspension Noise">Suspension Noise</option>
+                      <option value="Body Wash / Paint">Body Wash / Paint</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-[8.5px] text-muted-foreground uppercase block mb-0.5 font-bold">Part Number / Voice mic</label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="E.g. FDH01"
+                        value={chatPartForm.partNo}
+                        onChange={(e) => setChatPartForm({ ...chatPartForm, partNo: e.target.value })}
+                        className="w-full bg-background border border-border p-2 pr-8 rounded outline-none font-mono text-[11.5px]"
+                      />
+                      <Mic size={14} className="absolute right-2.5 top-2.5 text-muted-foreground hover:text-primary cursor-pointer" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-[8.5px] text-muted-foreground uppercase block mb-0.5 font-bold">Part Description</label>
+                    <input
+                      type="text"
+                      placeholder="Part description..."
+                      value={chatPartForm.desc}
+                      onChange={(e) => setChatPartForm({ ...chatPartForm, desc: e.target.value })}
+                      className="w-full bg-background border border-border p-2 rounded outline-none"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-[8.5px] text-muted-foreground uppercase block mb-0.5 font-bold">Price (₹)</label>
+                      <input
+                        type="number"
+                        value={chatPartForm.price}
+                        onChange={(e) => setChatPartForm({ ...chatPartForm, price: parseFloat(e.target.value) || 0 })}
+                        className="w-full bg-background border border-border p-2 rounded outline-none font-mono"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[8.5px] text-muted-foreground uppercase block mb-0.5 font-bold">Unit Quantity</label>
+                      <input
+                        type="number"
+                        value={chatPartForm.qty}
+                        onChange={(e) => setChatPartForm({ ...chatPartForm, qty: parseInt(e.target.value) || 1 })}
+                        className="w-full bg-background border border-border p-2 rounded outline-none font-mono text-center"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2 border-t border-border pt-3 select-none">
+                  <button
+                    onClick={() => {
+                      if (!chatPartForm.partNo || !chatPartForm.desc) return;
+                      const newD = {
+                        type: "P",
+                        desc: chatPartForm.desc,
+                        code: chatPartForm.partNo,
+                        qty: chatPartForm.qty,
+                        price: chatPartForm.price * chatPartForm.qty,
+                        accepted: "YES",
+                        acceptedQty: chatPartForm.qty,
+                        rejectionReason: "-"
+                      };
+                      setJcSession({ ...jcSession, demands: [...demands, newD] });
+                      setChatToast("Part item added!");
+                      setTimeout(() => setChatToast(""), 2000);
+                    }}
+                    className="py-2 bg-secondary text-foreground text-[10px] font-bold rounded-lg hover:bg-muted transition-colors cursor-pointer uppercase font-sans border border-border"
+                  >
+                    ADD
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (!chatPartForm.partNo || !chatPartForm.desc) return;
+                      const newD = {
+                        type: "P",
+                        desc: chatPartForm.desc,
+                        code: chatPartForm.partNo,
+                        qty: chatPartForm.qty,
+                        price: chatPartForm.price * chatPartForm.qty,
+                        accepted: "YES",
+                        acceptedQty: chatPartForm.qty,
+                        rejectionReason: "-"
+                      };
+                      setJcSession({ ...jcSession, demands: [...demands, newD] });
+                      setChatActivePopup(null);
+                      setChatToast("Part item added successfully!");
+                      setTimeout(() => setChatToast(""), 3000);
+                    }}
+                    className="py-2 bg-primary text-primary-foreground text-[10px] font-extrabold rounded-lg hover:brightness-110 transition-all cursor-pointer uppercase font-sans"
+                  >
+                    ADD & CLOSE
+                  </button>
+                  <button
+                    onClick={() => setChatActivePopup(null)}
+                    className="py-2 bg-background border border-border text-muted-foreground hover:text-foreground text-[10px] font-bold rounded-lg transition-colors cursor-pointer uppercase font-sans"
+                  >
+                    CANCEL
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {chatActivePopup === "HISTORY" && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xs font-sans">
+              <div className="bg-card border border-border p-5 rounded-2xl w-full max-w-sm flex flex-col gap-4 text-foreground shadow-2xl relative select-none">
+                <div className="flex justify-between items-center border-b border-border pb-1.5">
+                  <p className="text-[12.5px] font-black text-secondary uppercase tracking-wide">Vehicle History Logs</p>
+                  <button onClick={() => setChatActivePopup(null)} className="text-muted-foreground hover:text-foreground cursor-pointer">
+                    <X size={15} />
+                  </button>
+                </div>
+
+                <div className="flex flex-col gap-2.5 text-[11px] font-sans leading-relaxed">
+                  <div className="bg-background border border-border p-3 rounded-lg">
+                    <span className="text-[9.5px] font-bold text-primary uppercase font-mono">29-Jan-2026 At Prem Motors</span>
+                    <p className="font-semibold mt-1">Periodic Maintenance Service (PMS-Standard)</p>
+                    <p className="text-muted-foreground mt-0.5">Odometer: 29,800 KMS</p>
+                    <ul className="list-disc pl-4 text-muted-foreground mt-1 flex flex-col gap-0.5">
+                      <li>Engine oil & oil filter replaced</li>
+                      <li>Front brake pads overhauled & cleaned</li>
+                      <li>AC Cabin filter vacuum sanitized</li>
+                    </ul>
+                  </div>
+
+                  <div className="bg-background border border-border p-3 rounded-lg opacity-85">
+                    <span className="text-[9.5px] font-bold text-muted-foreground uppercase font-mono">14-Sep-2025 At Prem Motors</span>
+                    <p className="font-semibold mt-1">Running Repairs & Balancing Check</p>
+                    <p className="text-muted-foreground mt-0.5">Odometer: 21,500 KMS</p>
+                    <ul className="list-disc pl-4 text-muted-foreground mt-1 flex flex-col gap-0.5">
+                      <li>Wheel Balancing & weight rotation</li>
+                      <li>Wiper blade wash fluid refilled</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="flex justify-end mt-1">
+                  <button
+                    onClick={() => setChatActivePopup(null)}
+                    className="px-4 py-2 bg-primary text-primary-foreground text-[10.5px] font-bold rounded-lg hover:brightness-110 cursor-pointer uppercase"
+                  >
+                    CLOSE LOGS
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       );
-    }
-
-    case "LABOUR_PARTS": {
+    }    case "LABOUR_PARTS": {
       const extraItems = [
         { desc: "Brake Pad Check Detail Layout", code: "LOC045", type: "L" as const, qty: 1, price: 150 },
         { desc: "Wiper Fluid concentrated pouch", code: "68510-79M10", type: "P" as const, qty: 1, price: 120 }
