@@ -916,7 +916,7 @@ function AppointmentsPanel({ onAction }: { onAction: (a: PanelType, data?: Recor
               </div>
 
               {/* Sub-header bar of Details & Action Trigger Row */}
-              <div className="bg-[#0E1B30] border-b border-border px-6 py-3.5 flex flex-wrap items-center justify-between gap-4">
+              <div className="bg-primary/5 dark:bg-[#0E1B30] border-b border-border px-6 py-3.5 flex flex-wrap items-center justify-between gap-4">
                 <div className="flex items-center gap-8">
                   {/* Registration No. Box */}
                   <div className="flex flex-col">
@@ -1267,7 +1267,7 @@ function AppointmentsPanel({ onAction }: { onAction: (a: PanelType, data?: Recor
               </div>
 
               {/* Form Bottom Bar - Dark Theme Styling */}
-              <div className="bg-[#0E1B30] px-6 py-3.5 flex justify-end gap-3 border-t border-border">
+              <div className="bg-primary/5 dark:bg-[#0E1B30] px-6 py-3.5 flex justify-end gap-3 border-t border-border">
                 <button 
                   type="button" 
                   onClick={() => setShowAddPopup(false)}
@@ -3401,21 +3401,21 @@ function JCOpeningPanel({
       {/* Vehicle History Popup Dialog Modal */}
       <AnimatePresence>
         {showHistoryModal && (
-          <div className="fixed inset-0 bg-[#070C16]/85 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 z-50 overflow-y-auto">
+          <div className="fixed inset-0 bg-black/50 dark:bg-[#070C16]/85 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 z-50 overflow-y-auto">
             <motion.div
               initial={{ opacity: 0, y: 15, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 15, scale: 0.98 }}
-              className="bg-[#0B1220] border border-slate-800 rounded-2xl w-full max-w-4xl max-h-[85vh] overflow-hidden shadow-2xl flex flex-col font-sans text-slate-100"
+              className="bg-card border border-border dark:border-slate-800 rounded-2xl w-full max-w-4xl max-h-[85vh] overflow-hidden shadow-2xl flex flex-col font-sans text-foreground"
             >
               {/* Modal Header */}
-              <div className="p-4 sm:p-5 border-b border-slate-800 bg-[#0F172A] flex items-center justify-between shrink-0">
+              <div className="p-4 sm:p-5 border-b border-border dark:border-slate-800 bg-muted/30 dark:bg-[#0F172A] flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
                     <History size={16} className="text-primary" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-100">
+                    <h3 className="text-sm font-extrabold uppercase tracking-wider text-foreground dark:text-slate-100">
                       Vehicle History Database
                     </h3>
                     <p className="text-[10px] text-muted-foreground uppercase font-mono tracking-widest mt-0.5">
@@ -3426,23 +3426,23 @@ function JCOpeningPanel({
                 <button
                   type="button"
                   onClick={() => setShowHistoryModal(false)}
-                  className="p-1.5 hover:bg-slate-800 text-slate-400 hover:text-slate-200 rounded-lg cursor-pointer transition-colors"
+                  className="p-1.5 hover:bg-muted dark:hover:bg-slate-800 text-muted-foreground hover:text-foreground dark:hover:text-slate-200 rounded-lg cursor-pointer transition-colors"
                 >
                   <X size={15} />
                 </button>
               </div>
 
               {/* Modal Body Container with customized background */}
-              <div className="p-5 overflow-y-auto flex-1 bg-[#090F1C]">
+              <div className="p-5 overflow-y-auto flex-1 bg-card dark:bg-[#090F1C]">
                 <VehicleHistoryPanel initialReg={regNo || "DL6CR1517"} />
               </div>
 
               {/* Modal Footer */}
-              <div className="p-4 border-t border-slate-800 bg-[#0F172A] flex justify-end gap-2 shrink-0">
+              <div className="p-4 border-t border-border dark:border-slate-800 bg-muted/30 dark:bg-[#0F172A] flex justify-end gap-2 shrink-0">
                 <button
                   type="button"
                   onClick={() => setShowHistoryModal(false)}
-                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-[11px] font-bold text-slate-200 rounded-lg cursor-pointer transition-all uppercase tracking-wider font-sans"
+                  className="px-4 py-2 bg-muted hover:bg-muted/80 dark:bg-slate-800 dark:hover:bg-slate-700 text-[11px] font-bold text-foreground dark:text-slate-200 rounded-lg cursor-pointer transition-all uppercase tracking-wider font-sans border border-border dark:border-slate-800"
                 >
                   Close Records
                 </button>
@@ -5817,21 +5817,21 @@ function AllJobCardsPanel({ onAction }: { onAction?: (a: PanelType, d?: Record<s
 
       <AnimatePresence>
         {localHistoryRegNo && (
-          <div className="fixed inset-0 bg-[#070C16]/85 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 z-[9999] overflow-y-auto">
+          <div className="fixed inset-0 bg-black/50 dark:bg-[#070C16]/85 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 z-[9999] overflow-y-auto">
             <motion.div
               initial={{ opacity: 0, y: 15, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 15, scale: 0.98 }}
-              className="bg-[#0B1220] border border-slate-800 rounded-2xl w-full max-w-4xl max-h-[85vh] overflow-hidden shadow-2xl flex flex-col font-sans text-slate-100"
+              className="bg-card border border-border dark:border-slate-800 rounded-2xl w-full max-w-4xl max-h-[85vh] overflow-hidden shadow-2xl flex flex-col font-sans text-foreground"
             >
               {/* Modal Header */}
-              <div className="p-4 sm:p-5 border-b border-slate-800 bg-[#0F172A] flex items-center justify-between shrink-0">
+              <div className="p-4 sm:p-5 border-b border-border dark:border-slate-800 bg-muted/30 dark:bg-[#0F172A] flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
                     <History size={16} className="text-primary" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-100">
+                    <h3 className="text-sm font-extrabold uppercase tracking-wider text-foreground dark:text-slate-100">
                       Vehicle History Database
                     </h3>
                     <p className="text-[10px] text-muted-foreground uppercase font-mono tracking-widest mt-0.5">
@@ -5842,23 +5842,23 @@ function AllJobCardsPanel({ onAction }: { onAction?: (a: PanelType, d?: Record<s
                 <button
                   type="button"
                   onClick={() => setLocalHistoryRegNo(null)}
-                  className="p-1.5 hover:bg-slate-800 text-slate-400 hover:text-slate-200 rounded-lg cursor-pointer transition-colors"
+                  className="p-1.5 hover:bg-muted dark:hover:bg-slate-800 text-muted-foreground hover:text-foreground dark:hover:text-slate-200 rounded-lg cursor-pointer transition-colors"
                 >
                   <X size={15} />
                 </button>
               </div>
 
               {/* Modal Body Container */}
-              <div className="p-5 overflow-y-auto flex-1 bg-[#090F1C]">
+              <div className="p-5 overflow-y-auto flex-1 bg-card dark:bg-[#090F1C]">
                 <VehicleHistoryPanel initialReg={localHistoryRegNo} />
               </div>
 
               {/* Modal Footer */}
-              <div className="p-4 border-t border-slate-800 bg-[#0F172A] flex justify-end gap-2 shrink-0">
+              <div className="p-4 border-t border-border dark:border-slate-800 bg-muted/30 dark:bg-[#0F172A] flex justify-end gap-2 shrink-0">
                 <button
                   type="button"
                   onClick={() => setLocalHistoryRegNo(null)}
-                  className="px-4 py-2 bg-[#1A2333] hover:bg-[#253248] text-[11px] font-bold text-slate-200 rounded-lg cursor-pointer transition-all uppercase tracking-wider font-sans border border-slate-800"
+                  className="px-4 py-2 bg-muted hover:bg-muted/80 dark:bg-[#1A2333] dark:hover:bg-[#253248] text-[11px] font-bold text-foreground dark:text-slate-200 rounded-lg cursor-pointer transition-all uppercase tracking-wider font-sans border border-border dark:border-slate-800"
                 >
                   Close Records
                 </button>
@@ -7922,7 +7922,7 @@ function BotBubble({
             <ReactMarkdown 
               remarkPlugins={[remarkGfm]}
               components={{
-                p: ({node, ...props}) => <p className="mb-2 last:mb-0" {...props} />,
+                p: ({node, ...props}) => <p className="mb-2 last:mb-0" style={{ color: "#ffffff" }} {...props} />,
                 ul: ({node, ...props}) => <ul className="list-disc pl-4 mb-2 last:mb-0" {...props} />,
                 ol: ({node, ...props}) => <ol className="list-decimal pl-4 mb-2 last:mb-0" {...props} />,
                 li: ({node, ...props}) => <li className="mb-1" {...props} />,
@@ -8064,21 +8064,21 @@ function BotBubble({
       {/* Local Vehicle History Popup Dialog Modal */}
       <AnimatePresence>
         {showVehicleHistoryPopup && (
-          <div className="fixed inset-0 bg-[#070C16]/85 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 z-[9999] overflow-y-auto">
+          <div className="fixed inset-0 bg-black/50 dark:bg-[#070C16]/85 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 z-[9999] overflow-y-auto">
             <motion.div
               initial={{ opacity: 0, y: 15, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 15, scale: 0.98 }}
-              className="bg-[#0B1220] border border-slate-800 rounded-2xl w-full max-w-4xl max-h-[85vh] overflow-hidden shadow-2xl flex flex-col font-sans text-slate-100"
+              className="bg-card border border-border dark:border-slate-800 rounded-2xl w-full max-w-4xl max-h-[85vh] overflow-hidden shadow-2xl flex flex-col font-sans text-foreground"
             >
               {/* Modal Header */}
-              <div className="p-4 sm:p-5 border-b border-slate-800 bg-[#0F172A] flex items-center justify-between shrink-0">
+              <div className="p-4 sm:p-5 border-b border-border dark:border-slate-800 bg-muted/30 dark:bg-[#0F172A] flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
                     <History size={16} className="text-primary" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-100">
+                    <h3 className="text-sm font-extrabold uppercase tracking-wider text-foreground dark:text-slate-100">
                       Vehicle History Database
                     </h3>
                     <p className="text-[10px] text-muted-foreground uppercase font-mono tracking-widest mt-0.5">
@@ -8089,23 +8089,23 @@ function BotBubble({
                 <button
                   type="button"
                   onClick={() => setShowVehicleHistoryPopup(false)}
-                  className="p-1.5 hover:bg-slate-800 text-slate-400 hover:text-slate-200 rounded-lg cursor-pointer transition-colors"
+                  className="p-1.5 hover:bg-muted dark:hover:bg-slate-800 text-muted-foreground hover:text-foreground dark:hover:text-slate-200 rounded-lg cursor-pointer transition-colors"
                 >
                   <X size={15} />
                 </button>
               </div>
 
               {/* Modal Body Container */}
-              <div className="p-5 overflow-y-auto flex-1 bg-[#090F1C]">
+              <div className="p-5 overflow-y-auto flex-1 bg-card dark:bg-[#090F1C]">
                 <VehicleHistoryPanel initialReg={jcSession?.regNo || (initialData?.regNo as string) || "DL6CR1517"} />
               </div>
 
               {/* Modal Footer */}
-              <div className="p-4 border-t border-slate-800 bg-[#0F172A] flex justify-end gap-2 shrink-0">
+              <div className="p-4 border-t border-border dark:border-slate-800 bg-muted/30 dark:bg-[#0F172A] flex justify-end gap-2 shrink-0">
                 <button
                   type="button"
                   onClick={() => setShowVehicleHistoryPopup(false)}
-                  className="px-4 py-2 bg-[#1A2333] hover:bg-[#253248] text-[11px] font-bold text-slate-200 rounded-lg cursor-pointer transition-all uppercase tracking-wider font-sans border border-slate-800"
+                  className="px-4 py-2 bg-muted hover:bg-muted/80 dark:bg-[#1A2333] dark:hover:bg-[#253248] text-[11px] font-bold text-foreground dark:text-slate-200 rounded-lg cursor-pointer transition-all uppercase tracking-wider font-sans border border-border dark:border-slate-800"
                 >
                   Close Records
                 </button>
@@ -8150,6 +8150,81 @@ const DASH_STATS = [
   { label: "Active JCs", value: "3", icon: FileText, color: "#FACC15", sub: "1 OCAS pending" },
   { label: "Pending Tasks", value: "6", icon: CheckSquare, color: "#A78BFA", sub: "2 high priority" },
   { label: "Unread Alerts", value: "3", icon: Bell, color: "#F87171", sub: "1 urgent" },
+]
+
+const DASHBOARD_TILES = [
+  { 
+    id: "jc-opening" as PanelType, 
+    title: "Open Job Card", 
+    sub: "CUSTOMER INTAKE", 
+    icon: FileText, 
+    color: "text-[#eab308]", 
+    bgBorder: "border-[#eab308]/20", 
+    badge: null 
+  },
+  { 
+    id: "appointments" as PanelType, 
+    title: "Appointments", 
+    sub: "TODAY'S SCHEDULE", 
+    icon: Calendar, 
+    color: "text-[#3b82f6]", 
+    bgBorder: "border-[#3b82f6]/20", 
+    badge: { text: "7", colorClass: "text-[#3b82f6] border-[#3b82f6]/30 bg-[#3b82f6]/10" } 
+  },
+  { 
+    id: "all-jobcards" as PanelType, 
+    title: "All Job Cards", 
+    sub: "ACTIVE WORKSHOP", 
+    icon: ClipboardList, 
+    color: "text-[#eab308]", 
+    bgBorder: "border-[#eab308]/20", 
+    badge: null 
+  },
+  { 
+    id: "vehicle-history" as PanelType, 
+    title: "Vehicle History", 
+    sub: "SERVICE & RECORDS", 
+    icon: Search, 
+    color: "text-[#06b6d4]", 
+    bgBorder: "border-[#06b6d4]/20", 
+    badge: null 
+  },
+  { 
+    id: "tasks" as PanelType, 
+    title: "Advisor Tasks", 
+    sub: "TODAY'S CHECKLIST", 
+    icon: CheckSquare, 
+    color: "text-[#a855f7]", 
+    bgBorder: "border-[#a855f7]/20", 
+    badge: { text: "6", colorClass: "text-[#a855f7] border-[#a855f7]/30 bg-[#a855f7]/10" } 
+  },
+  { 
+    id: "notifications" as PanelType, 
+    title: "Notifications", 
+    sub: "ALERTS & CONSENTS", 
+    icon: Bell, 
+    color: "text-[#ef4444]", 
+    bgBorder: "border-[#ef4444]/20", 
+    badge: { text: "3", colorClass: "text-[#ef4444] border-[#ef4444]/30 bg-[#ef4444]/10" } 
+  },
+  { 
+    id: "my-calls" as PanelType, 
+    title: "My Calls", 
+    sub: "ADVISOR CHECKBACKS", 
+    icon: Phone, 
+    color: "text-[#22c55e]", 
+    bgBorder: "border-[#22c55e]/20", 
+    badge: { text: "2", colorClass: "text-[#22c55e] border-[#22c55e]/30 bg-[#22c55e]/10" } 
+  },
+  { 
+    id: "suzuki-connect-advice" as PanelType, 
+    title: "Suzuki Connect", 
+    sub: "ONBOARD OBD IOT", 
+    icon: Car, 
+    color: "text-[#0ea5e9]", 
+    bgBorder: "border-[#0ea5e9]/20", 
+    badge: null 
+  },
 ]
 
 // ── Mock Data for New Sections ────────────────────────────────────────────────
@@ -8227,425 +8302,66 @@ function DashboardView({
   };
 
   return (
-    <div className="p-4 sm:p-6 w-full h-full overflow-y-auto font-sans text-foreground relative z-10 flex flex-col items-center bg-slate-50/50 dark:bg-transparent transition-colors duration-300">
-      <div className="max-w-[1200px] w-full flex flex-col gap-5 sm:gap-6">
-        
-        {/* Header */}
-        <motion.div 
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-card border border-border p-5 md:p-6 rounded-2xl flex sm:flex-row flex-col justify-between items-start sm:items-center gap-4 shadow-sm"
-        >
-          <div className="space-y-1">
-            <h1 className="text-[17px] font-extrabold flex items-center gap-2.5 flex-wrap tracking-tight">
-              <LayoutDashboard className="text-primary" size={18} />
-              <span className="uppercase tracking-wide font-sans">NEXA Workshop Cockpit</span>
-              <span className="text-[9px] font-bold bg-primary/10 text-primary border border-primary/20 flex items-center px-2.5 py-0.5 rounded-full tracking-widest uppercase font-mono">Prem Motors Pvt. Ltd.</span>
-            </h1>
-            <p className="text-[11px] text-muted-foreground leading-relaxed">Real-time workshop intelligence and logistics dashboard. Monitor bay activity, check-in schedules, advisor backlogs, and telemetry.</p>
-          </div>
-        </motion.div>
-
-        {/* KPIs Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          
-          {/* Card 1: Appointments */}
-          <motion.div 
-            id="dashboard-kpi-appointments"
-            onClick={() => onSelectPanel?.("appointments")}
-            whileHover={{ y: -3, transition: { duration: 0.2 } }}
-            className="group bg-card border border-border p-4.5 rounded-2xl shadow-sm hover:border-primary/55 hover:shadow-md hover:shadow-primary/5 transition-all duration-300 cursor-pointer select-none space-y-2.5"
-          >
-            <div className="flex justify-between items-center">
-              <span className="text-[10px] font-bold tracking-widest uppercase text-muted-foreground group-hover:text-primary transition-colors">My Appointments</span>
-              <div className="w-8 h-8 flex items-center justify-center bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-all rounded-xl border border-primary/10">
-                <Calendar size={15} strokeWidth={2} />
-              </div>
-            </div>
-            <div>
-              <div className="font-mono text-2xl sm:text-3xl font-extrabold leading-none text-foreground">7 Today</div>
-              <div className="text-[9.5px] text-emerald-600 dark:text-emerald-500 font-bold mt-2 flex items-center gap-1 font-mono uppercase tracking-wider">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span>4 In-Service | 3 Confirmed</span>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Card 2: Job Cards */}
-          <motion.div 
-            id="dashboard-kpi-jobcards"
-            onClick={() => onSelectPanel?.("all-jobcards")}
-            whileHover={{ y: -3, transition: { duration: 0.2 } }}
-            className="group bg-card border border-border p-4.5 rounded-2xl shadow-sm hover:border-amber-500/55 hover:shadow-md hover:shadow-amber-500/5 transition-all duration-300 cursor-pointer select-none space-y-2.5"
-          >
-            <div className="flex justify-between items-center">
-              <span className="text-[10px] font-bold tracking-widest uppercase text-muted-foreground group-hover:text-amber-500 transition-colors">Active Jobcards</span>
-              <div className="w-8 h-8 flex items-center justify-center bg-amber-500/10 text-amber-500 group-hover:bg-amber-500 group-hover:text-black transition-all rounded-xl border border-amber-500/10">
-                <ClipboardList size={15} strokeWidth={2} />
-              </div>
-            </div>
-            <div>
-              <div className="font-mono text-2xl sm:text-3xl font-extrabold leading-none text-foreground">144 Active</div>
-              <div className="text-[9.5px] text-emerald-600 dark:text-emerald-500 font-bold mt-2 flex items-center gap-1 font-mono uppercase tracking-wider">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span>98 In repair active bays</span>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Card 3: My Tasks */}
-          <motion.div 
-            id="dashboard-kpi-tasks"
-            onClick={() => onSelectPanel?.("tasks")}
-            whileHover={{ y: -3, transition: { duration: 0.2 } }}
-            className="group bg-card border border-border p-4.5 rounded-2xl shadow-sm hover:border-violet-500/55 hover:shadow-md hover:shadow-violet-500/5 transition-all duration-300 cursor-pointer select-none space-y-2.5"
-          >
-            <div className="flex justify-between items-center">
-              <span className="text-[10px] font-bold tracking-widest uppercase text-muted-foreground group-hover:text-violet-500 transition-colors">My Tasks</span>
-              <div className="w-8 h-8 flex items-center justify-center bg-violet-500/10 text-violet-400 group-hover:bg-violet-500 group-hover:text-white transition-all rounded-xl border border-violet-500/5">
-                <CheckSquare size={15} strokeWidth={2} />
-              </div>
-            </div>
-            <div>
-              <div className="font-mono text-2xl sm:text-3xl font-extrabold leading-none text-foreground">{doneTasks} / {tasks.length}</div>
-              <div className="text-[9.5px] text-muted-foreground font-semibold mt-2 block uppercase tracking-wider font-mono">
-                Daily Advisor targets completed
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Card 4: Services */}
-          <motion.div 
-            id="dashboard-kpi-active-services"
-            onClick={() => onSelectPanel?.("all-jobcards")}
-            whileHover={{ y: -3, transition: { duration: 0.2 } }}
-            className="group bg-card border border-border p-4.5 rounded-2xl shadow-sm hover:border-emerald-500/55 hover:shadow-md hover:shadow-emerald-500/5 transition-all duration-300 cursor-pointer select-none space-y-2.5"
-          >
-            <div className="flex justify-between items-center">
-              <span className="text-[10px] font-bold tracking-widest uppercase text-muted-foreground group-hover:text-emerald-500 transition-colors">Intakes Today</span>
-              <div className="w-8 h-8 flex items-center justify-center bg-emerald-500/10 text-emerald-500 group-hover:bg-emerald-500 group-hover:text-white transition-all rounded-xl border border-emerald-500/10">
-                <Wrench size={15} strokeWidth={2} />
-              </div>
-            </div>
-            <div>
-              <div className="font-mono text-2xl sm:text-3xl font-extrabold leading-none text-foreground">24 Intake</div>
-              <div className="text-[9.5px] text-muted-foreground font-semibold mt-2 block uppercase tracking-wider font-mono">
-                16 pre-scheduled | 8 walk-ins
-              </div>
-            </div>
-          </motion.div>
-        </div>
-
-        {/* Journey Control Banner */}
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.99 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg relative overflow-hidden flex sm:flex-row flex-col justify-between items-start sm:items-center gap-5 text-white"
-        >
-          {/* Subtle decoration sphere */}
-          <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-indigo-500/10 blur-2xl pointer-events-none" />
-          
-          <div className="flex gap-4 items-start flex-1 min-w-0 z-10">
-            <div className="w-10 h-10 rounded-xl bg-indigo-500/15 border border-indigo-500/35 flex items-center justify-center shrink-0">
-              <Wrench size={18} className="text-indigo-400 animate-pulse" />
-            </div>
-            <div className="space-y-1">
-              <div className="text-[9px] font-bold font-mono tracking-widest text-[#818cf8] uppercase">Advisor Journey In Progress &middot; Engine Restored</div>
-              <div className="text-[13px] font-bold text-slate-100 flex items-center gap-1.5">
-                <span>Active Job Card Opening Flow</span>
-                <span className="text-xs font-semibold px-2 py-0.5 rounded bg-amber-500/10 text-amber-500 border border-amber-500/15">Step 3 of 8</span>
-              </div>
-              <div className="text-[11px] text-slate-300">Evaluating Exterior Body Damage and digital inspection audit report.</div>
-              
-              {/* Dynamic Step Progress Indicator */}
-              <div className="flex gap-1.5 pt-2 items-center">
-                {[1, 2, 3, 4, 5, 6, 7, 8].map((stepNum) => {
-                  const isActive = stepNum === 3;
-                  const isCompleted = stepNum < 3;
-                  return (
-                    <div 
-                      key={stepNum} 
-                      className={`h-1.5 rounded-full transition-all duration-300 ${
-                        isActive ? "w-6 bg-amber-400" : isCompleted ? "w-3.5 bg-[#818cf8]" : "w-1.5 bg-slate-800"
-                      }`} 
-                    />
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-          
-          <div className="flex gap-2.5 shrink-0 z-10 w-full sm:w-auto">
-            <button 
-              className="flex-1 sm:flex-none bg-slate-800 hover:bg-slate-700/80 text-slate-200 hover:text-white px-4 py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-wider font-sans border border-slate-705/10 cursor-pointer transition-all hover:scale-[1.01] active:scale-95" 
-              onClick={() => showToast('Flow state reset.')}
+    <div className="p-4 sm:p-8 w-full h-full overflow-y-auto font-sans relative z-10 flex flex-col items-center justify-center bg-background text-foreground">
+      <div className="max-w-[1000px] w-full flex flex-col justify-center flex-1 my-auto">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+          {DASHBOARD_TILES.map((tile, i) => (
+            <motion.div 
+              key={tile.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.05 }}
+              onClick={() => onSelectPanel?.(tile.id)}
+              className="relative group bg-card border border-border hover:border-primary/50 p-8 rounded-[24px] shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col items-center justify-center text-center h-[180px]"
             >
-              ↺ Reset State
-            </button>
-            <button 
-              className="flex-1 sm:flex-none bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-5 py-2.5 rounded-xl text-[11px] uppercase tracking-wider font-sans transition-all hover:scale-[1.01] active:scale-95 shadow-md shadow-indigo-600/10 flex items-center justify-center gap-1.5 cursor-pointer" 
-              onClick={() => onReturnToChat()}
-            >
-              <span>Resume Chat</span>
-              <ArrowRight size={12} />
-            </button>
-          </div>
-        </motion.div>
+              <div className={`w-12 h-12 flex items-center justify-center mb-4 rounded-full border ${tile.bgBorder} ${tile.color} group-hover:scale-110 transition-transform duration-300`}>
+                <tile.icon size={20} strokeWidth={1.5} />
+              </div>
+              <h3 className="text-[15px] font-bold tracking-wide text-foreground">{tile.title}</h3>
+              <p className="text-[10px] text-muted-foreground font-mono tracking-widest uppercase mt-2">{tile.sub}</p>
 
-        {/* Content Columns */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-5 md:gap-6">
-          
-          {/* Left Column */}
-          <div className="flex flex-col gap-5 md:gap-6">
-            
-            {/* Active Garage Jobcards */}
-            <div className="bg-card border border-border rounded-2xl shadow-sm overflow-hidden flex flex-col">
-              <div className="p-4 sm:p-5 border-b border-border flex justify-between items-center gap-3 flex-wrap bg-slate-50/50 dark:bg-[#0F172A]/20">
-                <div className="space-y-0.5">
-                  <div className="text-[12.5px] font-bold uppercase tracking-wider text-foreground">Active Garage Jobcards</div>
-                  <div className="text-[9px] font-mono text-muted-foreground font-medium uppercase tracking-widest">Select record for critical system operations & checklists</div>
+              {tile.badge && (
+                <div className={`absolute top-4 right-4 text-[10px] font-mono font-bold w-6 h-6 flex items-center justify-center rounded-full border ${tile.badge.colorClass}`}>
+                  {tile.badge.text}
                 </div>
-                
-                {/* Refined Search input */}
-                <div className="relative w-full sm:w-60">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"><Search size={12} /></span>
-                  <input 
-                    type="text" 
-                    placeholder="Search Registration, JC or Client…" 
-                    className="bg-muted border border-border pl-8 pr-3 py-1.8 text-[11.5px] w-full rounded-xl outline-none focus:border-primary/50 text-foreground transition-all placeholder:text-muted-foreground font-sans"
-                    value={search}
-                    onChange={e => setSearch(e.target.value)}
-                  />
-                </div>
-              </div>
-              
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse min-w-[620px]">
-                  <thead>
-                    <tr className="bg-muted/30 border-b border-border">
-                      <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-muted-foreground whitespace-nowrap">SR</th>
-                      <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-muted-foreground whitespace-nowrap">Reg Num</th>
-                      <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-muted-foreground whitespace-nowrap">Intake Date</th>
-                      <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-muted-foreground whitespace-nowrap">Jobcard No</th>
-                      <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-muted-foreground whitespace-nowrap">Customer Name</th>
-                      <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-muted-foreground whitespace-nowrap">Vehicle Model</th>
-                      <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-muted-foreground whitespace-nowrap">CCP</th>
-                      <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-muted-foreground whitespace-nowrap">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border">
-                    {filteredCards.length > 0 ? filteredCards.map((jc, idx) => (
-                      <tr 
-                        key={idx} 
-                        className="hover:bg-muted/20 cursor-pointer transition-colors group/row" 
-                        onClick={() => setSelectedJC(jc)}
-                      >
-                        <td className="px-4 py-3.2 text-[11.5px] font-mono text-muted-foreground">{jc.serial}</td>
-                        <td className="px-4 py-3.2 text-[11.5px] font-mono font-bold text-primary group-hover/row:text-primary-foreground/90 transition-all">{jc.regNum}</td>
-                        <td className="px-4 py-3.2 text-[11.5px] font-mono text-muted-foreground">{jc.openingDate.split(" ")[0]}</td>
-                        <td className="px-4 py-3.2 text-[11.5px] font-mono text-foreground">{jc.jobCardNo}</td>
-                        <td className="px-4 py-3.2 text-[11.5px] font-semibold text-foreground max-w-[130px] truncate">{jc.customerName}</td>
-                        <td className="px-4 py-3.2 text-[11.5px] text-muted-foreground max-w-[120px] truncate">{jc.model}</td>
-                        <td className="px-4 py-3.2">
-                          <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-bold border ${jc.ccp.includes("Not eligible") ? "bg-muted text-muted-foreground/60 border-border" : jc.ccp.includes("purchased") ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" : "bg-primary/10 text-primary border-primary/20"}`}>
-                            {jc.ccp.includes("Not eligible") ? "N/A" : jc.ccp.includes("purchased") ? "Purchased" : "Eligible"}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3.2">
-                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[9px] font-extrabold border ${jc.status === 'Job Card Opened' ? 'bg-amber-500/10 text-amber-600 border-amber-500/20' : 'bg-muted text-muted-foreground border-border'}`}>
-                            <span className={`w-1.5 h-1.5 rounded-full ${jc.status === 'Job Card Opened' ? 'bg-amber-500 animate-pulse' : 'bg-muted-foreground'}`}></span>
-                            {jc.status}
-                          </span>
-                        </td>
-                      </tr>
-                    )) : (
-                      <tr>
-                        <td colSpan={8} className="p-8 text-center text-muted-foreground italic text-[11.5px]">No active NEXA job cards match the filter criteria.</td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-              
-              {/* Table Footer */}
-              <div className="p-4 bg-muted/20 border-t border-border flex justify-between items-center flex-wrap gap-2.5">
-                <span className="text-[10px] text-muted-foreground font-sans">💡 Tip: Selection launches Interactive actions including Search, Update, and Tax Billing.</span>
-                <button 
-                  className="bg-card hover:bg-muted border border-border hover:border-muted-foreground text-foreground px-4 py-2 rounded-xl text-[11px] font-bold flex items-center gap-1.5 transition-colors cursor-pointer active:scale-95 shadow-sm" 
-                  onClick={() => showToast('Opening: Allocate New Job Card')}
-                >
-                  <Plus size={12} className="text-primary" />
-                  <span>Allocate New Job Card</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Bulletins */}
-            <div className="bg-card border border-border rounded-2xl shadow-sm overflow-hidden">
-              <div className="px-4.5 py-4 border-b border-border bg-slate-50/50 dark:bg-[#0F172A]/20">
-                <div className="text-[12.5px] font-bold uppercase tracking-wider text-foreground flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></div>
-                  Latest Dealer Service Bulletins
-                </div>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 p-4.5">
-                <div className="bg-muted/40 hover:bg-muted/70 border border-border border-l-4 border-l-rose-500 p-4 rounded-xl transition-all duration-300 flex flex-col justify-between">
-                  <div>
-                    <span className="text-[9px] font-extrabold uppercase tracking-widest bg-rose-500/10 text-rose-500 border border-rose-500/20 px-2 py-0.5 rounded">HIGH Priority</span>
-                    <h4 className="text-[11.5px] font-bold text-foreground mt-2.5 leading-tight">All-New Grand Vitara Smart Hybrid Campaign Guide</h4>
-                    <p className="text-[10.5px] text-muted-foreground mt-1.5 leading-snug">New update on inspection protocols of Smart Hybrid components for safety audit.</p>
-                  </div>
-                  <div className="text-[9px] font-mono text-slate-400 mt-3">Issued: May 25, 2026</div>
-                </div>
-                
-                <div className="bg-muted/40 hover:bg-muted/70 border border-border border-l-4 border-l-sky-500 p-4 rounded-xl transition-all duration-300 flex flex-col justify-between">
-                  <div>
-                    <span className="text-[9px] font-extrabold uppercase tracking-widest bg-sky-500/10 text-sky-600 border border-sky-500/20 px-2 py-0.5 rounded">MEDIUM Priority</span>
-                    <h4 className="text-[11.5px] font-bold text-foreground mt-2.5 leading-tight">NEXA Premium Points Rules Revision</h4>
-                    <p className="text-[10.5px] text-muted-foreground mt-1.5 leading-snug">Nexon loyalty points multiplier increased to 1.5&times; for select accessories fitment.</p>
-                  </div>
-                  <div className="text-[9px] font-mono text-slate-400 mt-3">Issued: May 18, 2026</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Column */}
-          <div className="flex flex-col gap-5 md:gap-6">
-            
-            {/* Today's Schedule */}
-            <div className="bg-card border border-border rounded-2xl shadow-sm overflow-hidden">
-              <div className="px-4 py-3.5 border-b border-border bg-slate-50/50 dark:bg-[#0F172A]/20">
-                <div className="text-[12.5px] font-bold uppercase tracking-wider text-foreground flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                  Today's Service Schedule
-                </div>
-              </div>
-              <div className="p-4 flex flex-col gap-3">
-                <div className="bg-muted/45 hover:bg-muted/70 border border-border p-3.5 rounded-xl flex justify-between items-start transition-all duration-350">
-                  <div className="space-y-0.5">
-                    <div className="font-mono text-[9px] font-bold text-primary tracking-wider">KL01CC4342</div>
-                    <div className="text-[12px] font-bold text-foreground leading-tight">SOMARAJAN C N</div>
-                    <div className="text-[10.5px] text-muted-foreground italic">Baleno Petrol</div>
-                  </div>
-                  <div className="text-right flex flex-col items-end gap-1 shrink-0">
-                    <div className="font-mono text-[9.5px] font-semibold text-muted-foreground">09:30 AM</div>
-                    <span className="text-[8px] font-bold px-1.5 py-0.5 bg-amber-500/10 text-amber-600 border border-amber-500/20 rounded uppercase">Delayed</span>
-                  </div>
-                </div>
-                
-                <div className="bg-muted/45 hover:bg-muted/70 border border-border p-3.5 rounded-xl flex justify-between items-start transition-all duration-350">
-                  <div className="space-y-0.5">
-                    <div className="font-mono text-[9px] font-bold text-primary tracking-wider">UK18P2194</div>
-                    <div className="text-[12px] font-bold text-foreground leading-tight">AREA MANAGER CSD</div>
-                    <div className="text-[10.5px] text-muted-foreground italic">New Celerio 2021</div>
-                  </div>
-                  <div className="text-right flex flex-col items-end gap-1 shrink-0">
-                    <div className="font-mono text-[9.5px] font-semibold text-muted-foreground">11:00 AM</div>
-                    <span className="text-[8px] font-bold px-1.5 py-0.5 bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 rounded uppercase">Checked In</span>
-                  </div>
-                </div>
-                
-                <div className="bg-muted/45 hover:bg-muted/70 border border-border p-3.5 rounded-xl flex justify-between items-start transition-all duration-350">
-                  <div className="space-y-0.5">
-                    <div className="font-mono text-[9px] font-bold text-primary tracking-wider">HR26EY6033</div>
-                    <div className="text-[12px] font-bold text-foreground leading-tight">SACHIN</div>
-                    <div className="text-[10.5px] text-muted-foreground italic">WagonR Petrol</div>
-                  </div>
-                  <div className="text-right flex flex-col items-end gap-1 shrink-0">
-                    <div className="font-mono text-[9.5px] font-semibold text-muted-foreground">01:30 PM</div>
-                    <span className="text-[8px] font-bold px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-muted-foreground border border-border rounded uppercase">Confirmed</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Advisor Checklist */}
-            <div className="bg-card border border-border rounded-2xl shadow-sm overflow-hidden">
-              <div className="px-4 py-3.5 border-b border-border bg-slate-50/50 dark:bg-[#0F172A]/20">
-                <div className="text-[12.5px] font-bold uppercase tracking-wider text-foreground flex items-center gap-2">
-                  <CheckCircle size={14} className="text-indigo-500" />
-                  Advisor Tasklists
-                </div>
-              </div>
-              <div className="p-4 flex flex-col gap-2">
-                {tasks.map(t => (
-                  <div 
-                    key={t.id} 
-                    className="flex items-start gap-3 p-3 bg-muted/40 hover:bg-muted/70 border border-border rounded-xl cursor-pointer transition-all duration-200"
-                    onClick={() => setTasks(tasks.map(x => x.id === t.id ? { ...x, done: !x.done } : x))}
-                  >
-                    <div className={`mt-0.5 shrink-0 w-4.5 h-4.5 border rounded-lg ${t.done ? 'bg-primary border-primary text-primary-foreground' : 'bg-card border-border'} flex items-center justify-center text-[10px] transition-colors`}>
-                      {t.done && <Check size={11} strokeWidth={3} />}
-                    </div>
-                    <div className={`text-[12.3px] font-medium leading-tight select-none ${t.done ? 'line-through text-muted-foreground/60' : 'text-foreground'}`}>
-                      {t.text}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Pending calls */}
-            <div className="bg-card border border-border rounded-2xl shadow-sm overflow-hidden">
-              <div className="px-4 py-3.5 border-b border-border bg-slate-50/50 dark:bg-[#0F172A]/20">
-                <div className="text-[12.5px] font-bold uppercase tracking-wider text-foreground flex items-center gap-2">
-                  <Phone size={14} className="text-emerald-500" />
-                  Callbacks Queue
-                </div>
-              </div>
-              <div className="p-4 flex flex-col gap-3">
-                <div className="flex justify-between items-start gap-2.5 p-3.5 bg-muted/40 hover:bg-muted/70 border border-border rounded-xl transition-all duration-350">
-                  <div className="flex gap-2.5 items-start">
-                    <div className="bg-emerald-500/10 text-emerald-500 p-2 rounded-lg border border-emerald-505/15 shrink-0">
-                      <Phone size={12} />
-                    </div>
-                    <div className="mini-card-labels">
-                      <div className="text-[12px] font-bold text-foreground">Somarajan C N</div>
-                      <div className="font-mono text-[9px] text-muted-foreground">9847058853</div>
-                      <div className="text-[10.5px] text-muted-foreground leading-normal mt-1.5 bg-card/65 dark:bg-[#0F172A]/40 px-2.5 py-1.5 border border-border/80 rounded">Re: Revised Estimate approval</div>
-                    </div>
-                  </div>
-                  <div className="font-mono text-[9px] text-slate-400 shrink-0 mt-0.5">10m ago</div>
-                </div>
-
-                <div className="flex justify-between items-start gap-2.5 p-3.5 bg-muted/40 hover:bg-muted/70 border border-border rounded-xl transition-all duration-350">
-                  <div className="flex gap-2.5 items-start">
-                    <div className="bg-emerald-500/10 text-emerald-500 p-2 rounded-lg border border-emerald-555/15 shrink-0">
-                      <Phone size={12} />
-                    </div>
-                    <div className="mini-card-labels">
-                      <div className="text-[12px] font-bold text-foreground">Meera Naik</div>
-                      <div className="font-mono text-[9px] text-muted-foreground">9812842974</div>
-                      <div className="text-[10.5px] text-muted-foreground leading-normal mt-1.5 bg-card/65 dark:bg-[#0F172A]/40 px-2.5 py-1.5 border border-border/80 rounded">Re: Insurance survey callback</div>
-                    </div>
-                  </div>
-                  <div className="font-mono text-[9px] text-slate-400 shrink-0 mt-0.5">1h ago</div>
-                </div>
-              </div>
-            </div>
-          </div>
+              )}
+            </motion.div>
+          ))}
         </div>
+      </div>
+
+      <div className="max-w-[1000px] w-full shrink-0 flex items-center justify-between pb-4 border-t border-border pt-6 mt-8">
+        <div className="flex items-center gap-4">
+          <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold tracking-widest text-[#d97706] bg-[#d97706]/10 border border-[#d97706]/20">
+            BULLETIN
+          </span>
+          <span className="text-[13px] text-muted-foreground">
+            Baleno Steering Column inspection campaign live.
+          </span>
+        </div>
+        <button className="text-[12px] font-semibold text-muted-foreground hover:text-foreground transition-colors underline decoration-border hover:decoration-muted-foreground underline-offset-4">
+          All Campaigns
+        </button>
       </div>
 
       {/* Action desk Modal */}
       <AnimatePresence>
         {selectedJC && (
-          <div className="fixed inset-0 z-[9999] bg-[#070C16]/85 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-[9999] bg-black/50 dark:bg-[#070C16]/85 backdrop-blur-md flex items-center justify-center p-4">
             <motion.div 
               initial={{ opacity: 0, y: 15, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 15, scale: 0.98 }}
-              className="bg-[#0B1220] border border-slate-800 w-full max-w-[440px] rounded-2xl shadow-2xl overflow-hidden flex flex-col text-slate-100"
+              className="bg-card border border-border dark:border-slate-800 w-full max-w-[440px] rounded-2xl shadow-2xl overflow-hidden flex flex-col text-foreground"
             >
               {/* Modal Header */}
-              <div className="p-4 sm:p-5 border-b border-slate-800 bg-[#0F172A] flex items-center justify-between shrink-0">
+              <div className="p-4 sm:p-5 border-b border-border dark:border-slate-800 bg-muted/30 dark:bg-[#0F172A] flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
                     <Activity size={16} className="text-primary animate-pulse" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-100">
+                    <h3 className="text-sm font-extrabold uppercase tracking-wider text-foreground dark:text-slate-100">
                       NEXA Action Desk
                     </h3>
                     <p className="text-[10px] text-muted-foreground uppercase font-mono tracking-widest mt-0.5">
@@ -8655,36 +8371,36 @@ function DashboardView({
                 </div>
                 <button 
                   onClick={() => setSelectedJC(null)}
-                  className="p-1.5 hover:bg-slate-800 text-slate-400 hover:text-slate-200 rounded-lg cursor-pointer transition-colors"
+                  className="p-1.5 hover:bg-muted dark:hover:bg-slate-800 text-muted-foreground hover:text-foreground dark:hover:text-slate-200 rounded-lg cursor-pointer transition-colors"
                 >
                   <X size={15} />
                 </button>
               </div>
 
               {/* Modal Body */}
-              <div className="p-5 bg-[#090F1C] flex flex-col gap-4">
-                <div className="grid grid-cols-2 gap-3.5 bg-[#0F172A] border border-slate-850 p-4 rounded-xl">
+              <div className="p-5 bg-card dark:bg-[#090F1C] flex flex-col gap-4">
+                <div className="grid grid-cols-2 gap-3.5 bg-muted/20 dark:bg-[#0F172A] border border-border dark:border-slate-850 p-4 rounded-xl">
                   <div>
-                    <span className="text-[9px] font-mono text-slate-400 uppercase tracking-wider block">Vehicle Model</span>
-                    <span className="text-[11.5px] font-bold text-slate-100 leading-tight block mt-0.5 truncate" title={selectedJC.model}>{selectedJC.model}</span>
+                    <span className="text-[9px] font-mono text-muted-foreground dark:text-slate-400 uppercase tracking-wider block">Vehicle Model</span>
+                    <span className="text-[11.5px] font-bold text-foreground dark:text-slate-100 leading-tight block mt-0.5 truncate" title={selectedJC.model}>{selectedJC.model}</span>
                   </div>
                   <div>
-                    <span className="text-[9px] font-mono text-slate-400 uppercase tracking-wider block">Registration No</span>
+                    <span className="text-[9px] font-mono text-muted-foreground dark:text-slate-400 uppercase tracking-wider block">Registration No</span>
                     <span className="text-[11.5px] font-bold text-primary font-mono block mt-0.5 truncate" title={selectedJC.regNum}>{selectedJC.regNum}</span>
                   </div>
-                  <div className="pt-2 border-t border-slate-800/40">
-                    <span className="text-[9px] font-mono text-slate-400 uppercase tracking-wider block">Customer Name</span>
-                    <span className="text-[11.5px] font-semibold text-slate-200 block mt-0.5 truncate" title={selectedJC.customerName}>{selectedJC.customerName}</span>
+                  <div className="pt-2 border-t border-border dark:border-slate-800/40">
+                    <span className="text-[9px] font-mono text-muted-foreground dark:text-slate-400 uppercase tracking-wider block">Customer Name</span>
+                    <span className="text-[11.5px] font-semibold text-foreground dark:text-slate-200 block mt-0.5 truncate" title={selectedJC.customerName}>{selectedJC.customerName}</span>
                   </div>
-                  <div className="pt-2 border-t border-slate-800/40">
-                    <span className="text-[9px] font-mono text-slate-400 uppercase tracking-wider block">Service Advisor</span>
-                    <span className="text-[11.5px] font-semibold text-slate-200 block mt-0.5 truncate" title={selectedJC.serviceAdvisor}>{selectedJC.serviceAdvisor}</span>
+                  <div className="pt-2 border-t border-border dark:border-slate-800/40">
+                    <span className="text-[9px] font-mono text-muted-foreground dark:text-slate-400 uppercase tracking-wider block">Service Advisor</span>
+                    <span className="text-[11.5px] font-semibold text-foreground dark:text-slate-200 block mt-0.5 truncate" title={selectedJC.serviceAdvisor}>{selectedJC.serviceAdvisor}</span>
                   </div>
                 </div>
 
                 <div className="flex flex-col gap-2.5 pt-2">
                   <button 
-                    className="w-full bg-[#1A2333] hover:bg-[#253248] border border-slate-800 text-[11px] font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer text-slate-200 uppercase tracking-wider font-sans"
+                    className="w-full bg-muted hover:bg-muted/85 dark:bg-[#1A2333] dark:hover:bg-[#253248] border border-border dark:border-slate-800 text-[11px] font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer text-foreground dark:text-slate-200 uppercase tracking-wider font-sans"
                     onClick={() => { 
                       setPopupHistoryRegNo(selectedJC.regNum);
                       setSelectedJC(null); 
@@ -8733,22 +8449,22 @@ function DashboardView({
       {/* Vehicle History Report Popup */}
       <AnimatePresence>
         {popupHistoryRegNo && (
-          <div className="fixed inset-0 bg-[#070C16]/85 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 z-[9999] overflow-y-auto" onClick={(e) => { if (e.target === e.currentTarget) setPopupHistoryRegNo(null); }}>
+          <div className="fixed inset-0 bg-black/50 dark:bg-[#070C16]/85 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 z-[9999] overflow-y-auto" onClick={(e) => { if (e.target === e.currentTarget) setPopupHistoryRegNo(null); }}>
             <motion.div
               initial={{ opacity: 0, y: 15, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 15, scale: 0.98 }}
-              className="bg-[#0B1220] border border-slate-800 rounded-2xl w-full max-w-4xl max-h-[85vh] overflow-hidden shadow-2xl flex flex-col font-sans text-slate-100"
+              className="bg-card border border-border dark:border-slate-800 rounded-2xl w-full max-w-4xl max-h-[85vh] overflow-hidden shadow-2xl flex flex-col font-sans text-foreground"
               onClick={e => e.stopPropagation()}
             >
               {/* Modal Header */}
-              <div className="p-4 sm:p-5 border-b border-slate-800 bg-[#0F172A] flex items-center justify-between shrink-0">
+              <div className="p-4 sm:p-5 border-b border-border dark:border-slate-800 bg-muted/30 dark:bg-[#0F172A] flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
                     <History size={16} className="text-primary animate-pulse" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-100">
+                    <h3 className="text-sm font-extrabold uppercase tracking-wider text-foreground dark:text-slate-100">
                       Vehicle History Database
                     </h3>
                     <p className="text-[10px] text-muted-foreground uppercase font-mono tracking-widest mt-0.5">
@@ -8759,23 +8475,23 @@ function DashboardView({
                 <button
                   type="button"
                   onClick={() => setPopupHistoryRegNo(null)}
-                  className="p-1.5 hover:bg-slate-800 text-slate-400 hover:text-slate-200 rounded-lg cursor-pointer transition-colors"
+                  className="p-1.5 hover:bg-muted dark:hover:bg-slate-800 text-muted-foreground hover:text-foreground dark:hover:text-slate-200 rounded-lg cursor-pointer transition-colors"
                 >
                   <X size={15} />
                 </button>
               </div>
 
               {/* Modal Body Container */}
-              <div className="p-5 overflow-y-auto flex-1 bg-[#090F1C]">
+              <div className="p-5 overflow-y-auto flex-1 bg-card dark:bg-[#090F1C]">
                 <VehicleHistoryPanel initialReg={popupHistoryRegNo} />
               </div>
 
               {/* Modal Footer */}
-              <div className="p-4 border-t border-slate-800 bg-[#0F172A] flex justify-end gap-2 shrink-0">
+              <div className="p-4 border-t border-border dark:border-slate-800 bg-muted/30 dark:bg-[#0F172A] flex justify-end gap-2 shrink-0">
                 <button
                   type="button"
                   onClick={() => setPopupHistoryRegNo(null)}
-                  className="px-4 py-2 bg-[#1A2333] hover:bg-[#253248] text-[11px] font-bold text-slate-200 rounded-lg cursor-pointer transition-all uppercase tracking-wider font-sans border border-slate-800"
+                  className="px-4 py-2 bg-muted hover:bg-muted/80 dark:bg-[#1A2333] dark:hover:bg-[#253248] text-[11px] font-bold text-foreground dark:text-slate-200 rounded-lg cursor-pointer transition-all uppercase tracking-wider font-sans border border-border dark:border-slate-800"
                 >
                   Close Records
                 </button>
@@ -8871,17 +8587,17 @@ function Sidebar({
   }
 
   return (
-    <div className="w-64 shrink-0 h-full flex flex-col bg-white border-r border-slate-200 dark:bg-slate-900 dark:border-slate-800">
+    <div className="w-64 shrink-0 h-full flex flex-col bg-background border-r border-border">
       {/* Logo + collapse */}
-      <div className="flex items-center justify-between px-6 h-[64px] border-b border-slate-100 dark:border-slate-800 shrink-0 select-none">
+      <div className="flex items-center justify-between px-6 h-[64px] border-b border-border shrink-0 select-none">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-            <div className="w-4 h-4 border-2 border-white rounded-sm rotate-45"></div>
+          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+            <div className="w-4 h-4 border-2 border-primary-foreground rounded-sm rotate-45"></div>
           </div>
-          <span className="font-bold text-lg tracking-tight text-slate-800 dark:text-slate-100">NEXA AI</span>
+          <span className="font-bold text-lg tracking-tight text-foreground">NEXA AI</span>
         </div>
         <button onClick={() => setSidebarOpen(false)}
-          className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer">
+          className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer">
           <ChevronLeft size={16} />
         </button>
       </div>
@@ -8890,7 +8606,7 @@ function Sidebar({
         {/* New Conversation */}
         <div className="px-3 pt-3 pb-2 shrink-0">
         <button onClick={onNewChat}
-          className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl border border-border bg-transparent hover:bg-transparent text-[12.5px] font-semibold font-sans text-[#c7c7f3] transition-all group">
+          className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl border border-border bg-transparent hover:bg-muted text-[12.5px] font-semibold font-sans text-primary transition-all group">
           <div className="w-4 h-4 rounded-md bg-primary/20 flex items-center justify-center group-hover:bg-primary/30 transition-colors shrink-0">
             <Plus size={11} className="text-primary" />
           </div>
@@ -8903,23 +8619,23 @@ function Sidebar({
         <div className="relative">
           <Search size={11} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search…"
-            className="w-full pl-7 pr-3 py-1.5 text-[12px] bg-transparent border border-border rounded-lg text-foreground placeholder:text-muted-foreground outline-none focus:border-primary/30 font-sans transition-colors" />
+            className="w-full pl-7 pr-3 py-1.5 text-[12px] bg-transparent border border-border rounded-lg text-foreground placeholder:text-muted-foreground outline-none focus:border-primary/50 font-sans transition-colors" />
         </div>
       </div>
 
       {/* Workshop Station section */}
       <div className="px-3 pb-3 shrink-0">
-        <p className="px-2 pb-1.5 text-[10px] uppercase tracking-widest text-slate-400 dark:text-slate-500 font-sans font-bold">Workshop Station</p>
+        <p className="px-2 pb-1.5 text-[10px] uppercase tracking-widest text-muted-foreground font-sans font-bold">Workshop Station</p>
         <div className="flex flex-col gap-0.5" id="work-chat-modes">
           <button 
             id="work-chat-mode-btn"
             onClick={() => onChangeChatType("work")}
             className={`flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[12.5px] font-sans font-semibold transition-all group cursor-pointer ${
               activeChatType === "work" 
-                ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300" 
-                : "text-slate-500 hover:text-slate-900 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-slate-100 dark:hover:bg-slate-800/50"
+                ? "bg-primary/10 text-primary" 
+                : "text-muted-foreground hover:text-foreground hover:bg-muted"
             }`}>
-            <Wrench size={13} className={`shrink-0 ${activeChatType === "work" ? "text-indigo-600 dark:text-indigo-400 shadow-sm" : "text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors"}`} />
+            <Wrench size={13} className={`shrink-0 ${activeChatType === "work" ? "text-primary shadow-sm" : "text-muted-foreground group-hover:text-primary transition-colors"}`} />
             <span className="flex-1 text-left">Workshop Station</span>
           </button>
           <button 
@@ -8927,10 +8643,10 @@ function Sidebar({
             onClick={() => onChangeChatType("employee")}
             className={`flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[12.5px] font-sans font-semibold transition-all group cursor-pointer ${
               activeChatType === "employee" 
-                ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300" 
-                : "text-slate-500 hover:text-slate-900 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-slate-100 dark:hover:bg-slate-800/50"
+                ? "bg-primary/10 text-primary" 
+                : "text-muted-foreground hover:text-foreground hover:bg-muted"
             }`}>
-            <User size={13} className={`shrink-0 ${activeChatType === "employee" ? "text-indigo-600 dark:text-indigo-400" : "text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors"}`} />
+            <User size={13} className={`shrink-0 ${activeChatType === "employee" ? "text-primary" : "text-muted-foreground group-hover:text-primary transition-colors"}`} />
             <span className="flex-1 text-left">Employee Chat</span>
           </button>
         </div>
@@ -8938,7 +8654,7 @@ function Sidebar({
 
       {/* Quick Access */}
       <div className="px-3 pb-3 shrink-0 col-quick-nav">
-        <p className="px-2 pb-1.5 text-[10px] uppercase tracking-widest text-[#7c7cdf] dark:text-[#a0a0eb] font-sans font-bold">Quick Access</p>
+        <p className="px-2 pb-1.5 text-[10px] uppercase tracking-widest text-primary font-sans font-bold">Quick Access</p>
         <div className="flex flex-col gap-0.5">
           {NAV_ITEMS.filter((item) => {
             if (activeChatType === "employee") {
@@ -8948,11 +8664,11 @@ function Sidebar({
             }
           }).map(item => (
             <button key={item.id} onClick={() => onNav(item.id)}
-              className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[12.5px] text-slate-500 hover:text-slate-900 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-slate-100 dark:hover:bg-slate-800/50 transition-all font-sans font-semibold group cursor-pointer">
-              <item.icon size={13} className="shrink-0 text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors" />
+              className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[12.5px] text-muted-foreground hover:text-foreground hover:bg-muted transition-all font-sans font-semibold group cursor-pointer">
+              <item.icon size={13} className="shrink-0 text-muted-foreground group-hover:text-primary transition-colors" />
               <span className="flex-1 text-left">{item.label}</span>
               {item.badge && (
-                <span className="text-[9.5px] font-bold px-1.5 py-0.5 rounded-full bg-red-100 dark:bg-red-950 text-red-600 dark:text-red-400 font-sans">{item.badge}</span>
+                <span className="text-[9.5px] font-bold px-1.5 py-0.5 rounded-full bg-destructive/10 text-destructive font-sans">{item.badge}</span>
               )}
             </button>
           ))}
@@ -8969,7 +8685,7 @@ function Sidebar({
               <p className="px-2 pb-1.5 pt-1 text-[9.5px] uppercase tracking-widest text-muted-foreground/50 font-sans font-bold">{section}</p>
               <div className="flex flex-col gap-0.5">
                 {items.map(h => (
-                  <div key={h.id} className={`group relative flex items-center rounded-lg transition-all ${activeSessionId === h.id ? "bg-primary/10 border-l-2 border-primary" : "hover:bg-card/50"}`}>
+                  <div key={h.id} className={`group relative flex items-center rounded-lg transition-all ${activeSessionId === h.id ? "bg-primary/10 border-l-2 border-primary" : "hover:bg-muted"}`}>
                     {editingId === h.id ? (
                       <input
                         autoFocus
@@ -8980,7 +8696,7 @@ function Sidebar({
                           if (e.key === "Enter") commitEdit(h.id)
                           if (e.key === "Escape") setEditingId(null)
                         }}
-                        className="flex-1 px-2.5 py-1.5 text-[12px] bg-card border border-primary/40 rounded-lg text-foreground outline-none font-sans min-w-0"
+                        className="flex-1 px-2.5 py-1.5 text-[12px] bg-background border border-primary/40 rounded-lg text-foreground outline-none font-sans min-w-0"
                       />
                     ) : (
                       <>
@@ -8989,17 +8705,17 @@ function Sidebar({
                           className={`flex-1 text-left pl-3 pr-14 py-1.5 text-[12px] font-sans truncate min-w-0 transition-colors ${activeSessionId === h.id ? "text-primary font-bold" : "text-muted-foreground group-hover:text-foreground"}`}>
                           {h.label}
                         </button>
-                        <div className="absolute right-1.5 px-1 py-0.5 rounded border border-slate-200/50 dark:border-slate-700/50 flex items-center gap-0.5 bg-slate-50 dark:bg-slate-800/95 shadow-sm z-10">
+                        <div className="absolute right-1.5 px-1 py-0.5 rounded border border-border flex items-center gap-0.5 bg-background shadow-sm z-10">
                           <button
                             onClick={(e) => startEdit(h.id, h.label, e)}
-                            className="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded text-slate-500 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer"
+                            className="p-1.5 hover:bg-muted rounded text-muted-foreground hover:text-primary transition-colors cursor-pointer"
                             title="Rename chat"
                           >
                             <Pencil size={11} strokeWidth={2} />
                           </button>
                           <button
                             onClick={(e) => onDeleteSession(h.id, e)}
-                            className="p-1.5 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded text-slate-500 dark:text-slate-300 hover:text-rose-600 dark:hover:text-rose-400 transition-colors cursor-pointer"
+                            className="p-1.5 hover:bg-destructive/10 rounded text-muted-foreground hover:text-destructive transition-colors cursor-pointer"
                             title="Delete chat"
                           >
                             <Trash2 size={11} strokeWidth={2} />
@@ -10348,19 +10064,19 @@ export default function App() {
       <div className="flex-1 flex flex-col min-h-0 min-w-0">
 
         {/* Top bar (Persistent across views) */}
-        <div className="shrink-0 h-[64px] flex items-center justify-between px-8 border-b border-[#c3c2c2] dark:border-slate-800 bg-white dark:bg-slate-900 z-20 relative transition-colors">
+        <div className="shrink-0 h-[64px] flex items-center justify-between px-8 border-b border-border bg-background z-20 relative transition-colors">
           {/* Active workspace identification on the left */}
           <div className="flex items-center gap-3">
             {!sidebarOpen && view !== "dashboard" && (
               <button 
                 onClick={() => setSidebarOpen(true)}
-                className="p-1.5 -ml-2 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all cursor-pointer"
+                className="p-1.5 -ml-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-all cursor-pointer"
                 title="Expand Sidebar"
               >
                 <ChevronRight size={18} />
               </button>
             )}
-            <span className="text-[13px] font-bold text-[#000000] dark:text-slate-100 tracking-wide uppercase font-sans">
+            <span className="text-[13px] font-bold text-foreground tracking-wide uppercase font-sans">
               {view === "dashboard" ? "DMS Dashboard Central" : activeChatType === "work" ? "NEXA Workshop Suite" : "Employee Engagement Engine"}
             </span>
           </div>
@@ -10368,14 +10084,14 @@ export default function App() {
           <div className="flex items-center gap-4 text-muted-foreground mr-1">
             <div className="hidden sm:flex items-center gap-1.5 px-3 mr-1">
               <div className="w-1.5 h-1.5 rounded-full bg-[#4ADE80] animate-pulse" />
-              <span className="text-[10.5px] text-slate-500 dark:text-slate-400 font-mono">21 May 2026 · 10:32 AM</span>
+              <span className="text-[10.5px] text-muted-foreground font-mono">21 May 2026 · 10:32 AM</span>
             </div>
 
             {/* Theme Toggle Button */}
             <button
               id="theme-toggle"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="hover:text-foreground transition-colors cursor-pointer flex items-center justify-center p-1.5 rounded-md hover:bg-muted dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400"
+              className="hover:text-foreground transition-colors cursor-pointer flex items-center justify-center p-1.5 rounded-md hover:bg-muted text-muted-foreground"
               title={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
             >
               {theme === "dark" ? (
@@ -10413,12 +10129,12 @@ export default function App() {
                     className="fixed inset-0 z-40" 
                     onClick={() => setNotifDropdownOpen(false)} 
                   />
-                  <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-slate-900 border border-[#c3c2c2] dark:border-slate-800 rounded-xl shadow-xl z-50 text-foreground overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
-                    <div className="p-3 border-b border-[#e2e8f0] dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-900/60">
+                  <div className="absolute right-0 mt-2 w-80 bg-background border border-border rounded-xl shadow-xl z-50 text-foreground overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
+                    <div className="p-3 border-b border-border flex items-center justify-between bg-muted/50">
                       <div className="flex items-center gap-1.5">
-                        <span className="text-[12px] font-sans font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wide">Notifications</span>
+                        <span className="text-[12px] font-sans font-bold text-foreground uppercase tracking-wide">Notifications</span>
                         {sharedNotifs.filter(n => !n.read).length > 0 && (
-                          <span className="px-1.5 py-0.5 rounded-full bg-rose-500/10 text-rose-500 text-[9px] font-bold font-mono">
+                          <span className="px-1.5 py-0.5 rounded-full bg-destructive/10 text-destructive text-[9px] font-bold font-mono">
                             {sharedNotifs.filter(n => !n.read).length}
                           </span>
                         )}
@@ -10427,13 +10143,13 @@ export default function App() {
                         onClick={() => {
                           setSharedNotifs(ns => ns.map(n => ({ ...n, read: true })));
                         }}
-                        className="text-[10px] text-[#4f46e5] dark:text-indigo-400 hover:text-[#4338ca] dark:hover:text-indigo-350 font-sans font-semibold transition-colors cursor-pointer"
+                        className="text-[10px] text-primary hover:opacity-80 font-sans font-semibold transition-colors cursor-pointer"
                       >
                         Mark all read
                       </button>
                     </div>
 
-                    <div className="max-h-[280px] overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60">
+                    <div className="max-h-[280px] overflow-y-auto divide-y divide-border/60">
                       {sharedNotifs.length === 0 ? (
                         <div className="p-6 text-center text-muted-foreground text-[11px] font-sans">
                           No notifications found
